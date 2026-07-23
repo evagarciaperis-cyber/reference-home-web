@@ -1,5 +1,13 @@
-// Placeholder de andamiaje (Fase 0). Se sustituye por el Home real
-// en la fase de migración del shell + Hero (ver docs/MIGRACION.md).
+import { Hero } from "@/ui/sections/Hero";
+
+// El resto de secciones de la home llegan en fases posteriores (ver
+// docs/MIGRACION.md). <main> envuelve el contenido tal como en el
+// index.html original; se trasladará a app/(marketing)/layout.tsx cuando
+// exista ese route group (igual que Header/MobileMenu, ver layout.tsx).
 export default function Home() {
-  return null;
+  return (
+    <main>
+      <Hero />
+    </main>
+  );
 }

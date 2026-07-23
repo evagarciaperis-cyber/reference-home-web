@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { PreloaderProvider } from "@/motion/PreloaderProvider";
 import { Preloader } from "@/ui/layout/Preloader";
 import { NoiseOverlay } from "@/ui/layout/NoiseOverlay";
 import { CustomCursor } from "@/ui/layout/CustomCursor";
@@ -25,11 +26,13 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <Preloader />
-        <NoiseOverlay />
-        <CustomCursor />
-        <SiteHeader />
-        {children}
+        <PreloaderProvider>
+          <Preloader />
+          <NoiseOverlay />
+          <CustomCursor />
+          <SiteHeader />
+          {children}
+        </PreloaderProvider>
       </body>
     </html>
   );
