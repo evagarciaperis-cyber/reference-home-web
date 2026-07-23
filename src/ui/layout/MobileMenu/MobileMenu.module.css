@@ -1,0 +1,43 @@
+/* Puerto literal de .mobile-menu* en web-nueva/assets/css/styles.css */
+
+.mobileMenu {
+  position: fixed;
+  inset: 0;
+  background: var(--acid);
+  z-index: 850;
+  transform: translateY(-105%);
+  transition: transform .8s var(--ease);
+  padding: 110px var(--pad) 42px;
+  visibility: hidden;
+}
+
+.isOpen {
+  transform: none;
+  visibility: visible;
+}
+
+.inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.inner a {
+  font-size: clamp(42px, 12vw, 84px);
+  letter-spacing: -.06em;
+  border-bottom: 1px solid rgba(17, 17, 15, .25);
+  display: flex;
+  justify-content: space-between;
+  line-height: 1.15;
+}
+
+.inner a span {
+  font-size: 11px;
+  letter-spacing: 0;
+  padding-top: 12px;
+}
+
+.inner p {
+  margin-top: auto;
+  font-size: 12px;
+}
