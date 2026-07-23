@@ -12,8 +12,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 |---|---|---|
 | 0 | Andamiaje del proyecto Next.js | ✅ Hecho |
 | 1 | Oráculo de paridad visual (Playwright) | ✅ Hecho |
-| 2 | Shell global: layout raíz, NoiseOverlay, CustomCursor, Preloader | Siguiente |
-| 3 | Header + MobileMenu (`useHeaderState`) | Pendiente |
+| 2 | Shell global: layout raíz, NoiseOverlay, CustomCursor, Preloader | ✅ Hecho |
+| 3 | Header + MobileMenu (`useHeaderState`) | Siguiente |
 | 4 | Sección Hero | Pendiente |
 | 5 | Sección Manifesto | Pendiente |
 | 6 | Sección Solutions (acordeón de servicios) | Pendiente |
@@ -49,6 +49,15 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - `e2e/utils/settle.ts` neutraliza las animaciones CSS en bucle infinito (`hero__orb`, `work-zoom__scroll`, `brand-story__caption`) antes de capturar, para que dos capturas del mismo estado sean deterministas sin recortar las transiciones de entrada (preloader → hero), que se esperan de forma natural.
 - Validado en ambas direcciones sobre el placeholder actual: el test de determinismo pasa en los 7 viewports (0% de diferencia) y el test de paridad falla correctamente con 84–92% de diferencia frente al oráculo — confirma que la herramienta detecta diferencias reales antes de depender de ella.
 - **Uso obligatorio de aquí en adelante**: ninguna fase visual (2–16) se da por cerrada sin `npm run parity:check` en verde para las rutas/secciones que esa fase cubre.
+
+## Fase 2 — Shell global (hecho)
+
+- `src/motion/core/media.ts` (`prefersReducedMotion`, `canHover`) y `src/motion/hooks/{usePreloader,useCustomCursor}.ts`: puerto literal de los bloques correspondientes de `main.js`, con el mismo contrato numérico (delay 780ms/0ms, lerp 0.18).
+- `src/ui/layout/{Preloader,NoiseOverlay,CustomCursor}/`: componentes autocontenidos (componente + CSS Module con los valores de `styles.css` sin modificar + `index.ts`), montados en `src/app/layout.tsx` antes de `{children}`.
+- `usePreloader` expone un booleano reutilizable pensado para que el Hero (fase 4) lo consuma también, sin que Preloader tenga que tocar el DOM de Hero directamente (en el original, el mismo `setTimeout` cambia las dos clases a la vez).
+- `useCustomCursor` usa delegación de eventos (`document` + `closest('[data-cursor]')`) en vez de la consulta única del script original, para que funcione con elementos `data-cursor` que añadan componentes futuros sin tener que revisar este hook otra vez.
+- `e2e/shell.spec.ts` + `e2e/oracle/preloader-*.png`: valida el shell de forma aislada, sin depender de que la home esté migrada (el Preloader es pantalla completa y opaca, cubre cualquier contenido detrás). 26 tests en verde, 2 saltados con motivo documentado (reduced-motion no tiene un instante estable que capturar).
+- `npm run parity:check` (paridad completa de la home) sigue en rojo, como se esperaba — el body aún no tiene contenido, así que se ve el fondo `html{background:var(--ink)}` en vez de `body{background:var(--paper)}`; ambos valores son correctos y están portados desde la Fase 0, es solo que nada ocupa el body todavía. Se resuelve solo al migrar Header/Hero (fases 3–4).
 
 ## Notas de alcance por fase visual (4–13)
 
