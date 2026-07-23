@@ -1,0 +1,28 @@
+/* Puerto literal de .cursor* en web-nueva/assets/css/styles.css */
+
+.cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--acid);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  pointer-events: none;
+  z-index: 1500;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.5);
+  transition: opacity .25s, transform .25s var(--ease);
+  mix-blend-mode: difference;
+}
+
+.isVisible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}

@@ -1,0 +1,49 @@
+/* Puerto literal de .preloader* en web-nueva/assets/css/styles.css */
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: var(--ink);
+  display: grid;
+  place-items: center;
+  color: var(--paper);
+  transition: transform 1s var(--ease) .25s;
+}
+
+.isHidden {
+  transform: translateY(-105%);
+}
+
+.mark {
+  font-size: clamp(38px, 8vw, 120px);
+  letter-spacing: -.08em;
+  font-weight: 700;
+}
+
+.mark span {
+  color: var(--acid);
+}
+
+.line {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  bottom: 32px;
+  height: 1px;
+  background: rgba(255, 255, 255, .15);
+}
+
+.line span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--acid);
+  animation: loading 1.15s var(--ease) forwards;
+}
+
+@keyframes loading {
+  to {
+    width: 100%;
+  }
+}
