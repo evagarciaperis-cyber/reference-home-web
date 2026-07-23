@@ -1,0 +1,18 @@
+/*
+  Design tokens — puerto literal del bloque :root de web-nueva/assets/css/styles.css (v2.5).
+  No cambiar valores sin actualizar también el sitio de referencia: son la fuente de verdad
+  de la paridad visual durante la migración.
+*/
+:root {
+  --ink: #11110f;
+  --paper: #ece9e1;
+  --acid: #e7ff48;
+  --wine: #8f173f;
+  --warm: #c9b8aa;
+  --line: rgba(17, 17, 15, .18);
+  --line-light: rgba(255, 255, 255, .2);
+  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+  --pad: clamp(20px, 3vw, 48px);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}

@@ -13,6 +13,49 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+
+  // Reglas de fronteras internas (docs/ARQUITECTURA.md, sección 2.8).
+  // src/app puede importar de ui/motion/content/email; nunca al revés.
+  {
+    files: [
+      "src/ui/**/*.{ts,tsx}",
+      "src/motion/**/*.{ts,tsx}",
+      "src/content/**/*.{ts,tsx}",
+      "src/email/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/app", "@/app/*"],
+              message:
+                "ui/motion/content/email no pueden importar de app (dirección de dependencia de un solo sentido, docs/ARQUITECTURA.md 2.8).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // content no depende de ui (docs/ARQUITECTURA.md, sección 2.8).
+  {
+    files: ["src/content/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/app", "@/app/*", "@/ui", "@/ui/*"],
+              message:
+                "content no debe depender de ui ni de app (docs/ARQUITECTURA.md 2.8).",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;
