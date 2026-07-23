@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "parity:update-oracle": "tsx e2e/capture-oracle.ts",
+    "parity:update-oracle-shell": "tsx e2e/capture-oracle-shell.ts",
     "parity:check": "playwright test",
     "parity:report": "playwright show-report"
   },

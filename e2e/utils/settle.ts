@@ -30,3 +30,14 @@ export async function settle(page: Page): Promise<void> {
 
   await page.evaluate(() => document.fonts?.ready).catch(() => {});
 }
+
+/**
+ * Congela una animación CSS en su estado inicial (útil para capturar un
+ * instante determinista de algo que normalmente progresa con el tiempo,
+ * como la barra de carga del preloader).
+ */
+export async function freezeAnimation(page: Page, selector: string): Promise<void> {
+  await page.addStyleTag({
+    content: `${selector} { animation: none !important; width: 0 !important; }`,
+  });
+}
