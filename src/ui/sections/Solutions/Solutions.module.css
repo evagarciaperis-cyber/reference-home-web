@@ -1,0 +1,188 @@
+/* Puerto literal de .solutions*, .services, .service* y .section en
+   web-nueva/assets/css/styles.css. El padding de .section se fusiona aquí
+   (mismo criterio que Manifesto, fase 5) hasta que un primitivo compartido
+   sustituya la duplicación entre secciones. */
+
+.solutions {
+  background: var(--ink);
+  color: var(--paper);
+  padding: clamp(90px, 12vw, 180px) var(--pad) 12vh;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  align-items: start;
+  gap: 4vw;
+}
+
+.header h2 {
+  font-size: clamp(60px, 9.5vw, 152px);
+  letter-spacing: -.078em;
+  line-height: .77;
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+}
+
+.header h2 span,
+.header h2 em {
+  display: block;
+}
+
+.header h2 em {
+  font-family: var(--serif);
+  font-weight: 400;
+}
+
+.services {
+  margin-top: 13vh;
+  border-top: 1px solid var(--line-light);
+}
+
+.service {
+  border-bottom: 1px solid var(--line-light);
+}
+
+.service button {
+  width: 100%;
+  background: none;
+  border: 0;
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items: center;
+  text-align: left;
+  padding: 28px 0;
+  cursor: pointer;
+}
+
+.number {
+  font-size: 11px;
+  opacity: .5;
+}
+
+.title {
+  font-size: clamp(28px, 4vw, 64px);
+  letter-spacing: -.05em;
+}
+
+.icon {
+  font-size: 28px;
+  transition: transform .5s var(--ease);
+}
+
+.isActive .icon {
+  transform: rotate(90deg);
+}
+
+.panel {
+  height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 4vw;
+  transition: height .75s var(--ease);
+}
+
+.isActive .panel {
+  height: min(48vw, 610px);
+  padding-bottom: 40px;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  padding-left: 100px;
+  max-width: 520px;
+}
+
+.copy p {
+  font-family: var(--serif);
+  font-size: clamp(19px, 2.1vw, 31px);
+  margin: 0 0 30px;
+  line-height: 1.2;
+}
+
+.copy ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.copy li {
+  border-top: 1px solid var(--line-light);
+  padding: 9px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.time {
+  margin-top: auto;
+  font-size: 10px;
+  opacity: .6;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+}
+
+.panel img {
+  height: 100%;
+  object-fit: cover;
+  background: #242420;
+}
+
+@media (max-width: 900px) {
+  .header {
+    grid-template-columns: 1fr;
+  }
+
+  .header h2 {
+    margin-top: 10vh;
+  }
+
+  .isActive .panel {
+    height: auto;
+  }
+
+  .panel {
+    grid-template-columns: 1fr;
+  }
+
+  .copy {
+    padding: 0 0 30px 100px;
+  }
+
+  .panel img {
+    max-height: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .solutions {
+    padding-top: 85px;
+    padding-bottom: 85px;
+  }
+
+  .header h2 {
+    text-align: left;
+    font-size: 58px;
+    line-height: .82;
+  }
+
+  .service button {
+    grid-template-columns: 55px 1fr auto;
+    padding: 22px 0;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .copy {
+    padding-left: 55px;
+  }
+
+  .panel img {
+    max-height: 390px;
+  }
+}
