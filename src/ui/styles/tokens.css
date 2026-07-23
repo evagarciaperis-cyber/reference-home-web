@@ -16,3 +16,12 @@
   --pad: clamp(20px, 3vw, 48px);
   --ease: cubic-bezier(.22, 1, .36, 1);
 }
+
+/* Puerto literal de styles.css línea 221 (dentro de @media max-width:640px):
+   afecta a --pad globalmente (header, secciones, hero...), no a un
+   componente concreto, así que vive aquí y no en ningún CSS Module. */
+@media (max-width: 640px) {
+  :root {
+    --pad: 18px;
+  }
+}
