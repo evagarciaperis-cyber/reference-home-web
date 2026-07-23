@@ -10,6 +10,7 @@
     "parity:update-oracle": "tsx e2e/capture-oracle.ts",
     "parity:update-oracle-shell": "tsx e2e/capture-oracle-shell.ts",
     "parity:update-oracle-header": "tsx e2e/capture-oracle-header.ts",
+    "parity:update-oracle-manifesto": "tsx e2e/capture-oracle-manifesto.ts",
     "parity:check": "playwright test",
     "parity:report": "playwright show-report"
   },
