@@ -1,0 +1,24 @@
+/* Puerto literal de .section-label* en web-nueva/assets/css/styles.css */
+
+.label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.label span {
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+}
+
+.light {
+  color: var(--paper);
+}
