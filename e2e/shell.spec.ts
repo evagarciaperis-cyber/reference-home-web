@@ -76,12 +76,15 @@ test("cursor: aparece sobre un elemento data-cursor y usa su texto", async ({ pa
 
   // La Fase 2 no incluye todavía contenido con data-cursor (llegará con las
   // tarjetas de proyecto en fases posteriores): se añade un elemento de
-  // prueba temporal para validar la delegación de eventos del hook.
+  // prueba temporal para validar la delegación de eventos del hook. Desde
+  // la Fase 4, el título del Hero (z-index:2) puede ocupar el centro del
+  // viewport -- z-index alto para garantizar que el puntero cae sobre la
+  // prueba y no sobre contenido real, sea cual sea la fase.
   await page.evaluate(() => {
     const probe = document.createElement("button");
     probe.dataset.cursor = "Probar";
     probe.id = "cursor-probe";
-    probe.style.cssText = "position:fixed;top:50%;left:50%;width:40px;height:40px;";
+    probe.style.cssText = "position:fixed;top:50%;left:50%;width:40px;height:40px;z-index:9999;";
     document.body.appendChild(probe);
   });
 
