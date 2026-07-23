@@ -17,8 +17,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 | 2 | Shell global: layout raíz, NoiseOverlay, CustomCursor, Preloader | ✅ Hecho |
 | 3 | Header + MobileMenu (`useHeaderState`) | ✅ Hecho |
 | 4 | Sección Hero | ✅ Hecho |
-| 5 | Sección Manifesto | Siguiente |
-| 6 | Sección Solutions (acordeón de servicios) | Pendiente |
+| 5 | Sección Manifesto | ✅ Hecho |
+| 6 | Sección Solutions (acordeón de servicios) | Siguiente |
 | 7 | Sección ProjectsGallery (scroll horizontal sticky) | Pendiente |
 | 8 | Sección Process | Pendiente |
 | 9 | Sección WorkZoom (zoom a pantalla) | Pendiente |
@@ -78,6 +78,15 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - **Tres correcciones de herramientas encontradas al haber por primera vez contenido y animaciones reales** (commits separados, mismo patrón que la corrección de la Fase 2): `settle()` esperaba un selector (`.hero.is-ready`) que solo existe con ese nombre en el oráculo, nunca en CSS Modules; la lista de animaciones en bucle a neutralizar tenía el mismo problema (`.hero__orb` nunca coincidía en el proyecto nuevo — causaba una regresión real de determinismo, confirmada por el propio test de "captura determinista"); y el `threshold` de color por píxel de `pixelmatch` era demasiado estricto para el ruido de antialiasing sub-píxel real entre HTML estático y DOM hidratado por React (diagnosticado a fondo: estilos computados y bounding rects idénticos byte a byte, diferencia cae a 0px exacto a partir de threshold 0.25). Un cuarto ajuste corrigió el elemento de prueba del cursor (Fase 2), que un elemento real del Hero podía interceptar.
 - **Limitación de entorno encontrada y documentada, no oculta**: `reducedMotion:'reduce'` de Playwright no se aplica realmente al navegador cuando los tests se lanzan vía `npx playwright test` en este entorno (confirmado con `matchMedia` devolviendo `false` incluso en `about:blank`, pese a que la configuración del proyecto es correcta). Verificado por separado que el mecanismo CSS en sí es correcto (reproducido con éxito fuera del test runner). Dos tests quedan explícitamente saltados con el diagnóstico completo en el propio código en vez de dar un falso positivo.
 - 143 tests en verde (3 ejecuciones seguidas), 67 skips documentados.
+
+## Fase 5 — Manifesto (hecho)
+
+- `useSplitReveal` y `useParallax` (nuevos hooks): puerto literal de `[data-split-reveal]` y `[data-parallax]` de `main.js`. Ninguno de los dos comprueba `prefers-reduced-motion` — el original tampoco lo hace en estos dos bloques (a diferencia de cursor/magnetic). Mismo patrón de atributos `data-*` para desacoplar el hook de los nombres de clase de CSS Modules (`data-word`/`data-visible`) que `data-loop-anim` (fase 4) y `data-header-tone` (fase 3).
+- `SectionLabel` y `Eyebrow` (nuevos primitivos): ya previstos en `docs/ARQUITECTURA.md` sección 5; Manifesto es su primer consumidor real. `SectionLabel` lo reutilizarán Solutions/Projects/Process/Work-Zoom/Principles/Contact en fases futuras.
+- `Manifesto`: puerto literal de la sección `.manifesto`. El padding compartido de `.section` (6+ secciones en el original) se fusiona en `.manifesto` por ser hoy su único consumidor — se extrae a un primitivo cuando una segunda sección lo necesite.
+- **Bug real encontrado y corregido antes de comitear**: el original une sus `<span class="word">` con `join(' ')`, insertando un espacio real entre ellos; `.map()` de React no lo hace por sí solo — las palabras aparecían pegadas sin espacios en la vista móvil. Corregido con `flatMap` intercalando un espacio de texto.
+- **`npm run parity:check` se mantiene en 0.000% exacto en los 7 viewports** para la home completa (sin regresiones en Header/MobileMenu/Shell/Hero) — Manifesto está fuera del viewport inicial (Hero es `min-height:100svh`), así que no afecta a esa comparación; su propia paridad se valida con un oráculo dedicado que hace scroll instantáneo hasta `#estudio` antes de capturar, también en 0.000% exacto en los 5 viewports con oráculo.
+- 211 tests en verde (3 ejecuciones seguidas), 69 skips documentados.
 
 ## Notas de alcance por fase visual (4–13)
 
