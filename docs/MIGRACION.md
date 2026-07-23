@@ -16,8 +16,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 | 1 | Oráculo de paridad visual (Playwright) | ✅ Hecho |
 | 2 | Shell global: layout raíz, NoiseOverlay, CustomCursor, Preloader | ✅ Hecho |
 | 3 | Header + MobileMenu (`useHeaderState`) | ✅ Hecho |
-| 4 | Sección Hero | Siguiente |
-| 5 | Sección Manifesto | Pendiente |
+| 4 | Sección Hero | ✅ Hecho |
+| 5 | Sección Manifesto | Siguiente |
 | 6 | Sección Solutions (acordeón de servicios) | Pendiente |
 | 7 | Sección ProjectsGallery (scroll horizontal sticky) | Pendiente |
 | 8 | Sección Process | Pendiente |
@@ -69,6 +69,15 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - Validación de paridad de píxel con dos estrategias distintas según el tipo de elemento: el header (transparente por defecto) se aísla ocultando todo lo demás y forzando un fondo plano idéntico en oráculo y proyecto nuevo (`isolateHeader()`); el menú móvil (capa opaca a pantalla completa) se compara directamente, igual que el Preloader en la Fase 2.
 - `e2e/header.spec.ts` cubre además el comportamiento pedido explícitamente: escritorio/móvil, apertura/cierre, bloqueo de scroll, hover (subrayado del nav), foco por teclado, y que los enlaces apunten a las rutas correctas. Al no existir contenido real todavía, se usa un espaciador sintético para poder probar `isScrolled`/`isHidden` con scroll real.
 - 84 tests en verde (3 ejecuciones seguidas para descartar inestabilidad), 38 skips documentados (combinaciones viewport/escritorio-móvil que no aplican).
+
+## Fase 4 — Hero (hecho)
+
+- `useMagnetic` (nuevo hook) + `PreloaderProvider` (nuevo, en `src/motion/`): el estado `ready` del preloader se calcula una sola vez y se comparte por contexto entre `Preloader` y `Hero` — viven en partes distintas del árbol (layout raíz vs. `page.tsx`) sin padre común cercano, así que sin esto habría dos temporizadores independientes calculando lo mismo.
+- `Hero`: puerto literal de la sección `.hero` (orb, topline, título con revelación escalonada vía CSS puro, footer con el círculo "Explorar" magnético, servicios). `page.tsx` deja de ser el placeholder de la Fase 0.
+- **`npm run parity:check` pasa a 0.000% exacto en los 7 viewports** — no solo "sin regresiones": con Header+Hero siendo hoy toda la home, la paridad completa de la página coincide con el oráculo. No estaba previsto llegar a esto en esta fase (se esperaba que siguiera en rojo hasta cerrar más secciones), pero es el resultado real.
+- **Tres correcciones de herramientas encontradas al haber por primera vez contenido y animaciones reales** (commits separados, mismo patrón que la corrección de la Fase 2): `settle()` esperaba un selector (`.hero.is-ready`) que solo existe con ese nombre en el oráculo, nunca en CSS Modules; la lista de animaciones en bucle a neutralizar tenía el mismo problema (`.hero__orb` nunca coincidía en el proyecto nuevo — causaba una regresión real de determinismo, confirmada por el propio test de "captura determinista"); y el `threshold` de color por píxel de `pixelmatch` era demasiado estricto para el ruido de antialiasing sub-píxel real entre HTML estático y DOM hidratado por React (diagnosticado a fondo: estilos computados y bounding rects idénticos byte a byte, diferencia cae a 0px exacto a partir de threshold 0.25). Un cuarto ajuste corrigió el elemento de prueba del cursor (Fase 2), que un elemento real del Hero podía interceptar.
+- **Limitación de entorno encontrada y documentada, no oculta**: `reducedMotion:'reduce'` de Playwright no se aplica realmente al navegador cuando los tests se lanzan vía `npx playwright test` en este entorno (confirmado con `matchMedia` devolviendo `false` incluso en `about:blank`, pese a que la configuración del proyecto es correcta). Verificado por separado que el mecanismo CSS en sí es correcto (reproducido con éxito fuera del test runner). Dos tests quedan explícitamente saltados con el diagnóstico completo en el propio código en vez de dar un falso positivo.
+- 143 tests en verde (3 ejecuciones seguidas), 67 skips documentados.
 
 ## Notas de alcance por fase visual (4–13)
 
