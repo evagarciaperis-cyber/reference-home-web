@@ -27,6 +27,25 @@ const INFINITE_LOOP_SELECTORS = [
 const ENTRANCE_SEQUENCE_MS = 2500;
 
 /**
+ * Congela las animaciones CSS en bucle infinito (ver INFINITE_LOOP_SELECTORS
+ * arriba). Se exporta aparte de settle() porque los scripts de oráculo por
+ * sección (manifesto, solutions...) necesitan aplicar esto ANTES de su
+ * propio scroll/espera a medida, no la secuencia completa de settle().
+ *
+ * Bug real encontrado en la Fase 6: capture-oracle-solutions.ts no la
+ * aplicaba, y el orb del Hero (aun con overflow:hidden y muy lejos del
+ * scroll) dejaba un artefacto de composición GPU reproducible (línea de
+ * ~57% opacidad de --acid, 1-2px) cerca de la parte superior del viewport
+ * en el oráculo de Solutions. Confirmado con el orb neutralizado: el
+ * artefacto desaparece por completo. No es un defecto de Solutions.tsx.
+ */
+export async function neutralizeLoopAnimations(page: Page): Promise<void> {
+  await page.addStyleTag({
+    content: `${INFINITE_LOOP_SELECTORS} { animation: none !important; }`,
+  });
+}
+
+/**
  * Deja la página en un estado visualmente estable antes de capturar:
  * congela animaciones en bucle infinito y espera a que termine la
  * secuencia de entrada (preloader -> hero) si existe en la ruta.
@@ -39,9 +58,7 @@ const ENTRANCE_SEQUENCE_MS = 2500;
  * funciona igual para ambos lados sin depender de ningún nombre de clase.
  */
 export async function settle(page: Page): Promise<void> {
-  await page.addStyleTag({
-    content: `${INFINITE_LOOP_SELECTORS} { animation: none !important; }`,
-  });
+  await neutralizeLoopAnimations(page);
 
   await page.waitForLoadState("load");
   await page.waitForTimeout(ENTRANCE_SEQUENCE_MS);

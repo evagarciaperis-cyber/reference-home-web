@@ -15,6 +15,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium } from "@playwright/test";
 import { VIEWPORTS, ROUTES } from "./matrix";
+import { neutralizeLoopAnimations } from "./utils/settle";
 
 const ORACLE_SITE_ROOT = path.resolve(__dirname, "..", "..", "web-nueva");
 const OUT_DIR = path.join(__dirname, "oracle");
@@ -37,6 +38,7 @@ async function main() {
       const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
       await page.goto(fileUrl);
       await page.waitForSelector(".hero.is-ready", { timeout: 5000 }).catch(() => {});
+      await neutralizeLoopAnimations(page);
       await page.evaluate(() => {
         const el = document.getElementById("estudio");
         if (el) window.scrollTo({ top: el.offsetTop, left: 0, behavior: "instant" });
