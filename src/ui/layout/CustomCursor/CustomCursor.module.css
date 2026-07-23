@@ -26,3 +26,13 @@
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
+
+/* Puerto literal de styles.css línea 223 (@media max-width:640px). El hook
+   sigue ejecutando su bucle en pointer:fine independientemente del ancho
+   — igual que el original, que no comprueba el viewport en JS — pero el
+   cursor deja de pintarse. */
+@media (max-width: 640px) {
+  .cursor {
+    display: none;
+  }
+}

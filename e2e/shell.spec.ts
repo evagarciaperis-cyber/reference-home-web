@@ -68,6 +68,12 @@ test("noise: propiedades computadas coinciden con el diseño original", async ({
 test("cursor: aparece sobre un elemento data-cursor y usa su texto", async ({ page, baseURL }) => {
   await page.goto(new URL("/", baseURL).href);
 
+  // El preloader es pantalla completa y opaca (z-index 2000, sin
+  // pointer-events:none): mientras esté visible intercepta cualquier
+  // movimiento de ratón, igual que le pasaría a un usuario real. Hay que
+  // esperar a que termine su secuencia de salida antes de simular el hover.
+  await page.waitForSelector('[data-shell="preloader"]', { state: "hidden", timeout: 3000 }).catch(() => {});
+
   // La Fase 2 no incluye todavía contenido con data-cursor (llegará con las
   // tarjetas de proyecto en fases posteriores): se añade un elemento de
   // prueba temporal para validar la delegación de eventos del hook.
@@ -92,4 +98,12 @@ test("cursor: aparece sobre un elemento data-cursor y usa su texto", async ({ pa
 
   await page.mouse.move(10, 10);
   await expect(cursor).not.toHaveClass(/isVisible/);
+});
+
+test("cursor: oculto en pantallas ≤640px (styles.css, corrección Fase 2)", async ({ page, baseURL }) => {
+  const viewport = page.viewportSize();
+  test.skip(!viewport || viewport.width > 640, "La regla solo aplica a viewports ≤640px");
+
+  await page.goto(new URL("/", baseURL).href);
+  await expect(page.locator('[data-shell="cursor"]')).toHaveCSS("display", "none");
 });

@@ -47,3 +47,14 @@
     width: 100%;
   }
 }
+
+/* Puerto literal de styles.css línea 239 (".preloader{display:none}" dentro
+   de @media prefers-reduced-motion:reduce): garantía puramente CSS de que
+   el preloader nunca llega a pintarse, independiente del timing de
+   hidratación de React (usePreloader ya cubre el delay 0ms, pero solo
+   actúa una vez el componente se monta y el efecto corre). */
+@media (prefers-reduced-motion: reduce) {
+  .preloader {
+    display: none;
+  }
+}

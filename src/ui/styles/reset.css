@@ -53,3 +53,19 @@ button {
 .no-scroll {
   overflow: hidden;
 }
+
+/* Puerto literal de web-nueva/assets/css/styles.css líneas 236-238 (regla
+   global, no específica de ninguna sección — el resto de ese bloque sí es
+   específico de secciones aún no migradas y se portará con cada una). */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}
