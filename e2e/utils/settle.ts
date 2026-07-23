@@ -41,3 +41,19 @@ export async function freezeAnimation(page: Page, selector: string): Promise<voi
     content: `${selector} { animation: none !important; width: 0 !important; }`,
   });
 }
+
+/**
+ * Oculta todo excepto el header (por defecto [data-header], presente tanto
+ * en el oráculo como en el proyecto nuevo) y fuerza un fondo plano e
+ * idéntico en ambos lados. El header es transparente en su estado inicial
+ * — sin esto, compararlo por píxel confundiría "falta contenido de la home"
+ * con una regresión real del propio header.
+ */
+export async function isolateHeader(page: Page, selector = "[data-header]"): Promise<void> {
+  await page.addStyleTag({
+    content: `
+      html, body { background: #808080 !important; }
+      body > *:not(${selector}) { visibility: hidden !important; }
+    `,
+  });
+}
