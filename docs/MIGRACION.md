@@ -18,8 +18,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 | 3 | Header + MobileMenu (`useHeaderState`) | ✅ Hecho |
 | 4 | Sección Hero | ✅ Hecho |
 | 5 | Sección Manifesto | ✅ Hecho |
-| 6 | Sección Solutions (acordeón de servicios) | Siguiente |
-| 7 | Sección ProjectsGallery (scroll horizontal sticky) | Pendiente |
+| 6 | Sección Solutions (acordeón de servicios) | ✅ Hecho |
+| 7 | Sección ProjectsGallery (scroll horizontal sticky) | Siguiente |
 | 8 | Sección Process | Pendiente |
 | 9 | Sección WorkZoom (zoom a pantalla) | Pendiente |
 | 10 | Sección BrandStory (brújula) | Pendiente |
@@ -87,6 +87,14 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - **Bug real encontrado y corregido antes de comitear**: el original une sus `<span class="word">` con `join(' ')`, insertando un espacio real entre ellos; `.map()` de React no lo hace por sí solo — las palabras aparecían pegadas sin espacios en la vista móvil. Corregido con `flatMap` intercalando un espacio de texto.
 - **`npm run parity:check` se mantiene en 0.000% exacto en los 7 viewports** para la home completa (sin regresiones en Header/MobileMenu/Shell/Hero) — Manifesto está fuera del viewport inicial (Hero es `min-height:100svh`), así que no afecta a esa comparación; su propia paridad se valida con un oráculo dedicado que hace scroll instantáneo hasta `#estudio` antes de capturar, también en 0.000% exacto en los 5 viewports con oráculo.
 - 211 tests en verde (3 ejecuciones seguidas), 69 skips documentados.
+
+## Fase 6 — Solutions (hecho)
+
+- `Solutions`: puerto literal del acordeón de 4 servicios de apertura única. El estado (índice activo) es `useState` local — no un hook de `motion`, ya que es interacción click-toggle simple sin matemática de scroll; la transición de altura del panel y la rotación del icono son CSS puro, igual que el original. Primer consumidor real de `SectionLabel` (variante `light`) desde su extracción en la fase 5.
+- **`data-header-tone="dark"` activado por primera vez de verdad**: Solutions está en la lista original de "secciones oscuras" de `main.js`. Hasta ahora `useHeaderState` (fase 3) tenía el mecanismo preparado pero nunca probado con una sección real — validado con un test dedicado que confirma que el header pasa a `on-dark` al hacer scroll hasta Solutions y vuelve a su estado normal al subir a Hero.
+- **Bug real encontrado y corregido antes de comitear (herramienta, no componente)**: el capturador de oráculo de Solutions no neutralizaba las animaciones en bucle antes de hacer scroll (a diferencia de `settle()`). El orbe del Hero —pese a `overflow:hidden` y estar muy lejos del punto de scroll— dejaba un artefacto de composición GPU reproducible (una línea de 1-2px con ~57% de opacidad de `--acid`) cerca de la parte superior del viewport, justo donde el header fijo queda oculto tras el scroll rápido hacia abajo. Diagnosticado a fondo (bounding box exacto, valores RGBA, reproducción controlada) antes de tocar nada; confirmado que no es un defecto de `Solutions.tsx` ni de `Manifesto.tsx`. Se extrajo `neutralizeLoopAnimations()` de `settle()` para los capturadores por sección.
+- **`npm run parity:check` se mantiene en 0.000% exacto en los 7 viewports** para la home completa, sin regresiones en Shell/Header/MobileMenu/Hero/Manifesto. Solutions en 0.000% exacto en los 5 viewports con oráculo.
+- 279 tests en verde (3 ejecuciones seguidas), 71 skips documentados.
 
 ## Notas de alcance por fase visual (4–13)
 
