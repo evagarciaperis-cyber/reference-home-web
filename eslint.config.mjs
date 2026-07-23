@@ -56,6 +56,17 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // <img> nativa deliberada, no next/image: la migración usa SVGs
+  // vectoriales que no necesitan pipeline de optimización (ARQUITECTURA.md,
+  // sección 11) y varios hooks de motion (useParallax, futuros WorkZoom/
+  // ProjectsGallery) necesitan un <img> real consultable por
+  // querySelector para aplicarle transform directamente, como el original.
+  {
+    files: ["src/ui/sections/**/*.{ts,tsx}"],
+    rules: {
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

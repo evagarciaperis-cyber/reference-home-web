@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" role="img">
+<defs>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 .12 0"/></filter>
+ <filter id="shadow"><feDropShadow dx="0" dy="30" stdDeviation="30" flood-opacity=".35"/></filter>
+</defs>
+<defs><radialGradient id="g" cx="66%" cy="28%"><stop stop-color="#e7ff48"/><stop offset=".48" stop-color="#bda99b"/><stop offset="1" stop-color="#7f193c"/></radialGradient></defs>
+<rect width="1600" height="1100" fill="#181815"/><circle cx="1070" cy="350" r="580" fill="url(#g)"/><rect x="170" y="160" width="850" height="690" rx="28" fill="#e9e5db" filter="url(#shadow)" transform="rotate(-7 595 505)"/><rect x="255" y="230" width="690" height="500" rx="15" fill="#151512" transform="rotate(-7 600 480)"/><path d="M370 650C470 330 690 300 830 510" fill="none" stroke="#e7ff48" stroke-width="15" opacity=".9"/><text x="250" y="970" fill="#ece9e1" font-family="Arial" font-size="62" letter-spacing="-3">OBJECT / DIGITAL / 01</text>
+<rect width="100%" height="100%" filter="url(#grain)" opacity=".15"/></svg>
