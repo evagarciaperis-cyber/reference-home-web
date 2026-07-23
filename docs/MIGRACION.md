@@ -11,8 +11,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 | # | Fase | Estado |
 |---|---|---|
 | 0 | Andamiaje del proyecto Next.js | ✅ Hecho |
-| 1 | Herramientas de regresión visual | Siguiente |
-| 2 | Shell global: layout raíz, NoiseOverlay, CustomCursor, Preloader | Pendiente |
+| 1 | Oráculo de paridad visual (Playwright) | ✅ Hecho |
+| 2 | Shell global: layout raíz, NoiseOverlay, CustomCursor, Preloader | Siguiente |
 | 3 | Header + MobileMenu (`useHeaderState`) | Pendiente |
 | 4 | Sección Hero | Pendiente |
 | 5 | Sección Manifesto | Pendiente |
@@ -42,14 +42,13 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - `globals.css`, `layout.tsx` y `page.tsx` reducidos a placeholder de andamiaje (el Home real llega en las fases 2–13).
 - Verificado: `npm run lint` y `npm run build` limpios.
 
-## Fase 1 — Herramientas de regresión visual (siguiente)
+## Fase 1 — Oráculo de paridad visual (hecho)
 
-Sin esto, el paso "comparación con la web actual" de cada fase posterior no es verificable de forma objetiva. Antes de tocar una sola sección visual:
-
-- Instalar Playwright (`@playwright/test`) como devDependency.
-- Script que sirve `web-nueva/` en estático (oráculo) y captura capturas de referencia por viewport (375/768/1024/1440/1920) de `index.html`, con y sin `prefers-reduced-motion`.
-- Script equivalente para el proyecto nuevo en `npm run dev`, mismos viewports.
-- Carpeta `e2e/` con el setup y un primer test trivial (compara dos capturas idénticas) para confirmar que el pipeline funciona antes de depender de él.
+- `e2e/oracle/*.png`: 7 capturas congeladas y **comiteadas** de `web-nueva/index.html` (viewports 375/768/1024/1440/1920 + variantes `mobile-375-reduced`/`desktop-1440-reduced` con `prefers-reduced-motion`). Generadas con `npm run parity:update-oracle`, que lee `web-nueva/` vía `file://` — solo hace falta en el equipo donde se regenera el oráculo, nunca en CI/despliegue: de ahí en adelante todo se compara contra los PNG ya comiteados.
+- `npm run parity:check` (Playwright): arranca el proyecto en modo producción (`next build && next start`), navega a cada ruta/viewport, compara píxel a píxel contra el oráculo (`pixelmatch`) y falla si supera el 0.1% de diferencia. Adjunta la imagen de diff al reporte HTML (`npm run parity:report`).
+- `e2e/utils/settle.ts` neutraliza las animaciones CSS en bucle infinito (`hero__orb`, `work-zoom__scroll`, `brand-story__caption`) antes de capturar, para que dos capturas del mismo estado sean deterministas sin recortar las transiciones de entrada (preloader → hero), que se esperan de forma natural.
+- Validado en ambas direcciones sobre el placeholder actual: el test de determinismo pasa en los 7 viewports (0% de diferencia) y el test de paridad falla correctamente con 84–92% de diferencia frente al oráculo — confirma que la herramienta detecta diferencias reales antes de depender de ella.
+- **Uso obligatorio de aquí en adelante**: ninguna fase visual (2–16) se da por cerrada sin `npm run parity:check` en verde para las rutas/secciones que esa fase cubre.
 
 ## Notas de alcance por fase visual (4–13)
 
