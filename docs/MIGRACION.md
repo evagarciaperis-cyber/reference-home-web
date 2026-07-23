@@ -6,6 +6,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 
 **Ciclo obligatorio por fase:** implementación → comparación con la web actual → corrección de diferencias → validación de paridad → commit → push. No se avanza a la siguiente fase sin paridad completa en la actual.
 
+**Granularidad:** si al implementar una fase resulta más grande de lo previsto, se divide en subfases antes de seguir — mejor 20 fases pequeñas que 10 demasiado grandes.
+
 ## Estado
 
 | # | Fase | Estado |
@@ -13,8 +15,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 | 0 | Andamiaje del proyecto Next.js | ✅ Hecho |
 | 1 | Oráculo de paridad visual (Playwright) | ✅ Hecho |
 | 2 | Shell global: layout raíz, NoiseOverlay, CustomCursor, Preloader | ✅ Hecho |
-| 3 | Header + MobileMenu (`useHeaderState`) | Siguiente |
-| 4 | Sección Hero | Pendiente |
+| 3 | Header + MobileMenu (`useHeaderState`) | ✅ Hecho |
+| 4 | Sección Hero | Siguiente |
 | 5 | Sección Manifesto | Pendiente |
 | 6 | Sección Solutions (acordeón de servicios) | Pendiente |
 | 7 | Sección ProjectsGallery (scroll horizontal sticky) | Pendiente |
@@ -58,6 +60,15 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - `useCustomCursor` usa delegación de eventos (`document` + `closest('[data-cursor]')`) en vez de la consulta única del script original, para que funcione con elementos `data-cursor` que añadan componentes futuros sin tener que revisar este hook otra vez.
 - `e2e/shell.spec.ts` + `e2e/oracle/preloader-*.png`: valida el shell de forma aislada, sin depender de que la home esté migrada (el Preloader es pantalla completa y opaca, cubre cualquier contenido detrás). 26 tests en verde, 2 saltados con motivo documentado (reduced-motion no tiene un instante estable que capturar).
 - `npm run parity:check` (paridad completa de la home) sigue en rojo, como se esperaba — el body aún no tiene contenido, así que se ve el fondo `html{background:var(--ink)}` en vez de `body{background:var(--paper)}`; ambos valores son correctos y están portados desde la Fase 0, es solo que nada ocupa el body todavía. Se resuelve solo al migrar Header/Hero (fases 3–4).
+- **Corrección posterior** (al preparar la Fase 3): faltaban dos reglas responsive/reduced-motion de `styles.css` que no se habían leído completas — el override global `*,*:before,*:after{transition-duration:.01ms!important}`/`html{scroll-behavior:auto}` (→ `reset.css`), `.preloader{display:none}` bajo reduced-motion (→ `Preloader.module.css`, garantía puramente CSS independiente del timing de hidratación) y `.cursor{display:none}` en `@media(max-width:640px)` (→ `CustomCursor.module.css`). De paso se corrigió una condición de carrera preexistente en el test de hover del cursor (no esperaba a que el preloader terminara su salida). Commit `98b84fd`.
+
+## Fase 3 — Header, navegación principal, MobileMenu (hecho)
+
+- `useHeaderState`: puerto literal de `updateHeader()` (umbrales 20px/500px/44px). La lista fija de selectores "oscuros" del original se sustituye por un atributo declarativo `data-header-tone="dark"` (`docs/ARQUITECTURA.md`, sección 6): ninguna sección lo usa todavía, así que hoy el header nunca entra en estado `on-dark` — se activará solo cuando cada sección oscura se migre y se marque a sí misma, sin volver a tocar este hook.
+- `Header`, `MobileMenu`, `SiteHeader`: componentes independientes; `SiteHeader` es el único dueño del estado de apertura compartido y del bloqueo de scroll del body (antes `document.body.classList.toggle('no-scroll')` manual). Montados en el layout raíz por ahora (única superficie existente); el comentario en `layout.tsx` deja anotado el traslado a `app/(marketing)/layout.tsx` cuando exista ese route group.
+- Validación de paridad de píxel con dos estrategias distintas según el tipo de elemento: el header (transparente por defecto) se aísla ocultando todo lo demás y forzando un fondo plano idéntico en oráculo y proyecto nuevo (`isolateHeader()`); el menú móvil (capa opaca a pantalla completa) se compara directamente, igual que el Preloader en la Fase 2.
+- `e2e/header.spec.ts` cubre además el comportamiento pedido explícitamente: escritorio/móvil, apertura/cierre, bloqueo de scroll, hover (subrayado del nav), foco por teclado, y que los enlaces apunten a las rutas correctas. Al no existir contenido real todavía, se usa un espaciador sintético para poder probar `isScrolled`/`isHidden` con scroll real.
+- 84 tests en verde (3 ejecuciones seguidas para descartar inestabilidad), 38 skips documentados (combinaciones viewport/escritorio-móvil que no aplican).
 
 ## Notas de alcance por fase visual (4–13)
 
