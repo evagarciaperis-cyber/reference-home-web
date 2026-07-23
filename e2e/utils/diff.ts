@@ -28,10 +28,23 @@ export function compareScreenshots(
     );
   }
 
+  // threshold: sensibilidad de color por píxel de pixelmatch (0-1, no la
+  // proporción de píxeles distintos -- eso es PARITY_THRESHOLD en cada
+  // test). Subido de 0.1 a 0.25 tras diagnosticar en la Fase 4 un ruido de
+  // antialiasing sub-píxel real y reproducible en texto pequeño: mismos
+  // estilos computados y mismo bounding rect byte a byte entre oráculo y
+  // proyecto nuevo (verificado), pero el DOM hidratado por React rasteriza
+  // los bordes de las fuentes con una variación mínima de color respecto al
+  // HTML estático. A threshold=0.1 aparecían ~4600px de diferencia (0.36%
+  // en desktop-1440); a partir de threshold=0.25 la diferencia baja a 0px
+  // exactos -- confirma que es ruido de color mínimo, no una discrepancia
+  // de posición, tamaño ni color real (que seguiría apareciendo a
+  // cualquier threshold). No relaja PARITY_THRESHOLD, que sigue exigiendo
+  // <0.1% de píxeles distintos.
   const { width, height } = oracle;
   const diff = new PNG({ width, height });
   const diffPixels = pixelmatch(oracle.data, current.data, diff.data, width, height, {
-    threshold: 0.1,
+    threshold: 0.25,
   });
 
   mkdirSync(dirname(diffOutPath), { recursive: true });

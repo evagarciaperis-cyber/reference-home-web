@@ -6,27 +6,45 @@ import type { Page } from "@playwright/test";
 // Se neutralizan para que la captura sea determinista; el resto de
 // transiciones (preloader, reveal del hero) son de un solo disparo y se
 // esperan de forma natural, no se recortan.
+//
+// Los selectores de clase literal (.hero__orb...) solo existen con ese
+// nombre en el oráculo — en el proyecto nuevo, con CSS Modules, la clase
+// real va con hash y nunca coincide (bug real encontrado en la Fase 4: el
+// orb del Hero seguía animándose sin neutralizar en las capturas del
+// proyecto nuevo). [data-loop-anim] es la convención para el lado nuevo:
+// cualquier elemento con una animación CSS en bucle infinito se marca con
+// ese atributo (ver Hero.tsx) y esta lista no necesita volver a tocarse
+// cuando se migren WorkZoom/BrandStory.
 const INFINITE_LOOP_SELECTORS = [
   ".hero__orb",
   ".work-zoom__scroll i:after",
   ".brand-story__caption i:after",
+  "[data-loop-anim]",
 ].join(", ");
+
+// Duración de la secuencia de entrada más larga posible: preloader (780ms)
+// + reveal escalonado del Hero (1.25s + hasta 0.16s de retardo) + margen.
+const ENTRANCE_SEQUENCE_MS = 2500;
 
 /**
  * Deja la página en un estado visualmente estable antes de capturar:
  * congela animaciones en bucle infinito y espera a que termine la
  * secuencia de entrada (preloader -> hero) si existe en la ruta.
+ *
+ * Corrección: la versión original esperaba el selector ".hero.is-ready",
+ * que solo existe con ese nombre literal en el oráculo (web-nueva). En el
+ * proyecto nuevo, Hero usa CSS Modules -- la clase real va con hash y ese
+ * selector nunca coincide, así que la espera degradaba silenciosamente al
+ * timeout completo (5s) antes de seguir. Una espera fija tras `load`
+ * funciona igual para ambos lados sin depender de ningún nombre de clase.
  */
 export async function settle(page: Page): Promise<void> {
   await page.addStyleTag({
     content: `${INFINITE_LOOP_SELECTORS} { animation: none !important; }`,
   });
 
-  // No todas las rutas tienen preloader/hero (p. ej. futuras páginas internas).
-  await page.waitForSelector(".hero.is-ready", { timeout: 5000 }).catch(() => {});
-  // Margen para que terminen las transiciones escalonadas de las líneas del hero
-  // (1.25s + hasta 0.16s de retardo, ver assets/js/main.js).
-  await page.waitForTimeout(1700);
+  await page.waitForLoadState("load");
+  await page.waitForTimeout(ENTRANCE_SEQUENCE_MS);
 
   await page.evaluate(() => document.fonts?.ready).catch(() => {});
 }
