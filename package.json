@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "parity:update-oracle": "tsx e2e/capture-oracle.ts",
+    "parity:check": "playwright test",
+    "parity:report": "playwright show-report"
   },
   "dependencies": {
     "next": "16.2.11",
@@ -14,11 +17,16 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^20",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.11",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }

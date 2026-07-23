@@ -13,6 +13,12 @@
 # testing
 /coverage
 
+# playwright / oráculo de paridad — e2e/oracle/ SÍ se comitea (es el oráculo)
+/playwright-report/
+/test-results/
+/blob-report/
+/e2e/__captures__/
+
 # next.js
 /.next/
 /out/
