@@ -13,6 +13,7 @@
     "parity:update-oracle-manifesto": "tsx e2e/capture-oracle-manifesto.ts",
     "parity:update-oracle-solutions": "tsx e2e/capture-oracle-solutions.ts",
     "parity:update-oracle-projects": "tsx e2e/capture-oracle-projects.ts",
+    "parity:update-oracle-process": "tsx e2e/capture-oracle-process.ts",
     "parity:check": "playwright test",
     "parity:report": "playwright show-report"
   },
