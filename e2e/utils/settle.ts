@@ -78,6 +78,34 @@ export async function freezeAnimation(page: Page, selector: string): Promise<voi
 }
 
 /**
+ * Espera a que una lectura de la página (p.ej. el transform/--card-scale
+ * de las tarjetas de ProjectsGallery) deje de cambiar entre dos lecturas
+ * consecutivas, en vez de una espera fija a ciegas.
+ *
+ * Sustituye a un waitForTimeout arbitrario cuando lo que hay que esperar
+ * es que una transición CSS (p.ej. .18s en --card-scale/--image-scale)
+ * termine de verdad. Un margen fijo, por generoso que sea, sigue siendo
+ * una apuesta bajo contención real de CPU: con la suite completa en
+ * paralelo, 300ms y luego 600ms resultaron insuficientes de forma
+ * intermitente (Fase 7/8, un test distinto fallaba en cada ejecución
+ * completa, siempre estable en aislado). Poll determinista en vez de
+ * aumentar otra vez el número a ciegas.
+ */
+export async function waitForStable(
+  read: () => Promise<string>,
+  { intervalMs = 60, maxWaitMs = 4000 }: { intervalMs?: number; maxWaitMs?: number } = {},
+): Promise<void> {
+  const start = Date.now();
+  let previous = await read();
+  while (Date.now() - start < maxWaitMs) {
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    const current = await read();
+    if (current === previous) return;
+    previous = current;
+  }
+}
+
+/**
  * Oculta todo excepto el header (por defecto [data-header], presente tanto
  * en el oráculo como en el proyecto nuevo) y fuerza un fondo plano e
  * idéntico en ambos lados. El header es transparente en su estado inicial

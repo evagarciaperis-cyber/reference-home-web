@@ -19,12 +19,30 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { chromium, type Page } from "@playwright/test";
 import { VIEWPORTS, ROUTES } from "./matrix";
-import { neutralizeLoopAnimations } from "./utils/settle";
+import { neutralizeLoopAnimations, waitForStable } from "./utils/settle";
 
 const ORACLE_SITE_ROOT = path.resolve(__dirname, "..", "..", "web-nueva");
 const OUT_DIR = path.join(__dirname, "oracle");
 const DESKTOP_MIN_WIDTH = 901;
 const JOURNEY_POINTS = [0, 0.25, 0.5, 0.75, 1];
+
+// Selector literal .project-card (no [data-project-card]): este script
+// captura el oráculo, el HTML original de web-nueva, no el proyecto
+// migrado -- mismo criterio de lectura que readCardTransforms() en
+// projects-gallery.spec.ts, adaptado al DOM del original.
+async function readCardTransforms(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const cards = Array.from(document.querySelectorAll(".project-card"));
+    return cards
+      .map((el) => {
+        const style = getComputedStyle(el);
+        const img = el.querySelector("img");
+        const imgTransform = img ? getComputedStyle(img).transform : "";
+        return `${style.transform}|${style.getPropertyValue("--card-scale")}|${imgTransform}`;
+      })
+      .join(";");
+  });
+}
 
 async function scrollToProgress(page: Page, progress: number) {
   const metrics = await page.evaluate(() => {
@@ -64,7 +82,8 @@ async function main() {
       if (vp.width >= DESKTOP_MIN_WIDTH) {
         for (const p of JOURNEY_POINTS) {
           await scrollToProgress(page, p);
-          await page.waitForTimeout(600);
+          await waitForStable(() => readCardTransforms(page));
+          await page.waitForTimeout(300);
           const outPath = path.join(OUT_DIR, `projects-${vp.name}-${Math.round(p * 100)}-home.png`);
           writeFileSync(outPath, await page.screenshot());
           console.log(`oráculo (projects): projects-${vp.name}-${Math.round(p * 100)}-home.png`);

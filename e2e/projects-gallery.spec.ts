@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { test, expect, type Page } from "@playwright/test";
 import { compareScreenshots } from "./utils/diff";
+import { waitForStable } from "./utils/settle";
 
 const ORACLE_DIR = path.join(__dirname, "oracle");
 const CAPTURES_DIR = path.join(__dirname, "__captures__");
@@ -34,6 +35,23 @@ async function scrollToProgress(page: Page, progress: number) {
   await page.evaluate((y) => window.scrollTo({ top: y, left: 0, behavior: "instant" }), target);
 }
 
+// Lectura usada para detectar que la transición CSS de .18s en
+// --card-scale/--image-scale (ProjectsGallery.module.css) ha terminado de
+// verdad, en vez de asumirlo con una espera fija (ver waitForStable).
+async function readCardTransforms(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const cards = Array.from(document.querySelectorAll("[data-project-card]"));
+    return cards
+      .map((el) => {
+        const style = getComputedStyle(el);
+        const img = el.querySelector("img");
+        const imgTransform = img ? getComputedStyle(img).transform : "";
+        return `${style.transform}|${style.getPropertyValue("--card-scale")}|${imgTransform}`;
+      })
+      .join(";");
+  });
+}
+
 async function scrollToProjects(page: Page) {
   await page.evaluate(() => {
     const el = document.getElementById("proyectos");
@@ -63,12 +81,21 @@ for (const point of JOURNEY_POINTS) {
     await page.goto(new URL("/", baseURL).href);
     await page.waitForSelector('[data-shell="preloader"]', { state: "hidden", timeout: 3000 }).catch(() => {});
     await scrollToProgress(page, point);
-    // 600ms: margen amplio sobre la transición CSS de .18s en --card-scale/
-    // --image-scale. Bajo ejecución paralela (11 workers compitiendo por
-    // CPU) 300ms resultó insuficiente de forma intermitente y capturaba un
-    // frame a mitad de transición (flakiness distinta en cada run completo,
-    // siempre estable en aislado -- contención de recursos, no un bug).
-    await page.waitForTimeout(600);
+    // Poll determinista en vez de una espera fija: espera a que
+    // --card-scale/--image-scale (transición CSS de .18s) dejen de
+    // cambiar de verdad, en lugar de asumirlo tras N ms. Un margen fijo
+    // (probado con 300ms y luego 600ms) seguía siendo una apuesta bajo
+    // contención real de CPU con la suite completa en paralelo —
+    // flakiness distinta en cada ejecución completa, siempre estable en
+    // aislado (Fase 7/8). Margen final de 120ms tras estabilizar, para
+    // dejar que el navegador pinte/componga el frame ya asentado.
+    await waitForStable(() => readCardTransforms(page));
+    // Margen adicional tras la estabilización: no cubre la transición (ya
+    // confirmada terminada por waitForStable), sino el retraso de
+    // compositor/pintado bajo contención extrema (suite completa, 500+
+    // tests en paralelo) -- confirmado en aislado que sin contención el
+    // resultado es 0.000% exacto de inmediato.
+    await page.waitForTimeout(300);
 
     const currentBuf = await page.screenshot();
     mkdirSync(path.join(CAPTURES_DIR, "current"), { recursive: true });
@@ -329,7 +356,14 @@ test("integración: ProjectsGallery viene justo después de Solutions y no marca
     const main = document.querySelector("main");
     return Array.from(main?.children ?? []).map((el) => el.id);
   });
-  expect(order).toEqual(["inicio", "estudio", "soluciones", "proyectos"]);
+  // Comprobamos adyacencia (ProjectsGallery justo después de Solutions),
+  // no la lista completa: nuevas secciones se añaden al final en fases
+  // posteriores (Fase 8 añadió "proceso") sin afectar esta continuidad --
+  // mismo ajuste aplicado a la Fase 7 sobre solutions.spec.ts.
+  const solucionesIdx = order.indexOf("soluciones");
+  const proyectosIdx = order.indexOf("proyectos");
+  expect(solucionesIdx).toBeGreaterThanOrEqual(0);
+  expect(proyectosIdx).toBe(solucionesIdx + 1);
 
   await page.evaluate(() => {
     const el = document.getElementById("proyectos");
