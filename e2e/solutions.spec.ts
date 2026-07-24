@@ -121,7 +121,13 @@ test("continuidad: Solutions viene justo después de Manifesto y usa fondo oscur
     const main = document.querySelector("main");
     return Array.from(main?.children ?? []).map((el) => el.id);
   });
-  expect(order).toEqual(["inicio", "estudio", "soluciones"]);
+  // Comprobamos adyacencia (Solutions justo después de Manifesto), no la
+  // lista completa: nuevas secciones se añaden al final en fases
+  // posteriores (Fase 7 añadió "proyectos") sin afectar esta continuidad.
+  const estudioIdx = order.indexOf("estudio");
+  const solucionesIdx = order.indexOf("soluciones");
+  expect(estudioIdx).toBeGreaterThanOrEqual(0);
+  expect(solucionesIdx).toBe(estudioIdx + 1);
 
   const bg = await page.locator("#soluciones").evaluate((el) => getComputedStyle(el).backgroundColor);
   expect(bg).toBe("rgb(17, 17, 15)"); // var(--ink)
