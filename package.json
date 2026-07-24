@@ -16,6 +16,7 @@
     "parity:update-oracle-process": "tsx e2e/capture-oracle-process.ts",
     "parity:update-oracle-workzoom": "tsx e2e/capture-oracle-workzoom.ts",
     "parity:update-oracle-brandstory": "tsx e2e/capture-oracle-brandstory.ts",
+    "parity:update-oracle-principles": "tsx e2e/capture-oracle-principles.ts",
     "parity:check": "playwright test",
     "parity:report": "playwright show-report"
   },
