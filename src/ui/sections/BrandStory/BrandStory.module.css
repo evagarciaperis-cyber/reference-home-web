@@ -1,0 +1,624 @@
+/* Puerto literal de .brand-story*, .brand-step*, .compass-* en
+   web-nueva/assets/css/styles.css. No usa la clase compartida .section
+   (el original tampoco se la aplica: altura fija en vh). El estado
+   "activo" de cada paso ([data-step-active]) y del índice general
+   (brandStory[data-active]) se leen tal cual del atributo que escribe
+   useBrandStory -- ver comentario del hook. */
+
+.brandStory {
+  position: relative;
+  height: 500vh;
+  min-height: 3200px;
+  background: #d4cbbb;
+  color: var(--ink);
+  --story-progress: 0;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  min-height: 660px;
+  overflow: clip;
+  isolation: isolate;
+  background: linear-gradient(145deg, #e4ded4 0%, #d3c8b8 58%, #c4b3a3 100%);
+  transition: background .55s ease;
+}
+
+.sticky:before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 20% 55%, rgba(231, 255, 72, .28), transparent 24%),
+    radial-gradient(circle at 84% 25%, rgba(143, 23, 63, .17), transparent 30%);
+  filter: blur(42px);
+  transform: scale(calc(1 + var(--story-progress) * .18));
+  will-change: transform;
+}
+
+.sticky:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(17, 17, 15, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 17, 15, .045) 1px, transparent 1px);
+  background-size: 8vw 8vw;
+  mask-image: linear-gradient(to right, black, transparent 62%);
+}
+
+.brandStory[data-active="1"] .sticky {
+  background: linear-gradient(145deg, #ded9d0 0%, #c9bdb2 58%, #b5a5a0 100%);
+}
+
+.brandStory[data-active="2"] .sticky {
+  background: linear-gradient(145deg, #d9d1c6 0%, #c8b7ac 48%, #b69b9f 100%);
+}
+
+.topline {
+  position: absolute;
+  z-index: 8;
+  top: 28px;
+  left: var(--pad);
+  right: var(--pad);
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid rgba(17, 17, 15, .34);
+  padding-top: 10px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+}
+
+.words {
+  position: absolute;
+  z-index: 2;
+  left: var(--pad);
+  top: 12vh;
+  width: 38vw;
+  height: 76vh;
+  pointer-events: none;
+}
+
+.phrase {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  will-change: opacity, transform;
+}
+
+.phrase span {
+  display: block;
+  font-size: clamp(72px, 9.2vw, 148px);
+  line-height: .75;
+  letter-spacing: -.085em;
+  font-weight: 600;
+}
+
+.phrase span:nth-child(2) {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  padding-left: 5vw;
+}
+
+.phrase span:nth-child(3) {
+  padding-left: 1vw;
+}
+
+.phraseEnd {
+  opacity: 0;
+  transform: translate3d(0, 12vh, 0);
+}
+
+.phraseEnd span {
+  font-size: clamp(58px, 7.8vw, 126px);
+}
+
+.phraseEnd span:nth-child(1) {
+  padding-left: 0;
+}
+
+.phraseEnd span:nth-child(2) {
+  padding-left: 8vw;
+}
+
+.phraseEnd span:nth-child(3) {
+  padding-left: 2vw;
+  color: var(--wine);
+}
+
+.route {
+  position: absolute;
+  z-index: 5;
+  left: 43.3vw;
+  top: 12vh;
+  bottom: 10vh;
+  width: 160px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.routeLine {
+  position: absolute;
+  left: 50%;
+  top: 5%;
+  bottom: 5%;
+  width: 1px;
+  background: rgba(17, 17, 15, .26);
+  overflow: hidden;
+}
+
+.routeLine:before,
+.routeLine:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--ink);
+  transform: translateX(-50%);
+  background: #d4cbbb;
+}
+
+.routeLine:before {
+  top: 0;
+}
+
+.routeLine:after {
+  bottom: 0;
+}
+
+.routeLine i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 0;
+  background: var(--wine);
+  will-change: height;
+}
+
+.compass {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 160px;
+  height: 160px;
+  display: grid;
+  place-items: center;
+  transform: translate3d(0, 62vh, 0) scale(.72);
+  transform-origin: center;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 18px 22px rgba(17, 17, 15, .16));
+}
+
+.compass svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.compass > span {
+  position: absolute;
+  top: -18px;
+  font-size: 9px;
+  letter-spacing: .2em;
+}
+
+.compassRing {
+  fill: #ece9e1;
+  stroke: #11110f;
+  stroke-width: 1.25;
+}
+
+.compassRingOuter {
+  fill: rgba(236, 233, 225, .76);
+  stroke-width: 2;
+}
+
+.compassTicks {
+  fill: none;
+  stroke: #11110f;
+  stroke-width: 1.4;
+}
+
+.compassNeedle {
+  fill: #11110f;
+  transform-origin: 80px 80px;
+  will-change: transform;
+}
+
+.compassNeedleNorth {
+  fill: #8f173f;
+}
+
+.compassCentre {
+  fill: #e7ff48;
+  stroke: #11110f;
+  stroke-width: 2;
+}
+
+.steps {
+  position: absolute;
+  z-index: 4;
+  left: 49vw;
+  right: var(--pad);
+  top: 10vh;
+  bottom: 7vh;
+}
+
+.step {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, .82fr);
+  grid-template-rows: auto auto 1fr;
+  gap: 18px 3vw;
+  align-content: center;
+  opacity: 0;
+  transform: translate3d(0, 9vh, 0) scale(.975);
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.stepHead {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(17, 17, 15, .32);
+  padding-bottom: 11px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .15em;
+}
+
+.stepIcons {
+  display: flex;
+  gap: 8px;
+}
+
+.stepIcons i {
+  font-style: normal;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(17, 17, 15, .38);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  transform: rotate(-12deg);
+  transition: transform .6s var(--ease), background .6s, color .6s;
+}
+
+.step[data-step-active] .stepIcons i {
+  transform: none;
+}
+
+.step[data-step-active] .stepIcons i:nth-child(2) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.step[data-step-active] .stepIcons i:nth-child(3) {
+  background: var(--acid);
+}
+
+.step h2 {
+  grid-column: 1 / -1;
+  font-size: clamp(48px, 5.2vw, 86px);
+  letter-spacing: -.07em;
+  line-height: .82;
+  margin: 10px 0 12px;
+  font-weight: 600;
+}
+
+.step h2 em {
+  font-family: var(--serif);
+  font-weight: 400;
+}
+
+.stepVisual {
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  align-self: stretch;
+  background: #bbb;
+  box-shadow: 0 22px 55px rgba(17, 17, 15, .14);
+}
+
+.stepVisual img {
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  transform: scale(1.08);
+  will-change: transform;
+  transition: transform 1.2s var(--ease);
+}
+
+.step[data-step-active] .stepVisual img {
+  transform: scale(1);
+}
+
+.step p {
+  font-family: var(--serif);
+  font-size: clamp(17px, 1.42vw, 23px);
+  line-height: 1.32;
+  margin: 0;
+  align-self: end;
+  max-width: 430px;
+}
+
+.caption {
+  position: absolute;
+  z-index: 8;
+  left: var(--pad);
+  right: var(--pad);
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  will-change: opacity;
+}
+
+.caption i {
+  width: 64px;
+  height: 1px;
+  background: rgba(17, 17, 15, .4);
+  position: relative;
+  overflow: hidden;
+}
+
+.caption i:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--wine);
+  transform: translateX(-100%);
+  animation: storyScroll 2s var(--ease) infinite;
+}
+
+@keyframes storyScroll {
+  50%, 100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 900px) {
+  .brandStory {
+    height: auto;
+    min-height: 0;
+  }
+
+  .sticky {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+    padding: 105px var(--pad) 100px;
+  }
+
+  .topline {
+    position: relative;
+    inset: auto;
+  }
+
+  .words {
+    position: relative;
+    inset: auto;
+    width: auto;
+    height: auto;
+    margin: 10vh 0 8vh;
+  }
+
+  .phrase {
+    position: relative;
+    inset: auto;
+  }
+
+  .phraseStart {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .phraseEnd {
+    display: none;
+  }
+
+  .phrase span {
+    font-size: clamp(72px, 14vw, 126px);
+  }
+
+  .route {
+    position: absolute;
+    left: auto;
+    right: var(--pad);
+    top: 125px;
+    bottom: auto;
+    width: 100px;
+    height: 100px;
+    transform: none;
+  }
+
+  .routeLine {
+    display: none;
+  }
+
+  .compass {
+    width: 100px;
+    height: 100px;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .steps {
+    position: relative;
+    inset: auto;
+    display: grid;
+    gap: 90px;
+  }
+
+  .step {
+    position: relative;
+    inset: auto;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto;
+    grid-template-columns: 1.15fr .85fr;
+    min-height: 610px;
+  }
+
+  .stepVisual img {
+    min-height: 360px;
+  }
+
+  .caption {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .sticky {
+    padding-top: 85px;
+  }
+
+  .route {
+    top: 94px;
+    width: 72px;
+    height: 72px;
+  }
+
+  .compass {
+    width: 72px;
+    height: 72px;
+  }
+
+  .compass > span {
+    display: none;
+  }
+
+  .words {
+    margin: 11vh 0 9vh;
+  }
+
+  .phrase span {
+    font-size: 58px;
+    line-height: .8;
+  }
+
+  .phrase span:nth-child(2) {
+    padding-left: 10vw;
+  }
+
+  .steps {
+    gap: 78px;
+  }
+
+  .step {
+    display: block;
+    min-height: 0;
+  }
+
+  .stepHead {
+    margin-bottom: 26px;
+  }
+
+  .step h2 {
+    font-size: 48px;
+    margin-bottom: 30px;
+  }
+
+  .stepVisual {
+    height: 74vw;
+    max-height: 480px;
+    margin-bottom: 30px;
+  }
+
+  .stepVisual img {
+    min-height: 0;
+  }
+
+  .step p {
+    font-size: 18px;
+  }
+
+  .stepIcons i {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandStory {
+    height: auto;
+    min-height: 0;
+  }
+
+  .sticky {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    padding: 110px var(--pad);
+    overflow: hidden;
+  }
+
+  .topline,
+  .words,
+  .steps {
+    position: relative;
+    inset: auto;
+  }
+
+  .words {
+    width: auto;
+    height: auto;
+    margin: 10vh 0;
+  }
+
+  .phrase {
+    position: relative;
+    inset: auto;
+  }
+
+  .phraseStart {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .phraseEnd,
+  .route,
+  .caption {
+    display: none;
+  }
+
+  .steps {
+    display: grid;
+    gap: 90px;
+  }
+
+  .step {
+    position: relative;
+    inset: auto;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto;
+  }
+}
+
+@supports not (overflow: clip) {
+  .sticky {
+    overflow: hidden;
+  }
+}

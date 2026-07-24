@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eee9df"/><stop offset="1" stop-color="#beb1a0"/></linearGradient>
+    <filter id="s" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="24" stdDeviation="28" flood-opacity=".17"/></filter>
+  </defs>
+  <rect width="1000" height="760" fill="url(#g)"/>
+  <circle cx="515" cy="370" r="230" fill="#e7ff48" opacity=".8"/>
+  <circle cx="515" cy="370" r="155" fill="none" stroke="#11110f" stroke-width="2"/>
+  <circle cx="515" cy="370" r="90" fill="#f4f0e8" filter="url(#s)"/>
+  <path d="M515 238 558 388 515 502 472 352Z" fill="#8f173f"/>
+  <circle cx="515" cy="370" r="16" fill="#11110f"/>
+  <path d="M135 148h210M135 178h135M720 585h150M765 615h105" stroke="#11110f" stroke-width="2" opacity=".55"/>
+  <text x="135" y="120" font-family="Arial,Helvetica,sans-serif" font-size="20" letter-spacing="5">OBSERVAR · ORDENAR</text>
+  <text x="720" y="555" font-family="Georgia,serif" font-size="25">La dirección comienza</text>
+</svg>

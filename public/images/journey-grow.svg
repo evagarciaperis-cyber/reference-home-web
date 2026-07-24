@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 760">
+  <defs><radialGradient id="g" cx="50%" cy="45%" r="70%"><stop stop-color="#c9b8aa"/><stop offset="1" stop-color="#8f173f"/></radialGradient></defs>
+  <rect width="1000" height="760" fill="url(#g)"/>
+  <g fill="none" stroke="#ece9e1" stroke-width="2" opacity=".8">
+    <circle cx="500" cy="380" r="80"/><circle cx="500" cy="380" r="150"/><circle cx="500" cy="380" r="225"/><circle cx="500" cy="380" r="300"/>
+    <path d="M500 80v600M200 380h600M288 168l424 424M712 168 288 592"/>
+  </g>
+  <path d="M500 380 608 172 558 404Z" fill="#e7ff48"/>
+  <circle cx="500" cy="380" r="22" fill="#11110f"/>
+  <g fill="#ece9e1" font-family="Arial,Helvetica,sans-serif" font-size="16" letter-spacing="4">
+    <text x="108" y="112">PUBLICAR</text><text x="738" y="650">EVOLUCIONAR</text>
+  </g>
+</svg>
