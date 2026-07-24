@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" role="img">
+<defs>
+ <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 .12 0"/></filter>
+ <filter id="shadow"><feDropShadow dx="0" dy="30" stdDeviation="30" flood-opacity=".35"/></filter>
+</defs>
+<rect width="1600" height="1100" fill="#8f173f"/><circle cx="1270" cy="190" r="390" fill="#11110f" opacity=".84"/><path d="M0 920L650 500l430 600H0Z" fill="#e8d7ca" opacity=".22"/>
+<rect x="180" y="165" width="1240" height="760" rx="34" fill="#0e0e0d" filter="url(#shadow)"/>
+<rect x="225" y="215" width="1150" height="650" rx="15" fill="#e8d7ca"/>
+<circle cx="265" cy="250" r="8" fill="#11110f"/><circle cx="292" cy="250" r="8" fill="#11110f" opacity=".55"/><circle cx="319" cy="250" r="8" fill="#11110f" opacity=".25"/>
+<text x="270" y="385" fill="#11110f" font-family="Arial" font-size="38" letter-spacing="8">DIGITAL PRODUCT / 2026</text>
+<text x="270" y="555" fill="#11110f" font-family="Arial" font-size="132" font-weight="700" letter-spacing="-7">LÍNEA</text>
+<text x="270" y="695" fill="#11110f" font-family="Georgia" font-size="132" font-style="italic" letter-spacing="-7">PRIVADA</text>
+<path d="M270 770H730" stroke="#11110f" stroke-width="4"/><circle cx="1220" cy="720" r="72" fill="none" stroke="#11110f" stroke-width="4"/><path d="m1188 750 62-62m-35 0h35v35" fill="none" stroke="#11110f" stroke-width="5"/>
+<rect width="100%" height="100%" filter="url(#grain)" opacity=".15"/></svg>

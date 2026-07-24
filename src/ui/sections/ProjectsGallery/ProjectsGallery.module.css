@@ -1,0 +1,256 @@
+/* Puerto literal de .projects*, .project-card* en
+   web-nueva/assets/css/styles.css. */
+
+.projects {
+  position: relative;
+  height: var(--projects-scroll-height, 650vh);
+  min-height: 220vh;
+  background: var(--paper);
+}
+
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  min-height: 660px;
+  display: grid;
+  grid-template-columns: 31vw minmax(0, 1fr);
+  overflow: clip;
+  padding: 100px 0 28px var(--pad);
+  isolation: isolate;
+}
+
+.intro {
+  padding-right: 3vw;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.intro h2 {
+  font-size: clamp(58px, 7.2vw, 116px);
+  letter-spacing: -.07em;
+  line-height: .82;
+  margin: 13vh 0 30px;
+  font-weight: 600;
+}
+
+.intro h2 em {
+  font-family: var(--serif);
+  font-weight: 400;
+}
+
+.intro p {
+  font-family: var(--serif);
+  font-size: 18px;
+  max-width: 320px;
+  margin: 0;
+}
+
+.progress {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  font-size: 10px;
+}
+
+.progress i {
+  height: 1px;
+  background: var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress b {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  background: var(--ink);
+  will-change: width;
+}
+
+.viewport {
+  overflow: clip;
+  min-width: 0;
+  position: relative;
+}
+
+.track {
+  height: 100%;
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  padding-right: var(--pad);
+}
+
+.card {
+  width: min(46vw, 690px);
+  flex: 0 0 auto;
+  position: relative;
+  transform: scale(var(--card-scale, .93));
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform .18s linear;
+}
+
+.media {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #bbb;
+}
+
+.card img {
+  height: 100%;
+  object-fit: cover;
+  transform: scale(var(--image-scale, 1.08));
+  will-change: transform;
+  transition: transform .18s linear;
+}
+
+.card:hover img {
+  transform: scale(calc(var(--image-scale, 1.08) + .025));
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 13px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+}
+
+.card h3 {
+  font-size: clamp(42px, 5.3vw, 82px);
+  line-height: .82;
+  letter-spacing: -.07em;
+  margin: 15px 0 0;
+  font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .projects {
+    height: auto;
+    min-height: 0;
+  }
+
+  .sticky {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    display: block;
+    padding: 110px var(--pad);
+  }
+
+  .intro {
+    padding: 0;
+  }
+
+  .intro h2 {
+    margin: 9vh 0 25px;
+  }
+
+  .progress {
+    display: none;
+  }
+
+  .viewport {
+    overflow: visible;
+  }
+
+  .track {
+    display: grid;
+    width: auto;
+    grid-template-columns: 1fr 1fr;
+    gap: 70px 22px;
+    padding: 80px 0 0;
+    transform: none !important;
+  }
+
+  .card {
+    width: auto;
+  }
+
+  .card:nth-child(even) {
+    margin-top: 90px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sticky {
+    padding-top: 85px;
+  }
+
+  .track {
+    grid-template-columns: 1fr;
+    gap: 70px;
+  }
+
+  .card:nth-child(even) {
+    margin-top: 0;
+  }
+
+  .card h3 {
+    font-size: 47px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects {
+    height: auto;
+    min-height: 0;
+  }
+
+  .sticky {
+    position: relative;
+    height: auto;
+    min-height: 0;
+    display: block;
+    padding: 110px var(--pad);
+  }
+
+  .intro {
+    padding: 0;
+  }
+
+  .progress {
+    display: none;
+  }
+
+  .viewport {
+    overflow: visible;
+  }
+
+  .track {
+    display: grid;
+    width: auto;
+    grid-template-columns: 1fr 1fr;
+    gap: 70px 22px;
+    padding: 80px 0 0;
+    transform: none !important;
+  }
+
+  .card {
+    width: auto;
+    transform: none !important;
+  }
+
+  .card:nth-child(even) {
+    margin-top: 90px;
+  }
+}
+
+@supports not (overflow: clip) {
+  .sticky,
+  .viewport {
+    overflow: hidden;
+  }
+}
