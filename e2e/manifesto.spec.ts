@@ -14,6 +14,14 @@ async function scrollToManifesto(page: import("@playwright/test").Page) {
   });
 }
 
+// Regresión encontrada en la fase 12: [data-word] es un atributo
+// compartido por todo [data-split-reveal], no exclusivo de Manifesto --
+// Stats (fase 12) también lo usa. Sin acotar a "#estudio", page.locator(
+// "[data-word]").last() empezó a resolver a la última palabra de Stats
+// (más abajo en la página) en vez de la de Manifesto, en cuanto Stats se
+// añadió al DOM. Acotado aquí para que este test siga siendo válido
+// independientemente de cuántas secciones más usen data-word en el futuro.
+
 // ---------------------------------------------------------------------
 // Paridad visual
 // ---------------------------------------------------------------------
@@ -51,7 +59,7 @@ test("estado inicial: las palabras están atenuadas antes de entrar en el viewpo
   await page.goto(new URL("/", baseURL).href);
   // Sin hacer scroll: Manifesto está fuera del viewport inicial (Hero es
   // min-height:100svh), así que sus palabras no deben haberse revelado.
-  const firstWord = page.locator("[data-word]").first();
+  const firstWord = page.locator("#estudio [data-word]").first();
   await expect(firstWord).not.toHaveAttribute("data-visible", "true");
   await expect(firstWord).toHaveCSS("opacity", "0.16");
 });
@@ -60,7 +68,7 @@ test("entrada: las palabras se revelan de forma escalonada al hacer scroll", asy
   await page.goto(new URL("/", baseURL).href);
   await scrollToManifesto(page);
 
-  const words = page.locator("[data-word]");
+  const words = page.locator("#estudio [data-word]");
   const count = await words.count();
   expect(count, "el texto debe partirse en varias palabras").toBeGreaterThan(1);
 
@@ -81,7 +89,7 @@ test("salida: las palabras reveladas no vuelven a ocultarse al salir del viewpor
   await scrollToManifesto(page);
   await page.waitForTimeout(1500);
 
-  const firstWord = page.locator("[data-word]").first();
+  const firstWord = page.locator("#estudio [data-word]").first();
   await expect(firstWord).toHaveCSS("opacity", "1");
 
   // Vuelve arriba (fuera del viewport de Manifesto) -- el original hace
