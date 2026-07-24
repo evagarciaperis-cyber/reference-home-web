@@ -112,6 +112,31 @@ export async function waitForStable(
  * — sin esto, compararlo por píxel confundiría "falta contenido de la home"
  * con una regresión real del propio header.
  */
+/**
+ * Oculta el header. Úsalo cuando el header en sí no es lo que se está
+ * validando y su micro-estado puede introducir una diferencia no
+ * determinista ajena a la sección bajo prueba.
+ *
+ * Caso real (fase 9, WorkZoom): el propio original tiene una carrera
+ * genuina entre el listener de 'scroll' de updateHeader() y su segunda
+ * invocación explícita dentro de renderWorkZoom() cuando la inmersión
+ * cambia de estado en ESE mismo scroll -- reproducido y confirmado
+ * también en el HTML original sin tocar (saltando directamente a un
+ * punto avanzado del recorrido). Cuál de los puntos del recorrido
+ * coincide exactamente con el frame en que la inmersión cruza el umbral
+ * depende de redondeos de scrollY específicos de cada viewport, así que
+ * no es fiable fijarlo a un checkpoint concreto ni en el oráculo ni en
+ * el test. Ocultar el header deja la comparación de píxel centrada en
+ * la mecánica real del zoom (que sí es determinista), sin depender de
+ * esa carrera; la fidelidad del propio header ya se valida aparte en
+ * header.spec.ts (fase 3).
+ */
+export async function hideHeader(page: Page, selector = "[data-header]"): Promise<void> {
+  await page.addStyleTag({
+    content: `${selector} { visibility: hidden !important; }`,
+  });
+}
+
 export async function isolateHeader(page: Page, selector = "[data-header]"): Promise<void> {
   await page.addStyleTag({
     content: `
