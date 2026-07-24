@@ -20,8 +20,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 | 5 | Sección Manifesto | ✅ Hecho |
 | 6 | Sección Solutions (acordeón de servicios) | ✅ Hecho |
 | 7 | Sección ProjectsGallery (scroll horizontal sticky) | ✅ Hecho |
-| 8 | Sección Process | Siguiente |
-| 9 | Sección WorkZoom (zoom a pantalla) | Pendiente |
+| 8 | Sección Process | ✅ Hecho |
+| 9 | Sección WorkZoom (zoom a pantalla) | Siguiente |
 | 10 | Sección BrandStory (brújula) | Pendiente |
 | 11 | Sección Principles | Pendiente |
 | 12 | Sección Stats (contadores) | Pendiente |
@@ -108,6 +108,16 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - **Test de continuidad de Solutions actualizado, no roto**: `solutions.spec.ts` comprobaba la lista completa de hijos de `<main>`, válida mientras Solutions era la última sección — al añadirse ProjectsGallery como hermano siguiente, se cambió esa comprobación de "lista exacta" a "adyacencia" (Solutions justo después de Manifesto), para que no vuelva a romperse en cada fase futura que añada una sección nueva al final.
 - **`npm run parity:check` se mantiene en 0.000% exacto en los 7 viewports** para la home completa, sin regresiones en Shell/Header/MobileMenu/Hero/Manifesto/Solutions. ProjectsGallery en 0.000% exacto en los 5 puntos del recorrido (0/25/50/75/100%) × 3 viewports de escritorio, y en el grid estático de móvil/tablet.
 - 357 tests en verde (2 ejecuciones completas seguidas), 133 skips documentados (reduced-motion + combinaciones de viewport/recorrido que no aplican).
+
+## Fase 8 — Process (hecho)
+
+- **Desajuste detectado y resuelto antes de implementar**: las reglas iniciales de esta fase (pedidas por el usuario) describían sticky, parallax, escalas, rotaciones y posición de brújula para Process. Verificado contra el original (`styles.css` y `main.js`) que `#proceso` es en realidad una sección completamente estática — label, headline y un grid de 4 pasos, sin ninguna lógica de scroll-driven motion; la única mención en `main.js` es pertenecer a la lista plana de "secciones oscuras". La brújula/sticky/pasos narrativos descritos pertenecen a `.brand-story` ("De la idea al lanzamiento"), una sección distinta y posterior en el DOM (`Process → WorkZoom → BrandStory`), ya planificada como fase 10 en este roadmap. Confirmado con el usuario antes de escribir código: se migra Process literalmente como sección estática; BrandStory se migra en su fase correspondiente, sin adelantarla ni alterar el orden del roadmap.
+- `Process`: puerto literal de la sección `.process` (label "04 · Proceso creativo", headline "La excelencia está en los detalles", grid de 4 pasos: Descubrir/Definir/Diseñar/Desarrollar). Reutiliza `SectionLabel` (fase 5). `data-header-tone="dark"` activa el mismo mecanismo que Solutions (fase 6) sin tocar `useHeaderState`. El padding de `.section` se fusiona en `.process`, mismo patrón ya repetido en Manifesto y Solutions.
+- **Validación coherente con una sección sin estado**: al no existir sticky/parallax/pasos activables, los puntos de recorrido pedidos (inicio/paso 1/paso 2/paso 3/final) se traducen en: contenido idéntico y sin roturas sin importar cómo se llegue a la sección (scroll lento incremental, scroll rápido con salto directo al final de la página) ni en qué dirección se abandone (navegación hacia atrás), más el colapso de la rejilla en los 3 breakpoints (4 → 2 → 1 columnas) y su recálculo correcto con `resize` en caliente.
+- **Bug de herramienta encontrado al ejecutar la suite completa (no específico de Process)**: `projects-gallery.spec.ts` tenía el mismo problema que se corrigió en `solutions.spec.ts` durante la fase 7 — su test de continuidad comprobaba la lista exacta de hijos de `<main>`, válida solo mientras ProjectsGallery era la última sección. Al añadir Process como hermano siguiente, se aplicó el mismo ajuste: comprobar adyacencia (ProjectsGallery justo después de Solutions), no la lista completa.
+- **Regresión de fondo detectada y corregida en `useStable` (herramienta, no diseño)**: la flakiness intermitente de los tests de paridad de píxel de ProjectsGallery bajo ejecución paralela, que la fase 7 daba por resuelta subiendo el margen fijo de espera post-scroll de 300ms a 600ms, reapareció al crecer el tamaño total de la suite con Process (más tests en paralelo, más contención real de CPU). Un margen fijo, por generoso que sea, seguía siendo una apuesta. Sustituido por `waitForStable()` (nuevo, `e2e/utils/settle.ts`): hace poll del `transform`/`--card-scale`/`--image-scale` de las tarjetas hasta que dos lecturas consecutivas coinciden, en vez de asumir que la transición CSS de .18s ha terminado tras N ms fijos — determinista en vez de una apuesta de temporización. Aplicado tanto al test como al capturador de oráculo de ProjectsGallery (con el selector `.project-card` literal, ya que ese script corre contra `web-nueva`, no contra el proyecto migrado).
+- **`npm run parity:check` se mantiene en 0.000% exacto en los 7 viewports** para la home completa, sin regresiones en Shell/Header/MobileMenu/Hero/Manifesto/Solutions/ProjectsGallery. Process en 0.000% exacto en los 5 viewports con oráculo.
+- 426 tests en verde (4 ejecuciones completas seguidas, con un único fallo aislado y no reproducible en `header.spec.ts` en una de ellas — confirmado como ruido de contención preexistente de la fase 3 tras 5 ejecuciones limpias en aislado, no una regresión de esta fase), 141 skips documentados.
 
 ## Notas de alcance por fase visual (4–13)
 
