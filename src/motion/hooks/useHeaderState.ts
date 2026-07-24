@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { HEADER_TONE_REFRESH_EVENT } from "../core/events";
 
 // Puerto literal de updateHeader() en main.js (mismos umbrales numéricos).
 const SCROLLED_AFTER_Y = 20;
@@ -16,6 +17,12 @@ const SAMPLE_Y = 44;
 // El caso especial del original (work-zoom solo cuenta como oscura
 // mientras está "inmersa") se resuelve igual: esa sección decidirá cuándo
 // añadir/quitar su propio atributo, sin que Header sepa nada de ella.
+// Resuelto en la fase 9: useWorkZoom añade/quita data-header-tone en su
+// propio elemento y dispara HEADER_TONE_REFRESH_EVENT en el mismo frame en
+// que cruza el umbral de inmersión -- igual que el original invoca
+// updateHeader() explícitamente dentro de renderWorkZoom(), en vez de
+// esperar al próximo evento de scroll (que podría no llegar de inmediato
+// si el usuario deja de hacer scroll justo en el umbral).
 const DARK_SECTION_SELECTOR = '[data-header-tone="dark"]';
 
 export type HeaderState = {
@@ -64,9 +71,13 @@ export function useHeaderState(menuOpen: boolean): HeaderState {
     };
 
     window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener(HEADER_TONE_REFRESH_EVENT, update);
     update();
 
-    return () => window.removeEventListener("scroll", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener(HEADER_TONE_REFRESH_EVENT, update);
+    };
   }, []);
 
   return state;
