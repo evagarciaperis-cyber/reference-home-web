@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">Proyecto digital Atelier Norte</title>
+<desc id="desc">Composición editorial original para mostrar una web de arquitectura dentro de un ordenador.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#241016"/>
+    <stop offset=".55" stop-color="#6d1736"/>
+    <stop offset="1" stop-color="#9f385d"/>
+  </linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f3ecdf" stop-opacity=".94"/>
+    <stop offset="1" stop-color="#cbb8a5" stop-opacity=".72"/>
+  </linearGradient>
+  <filter id="grain">
+    <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="4" stitchTiles="stitch"/>
+    <feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 .13 0"/>
+  </filter>
+</defs>
+<rect width="1600" height="1000" fill="url(#bg)"/>
+<path d="M1020 0h580v1000H760c135-172 221-363 258-573 26-147 27-289 2-427Z" fill="#120e0f" opacity=".92"/>
+<path d="M1092 0h508v1000h-635c112-189 174-378 184-568 8-151-11-295-57-432Z" fill="#d5c3b4" opacity=".16"/>
+<rect x="1055" y="90" width="390" height="730" rx="2" fill="url(#glass)" opacity=".82"/>
+<path d="M1055 820 1445 90M1142 820 1532 90M970 820 1360 90" stroke="#fff" stroke-opacity=".18" stroke-width="3"/>
+<path d="M1055 250h390M1055 432h390M1055 614h390" stroke="#261116" stroke-opacity=".36" stroke-width="3"/>
+<g fill="#f3ecdf" font-family="Arial, Helvetica, sans-serif">
+  <text x="76" y="66" font-size="20" font-weight="700" letter-spacing="3">ATELIER NORTE</text>
+  <text x="1160" y="66" font-size="13" letter-spacing="2">PROYECTOS</text>
+  <text x="1325" y="66" font-size="13" letter-spacing="2">ESTUDIO</text>
+  <text x="1468" y="66" font-size="13" letter-spacing="2">ES</text>
+  <text x="76" y="180" font-size="15" letter-spacing="4" opacity=".72">ARQUITECTURA / VALENCIA / 2026</text>
+  <text x="70" y="435" font-size="205" font-weight="700" letter-spacing="-12">FORMA</text>
+  <text x="70" y="622" font-family="Georgia, serif" font-size="190" font-style="italic" letter-spacing="-10">habitable</text>
+  <text x="84" y="825" font-size="22" letter-spacing="1" opacity=".85">ESPACIOS SERENOS. MATERIALES HONESTOS.</text>
+  <text x="84" y="862" font-size="22" letter-spacing="1" opacity=".85">ARQUITECTURA PENSADA PARA PERMANECER.</text>
+  <text x="84" y="938" font-size="13" letter-spacing="3">DESCUBRIR PROYECTOS  ↗</text>
+</g>
+<circle cx="902" cy="873" r="73" fill="none" stroke="#f3ecdf" stroke-width="2" opacity=".7"/>
+<path d="m872 902 61-61m-34 0h34v34" fill="none" stroke="#f3ecdf" stroke-width="3"/>
+<rect width="1600" height="1000" filter="url(#grain)" opacity=".25"/>
+</svg>
