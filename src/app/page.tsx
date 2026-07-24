@@ -5,6 +5,7 @@ import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
 import { Process } from "@/ui/sections/Process";
 import { WorkZoom } from "@/ui/sections/WorkZoom";
 import { BrandStory } from "@/ui/sections/BrandStory";
+import { Principles } from "@/ui/sections/Principles";
 
 // El resto de secciones de la home llegan en fases posteriores (ver
 // docs/MIGRACION.md). <main> envuelve el contenido tal como en el
@@ -20,6 +21,7 @@ export default function Home() {
       <Process />
       <WorkZoom />
       <BrandStory />
+      <Principles />
     </main>
   );
 }
