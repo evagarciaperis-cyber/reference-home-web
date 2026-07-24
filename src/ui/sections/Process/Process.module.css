@@ -1,0 +1,129 @@
+/* Puerto literal de .process* en web-nueva/assets/css/styles.css. El
+   padding de .section se fusiona aquí, igual que en Manifesto (fase 5) y
+   Solutions (fase 6), por ser el mismo patrón ya repetido en dos
+   secciones migradas. */
+
+.process {
+  position: relative;
+  background: var(--ink);
+  color: var(--paper);
+  overflow: hidden;
+  padding: clamp(90px, 12vw, 180px) var(--pad);
+}
+
+.texture {
+  position: absolute;
+  inset: 0;
+  opacity: .18;
+  background:
+    radial-gradient(circle at 20% 10%, #777, transparent 30%),
+    linear-gradient(135deg, transparent 0 44%, rgba(255, 255, 255, .05) 45%, transparent 46% 100%);
+}
+
+.process > *:not(.texture) {
+  position: relative;
+}
+
+.headline {
+  margin: 12vh 0 14vh;
+  text-align: center;
+}
+
+.headline p {
+  font-size: clamp(42px, 7vw, 110px);
+  letter-spacing: -.065em;
+  margin: 0;
+  line-height: .9;
+}
+
+.headline h2 {
+  font-size: clamp(72px, 11vw, 175px);
+  letter-spacing: -.08em;
+  line-height: .75;
+  margin: 0;
+  font-weight: 600;
+}
+
+.headline em {
+  font-family: var(--serif);
+  font-weight: 400;
+  color: var(--acid);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line-light);
+}
+
+.grid article {
+  padding: 30px 25px 50px;
+  border-right: 1px solid var(--line-light);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid article:last-child {
+  border: 0;
+}
+
+.grid span {
+  font-size: 10px;
+  opacity: .5;
+}
+
+.grid h3 {
+  font-size: clamp(30px, 3vw, 48px);
+  letter-spacing: -.05em;
+  margin: auto 0 20px;
+}
+
+.grid p {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 16px;
+  opacity: .76;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .grid article:nth-child(2) {
+    border-right: 0;
+  }
+
+  .grid article {
+    border-bottom: 1px solid var(--line-light);
+  }
+}
+
+@media (max-width: 640px) {
+  .process {
+    padding-top: 85px;
+    padding-bottom: 85px;
+  }
+
+  .headline {
+    margin: 9vh 0;
+  }
+
+  .headline p {
+    font-size: 42px;
+  }
+
+  .headline h2 {
+    font-size: 67px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grid article {
+    border-right: 0;
+    min-height: 240px;
+  }
+}

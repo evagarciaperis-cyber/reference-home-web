@@ -2,6 +2,7 @@ import { Hero } from "@/ui/sections/Hero";
 import { Manifesto } from "@/ui/sections/Manifesto";
 import { Solutions } from "@/ui/sections/Solutions";
 import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
+import { Process } from "@/ui/sections/Process";
 
 // El resto de secciones de la home llegan en fases posteriores (ver
 // docs/MIGRACION.md). <main> envuelve el contenido tal como en el
@@ -14,6 +15,7 @@ export default function Home() {
       <Manifesto />
       <Solutions />
       <ProjectsGallery />
+      <Process />
     </main>
   );
 }
