@@ -31,8 +31,32 @@ async function addScrollSpacer(page: import("@playwright/test").Page) {
 // html{scroll-behavior:smooth} (reset.css) hace que window.scrollTo anime
 // el desplazamiento; saltos sucesivos rápidos se solapan y dejan scrollY en
 // valores intermedios impredecibles. behavior:"instant" lo evita.
+//
+// Causa real de la flakiness histórica de "se oculta al hacer scroll
+// hacia abajo..." (investigada a fondo en la fase 16, con logging
+// temporal dentro de useHeaderState): dos scrollTo() consecutivos sin
+// esperar entre medias no dan tiempo al navegador a despachar el evento
+// 'scroll' del PRIMER salto antes de aplicar el segundo -- ambos acaban
+// viendo el mismo scrollY final (el segundo, no el primero), así que
+// useHeaderState calcula "y > lastScroll" como falso (900 no es mayor que
+// 900) y el header nunca se oculta. No es un defecto de useHeaderState:
+// reproducido también revirtiendo temporalmente el hook a su versión de
+// la fase 3 (ver fase 10), mismo resultado. Un usuario real haciendo
+// scroll nunca "salta" así -- dispara muchos eventos 'scroll' pequeños,
+// cada uno con la posición real de ese instante. Se espera aquí a que el
+// evento 'scroll' resultante se dispare de verdad antes de devolver el
+// control, en vez de asumir que la posición ya quedó "vista".
 async function scrollTo(page: import("@playwright/test").Page, y: number) {
-  await page.evaluate((top) => window.scrollTo({ top, left: 0, behavior: "instant" }), y);
+  await page.evaluate((top) => {
+    return new Promise<void>((resolve) => {
+      if (Math.round(window.scrollY) === Math.round(top)) {
+        resolve();
+        return;
+      }
+      window.addEventListener("scroll", () => resolve(), { once: true });
+      window.scrollTo({ top, left: 0, behavior: "instant" });
+    });
+  }, y);
 }
 
 // ---------------------------------------------------------------------
@@ -118,6 +142,18 @@ test.describe("comportamiento de escritorio", () => {
   test("se oculta al hacer scroll hacia abajo pasados 500px y reaparece al subir", async ({ page, baseURL }, testInfo) => {
     test.skip(viewportHasToggle(testInfo.project.name), "Solo aplica >900px");
     await page.goto(new URL("/", baseURL).href);
+    // Deja asentada la secuencia de entrada antes de cualquier scroll
+    // propio del test -- mismo criterio que en ProjectsGallery/WorkZoom/
+    // BrandStory (fases 7/9/10), aplicado aquí también: sin esto, un
+    // cambio de layout tardío durante la hidratación (fuentes/imágenes
+    // aún cargando) puede disparar un reajuste de scroll-anchoring del
+    // propio navegador después de que el test ya haya hecho su scroll,
+    // visto por useHeaderState como un evento 'scroll' más -- mismo
+    // scrollY, pero suficiente para que "y > lastScroll" se vuelva falso
+    // y el header se muestre de nuevo (ver investigación completa en
+    // scrollTo(), más abajo).
+    await page.waitForSelector('[data-shell="preloader"]', { state: "hidden", timeout: 3000 }).catch(() => {});
+    await page.waitForTimeout(300);
     await addScrollSpacer(page);
     const header = page.locator("[data-header]");
 
