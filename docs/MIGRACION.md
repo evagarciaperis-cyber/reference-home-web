@@ -25,8 +25,8 @@ Referencia: `docs/ARQUITECTURA.md`. Oráculo de paridad: `../web-nueva/index.htm
 | 10 | Sección BrandStory (brújula) | ✅ Hecho |
 | 11 | Sección Principles | ✅ Hecho |
 | 12 | Sección Stats (contadores) | ✅ Hecho |
-| 13 | Sección Contact (formulario) + Footer | Siguiente |
-| 14 | Página 404 | Pendiente |
+| 13 | Sección Contact (formulario) + Footer | ✅ Hecho |
+| 14 | Página 404 | Siguiente |
 | 15 | Metadata SEO base para lo migrado (home) + sitemap/robots | Pendiente |
 | 16 | Regresión visual consolidada de la home completa (mobile + desktop + reduced-motion) | Pendiente |
 
@@ -160,6 +160,18 @@ Al cerrar la fase 16, `index.html` y `404.html` tienen paridad completa en la nu
 - 54 tests propios en verde (3 ejecuciones completas seguidas de `stats.spec.ts`).
 - **Regresión real detectada y corregida durante la validación consolidada del bloque** (no en el componente, en un test de la fase 5): `manifesto.spec.ts` usaba `page.locator("[data-word]")` sin acotar — válido mientras Manifesto era la única sección con `[data-split-reveal]`, pero al añadir Stats (que reutiliza el mismo atributo) `.last()` empezó a resolver a la última palabra de Stats en vez de la de Manifesto. Corregido acotando a `"#estudio [data-word]"`. Es la tercera vez que aparece esta misma clase de bug (headers compartidos sin acotar: `<main>` en fases 7/8, `[data-word]` aquí) — el patrón a seguir en adelante es acotar siempre los selectores de test a la sección propia desde el principio.
 - **`header.spec.ts` re-confirmado, no corregido (fuera de alcance)**: 10 ejecuciones aisladas de "se oculta al hacer scroll..." dieron 4 fallos (~40%), mismo orden de magnitud que la investigación de la fase 10 — confirma que sigue siendo la misma flakiness preexistente de la fase 3, no una regresión de este bloque. Queda como deuda técnica para una fase de estabilización dedicada.
+
+## Fase 13 — Contact + Footer (hecho)
+
+- `Contact`: puerto literal de `.contact` (`id="contacto"`): intro + formulario (nombre, teléfono, correo, mensaje, checkbox de privacidad, campo señuelo oculto fuera del tabindex, botón de envío magnético). Está en la lista original de "secciones oscuras" de `main.js`, así que lleva `data-header-tone="dark"`. Reutiliza `SectionLabel` (variante `light`) y `useMagnetic` (fase 4) para el botón de envío — mismo hook que el círculo "Explorar" del Hero, sin duplicar lógica.
+- **Envío simulado, no real** (regla nº4 de la fase): se porta literalmente la lógica de `main.js` — `preventDefault`, `fetch` al mismo `action` del `<form>` esperando JSON `{ok, message}`, `try/catch/finally` con `disabled` del botón y texto de estado — sin construir ningún backend nuevo. No hay `send.php` funcional en este proyecto Next.js; el intento de `fetch` falla igual que fallaría en el original sin PHP desplegado. Los tests interceptan la respuesta de red (`page.route`) sin tocar la lógica del componente, para validar ambos caminos (éxito/error) de forma determinista.
+- `Footer`: puerto literal de `<footer class="site-footer">` (wordmark, grid de 4 columnas, línea inferior con "Volver arriba"). También en la lista de "secciones oscuras". Vive en `src/ui/layout/Footer/` (no en `sections/`), coherente con `docs/ARQUITECTURA.md` sección 4, que sitúa Footer junto a Header en el nivel de layout. `page.tsx` pasa a devolver un fragmento con `<main>` y `<Footer/>` como hermanos — en el original `</main>` cierra justo después de Contact y `<footer>` viene a continuación, fuera de `<main>`; hasta ahora todo el contenido vivía dentro de `<main>` porque no había nada después que necesitara ser su hermano.
+- **Regla nº7 aplicada desde el principio, no como corrección posterior**: todos los selectores de `contact.spec.ts`/`footer.spec.ts` están acotados a su sección (`#contacto`, `[data-site-footer]`) desde la primera versión — tras la regresión de `[data-word]` en la fase 12, se adoptó como práctica preventiva en vez de esperar a que un selector global colisione con una fase futura.
+- **Tres ajustes de test encontrados y corregidos antes de comitear** (ninguno del componente): (1) `toBeVisible()` sobre el campo señuelo fallaba porque Playwright considera "visible" cualquier elemento con caja de 1×1px aunque esté desplazado fuera de pantalla (`left:-9999px`, no `display:none`) — corregido comprobando la posición real (`x < 0`) en vez de la visibilidad; (2) el test de enlaces del footer esperaba 7 en vez de 8 (recuento manual incorrecto: "Volver arriba" también es un `<a>`); (3) el test del botón magnético fallaba en viewports ≤900px porque Contact pasa a una columna y el botón queda fuera del viewport tras alinear solo el inicio de la sección — corregido con `scrollIntoViewIfNeeded()`.
+- **`npm run parity:check` se mantiene en 0.000% exacto** para la home completa (873 tests, 0 fallos, 2 ejecuciones completas seguidas), sin regresiones en ninguna fase anterior. Contact y Footer en 0.000–0.004% (dentro del umbral) en los 5 viewports con oráculo.
+- **`header.spec.ts` re-confirmado de nuevo, no corregido (fuera de alcance)**: 10 ejecuciones aisladas dieron 6 fallos (~60%), mismo orden de magnitud que las fases 10 y 12 — sigue siendo la misma flakiness preexistente de la fase 3, ajena a Contact/Footer.
+- 183 tests propios en verde (2 ejecuciones completas seguidas de `contact.spec.ts` + `footer.spec.ts`).
+- **Con esta fase se completa el contenido de la home de paridad estricta** (fases 0–13). Quedan, antes del cierre formal de esa migración (fase 16 de este roadmap): la página 404 (fase 14), metadata SEO base (fase 15) y la regresión visual consolidada final (fase 16) — ninguna implica rediseño, todas siguen bajo la regla nº1.
 
 ## Notas de alcance por fase visual (4–13)
 
