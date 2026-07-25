@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Hero } from "@/ui/sections/Hero";
 import { Manifesto } from "@/ui/sections/Manifesto";
 import { Solutions } from "@/ui/sections/Solutions";
@@ -9,6 +10,36 @@ import { Principles } from "@/ui/sections/Principles";
 import { Stats } from "@/ui/sections/Stats";
 import { Contact } from "@/ui/sections/Contact";
 import { Footer } from "@/ui/layout/Footer";
+
+// Puerto literal de las <meta> de web-nueva/index.html (título,
+// description) -- fase 15, metadata técnica mínima, docs/MIGRACION.md.
+// Sin metadataBase (no hay dominio de despliegue todavío decidido): el
+// canonical queda relativo, válido pero sin resolver a absoluto hasta que
+// se fije. Sin imagen de Open Graph -- no existe ninguna diseñada para
+// ese uso todavía (regla nº2 de la fase 15: no inventar imágenes
+// sociales definitivas).
+const TITLE = "Reference Study — Experiencia digital";
+const DESCRIPTION =
+  "Estudio web independiente de una experiencia editorial y cinética. Proyecto estático listo para FTP.";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    type: "website",
+    locale: "es_ES",
+    siteName: "Reference Study",
+  },
+  twitter: {
+    card: "summary",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+};
 
 // Con Contact se completa el contenido de la home de paridad estricta (ver
 // docs/MIGRACION.md). <main> envuelve el contenido tal como en el
