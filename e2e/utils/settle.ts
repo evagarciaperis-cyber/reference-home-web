@@ -145,3 +145,37 @@ export async function isolateHeader(page: Page, selector = "[data-header]"): Pro
     `,
   });
 }
+
+/**
+ * Oculta el shell de la app (header, preloader, noise, cursor, footer)
+ * para comparar por píxel solo el contenido propio de una página
+ * standalone.
+ *
+ * Caso real (fase 14, página 404): el original (404.html) es un documento
+ * aislado sin header/footer/preloader/cursor -- una decisión consciente,
+ * tomada con el usuario, mantiene el shell global de la app en la 404 en
+ * vez de reestructurar el árbol de layouts para una sola página. Eso hace
+ * que la comparación de página completa contra el oráculo (que nunca tuvo
+ * shell) no tenga sentido -- oculta el shell en el lado migrado para que
+ * la comparación valide el contenido realmente portado (eyebrow, titular,
+ * párrafo, enlace de vuelta), no la presencia deliberada del shell.
+ *
+ * display:none, no visibility:hidden: Footer no es position:fixed (a
+ * diferencia de header/noise/cursor) -- con visibility:hidden seguía
+ * reservando su altura en el flujo normal, dejando <body> más alto que en
+ * el oráculo. El original tiene un quirk real (verificado): cuando <body>
+ * es más corto que el viewport, se ve el fondo oscuro de <html> por
+ * debajo; con la altura de Footer reservada pero invisible, esa zona
+ * mostraba el fondo claro de <body> en su lugar -- un ~40% de diferencia
+ * de píxel, no antialiasing. display:none saca a Footer del flujo del
+ * todo, igual que su ausencia real en el original.
+ */
+export async function hideAppShell(page: Page): Promise<void> {
+  await page.addStyleTag({
+    content: `
+      [data-header], [data-shell="preloader"], [data-shell="noise"], [data-shell="cursor"], [data-site-footer] {
+        display: none !important;
+      }
+    `,
+  });
+}

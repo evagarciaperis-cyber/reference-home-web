@@ -20,6 +20,7 @@
     "parity:update-oracle-stats": "tsx e2e/capture-oracle-stats.ts",
     "parity:update-oracle-contact": "tsx e2e/capture-oracle-contact.ts",
     "parity:update-oracle-footer": "tsx e2e/capture-oracle-footer.ts",
+    "parity:update-oracle-notfound": "tsx e2e/capture-oracle-notfound.ts",
     "parity:check": "playwright test",
     "parity:report": "playwright show-report"
   },
