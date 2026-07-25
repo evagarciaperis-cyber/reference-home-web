@@ -1,0 +1,38 @@
+/* Puerto literal de .legal-page, .eyebrow (reutilizado vía el primitivo
+   Eyebrow) y .text-link en web-nueva/assets/css/styles.css y 404.html.
+   El original aplica .legal-page directamente sobre <body>; aquí se aplica
+   a un contenedor propio de la página porque <body> es compartido por
+   toda la app (layout raíz) -- ver decisión de mantener el shell global
+   documentada en not-found.tsx. */
+
+.legalPage {
+  background: var(--paper);
+}
+
+.legalPage main {
+  max-width: 900px;
+  margin: auto;
+  padding: 70px 24px 120px;
+}
+
+.legalPage h1 {
+  font-size: clamp(55px, 9vw, 110px);
+  letter-spacing: -.07em;
+  line-height: .9;
+}
+
+.legalPage p {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.6;
+}
+
+.textLink {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
