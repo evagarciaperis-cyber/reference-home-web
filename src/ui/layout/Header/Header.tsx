@@ -15,6 +15,12 @@ const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boo
 // index.html -> /, nosotros.html -> /nosotros, proyectos.html -> /proyectos,
 // contacto.html -> /contacto. Esas páginas aún no existen (fases futuras),
 // igual que en el oráculo, donde los .html correspondientes están vacíos.
+// prefetch={false} en esas tres: sin él, next/link las precarga en
+// segundo plano en cuanto entran en el viewport y genera 404 reales en
+// consola (detectado en la fase 15 al revisar errores de consola) -- no
+// es un comportamiento del original (sitio estático sin prefetch), es un
+// artefacto propio de Next.js con rutas que aún no existen. No cambia la
+// navegación real: al hacer click, sigue yendo a la 404 tal cual debe.
 export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
   const { isScrolled, isHidden, isOnDark } = useHeaderState(menuOpen);
 
@@ -34,11 +40,15 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
 
       <nav className={styles.desktopNav} aria-label="Navegación principal">
         <Link href="/">Inicio</Link>
-        <Link href="/nosotros">Nosotros</Link>
-        <Link href="/proyectos">
+        <Link href="/nosotros" prefetch={false}>
+          Nosotros
+        </Link>
+        <Link href="/proyectos" prefetch={false}>
           Proyectos <sup>07</sup>
         </Link>
-        <Link href="/contacto">Contacto</Link>
+        <Link href="/contacto" prefetch={false}>
+          Contacto
+        </Link>
       </nav>
 
       <button

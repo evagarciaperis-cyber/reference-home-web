@@ -5,7 +5,8 @@ import styles from "./MobileMenu.module.css";
 
 type MobileMenuLink = { href: string; label: string; index: string };
 
-// Mismas rutas que la navegación de escritorio (ver Header.tsx).
+// Mismas rutas que la navegación de escritorio (ver Header.tsx, incluido
+// el motivo de prefetch:false en las tres que aún no existen).
 const LINKS: MobileMenuLink[] = [
   { href: "/", label: "Inicio", index: "01" },
   { href: "/nosotros", label: "Nosotros", index: "02" },
@@ -27,7 +28,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
     >
       <div className={styles.inner}>
         {LINKS.map((link) => (
-          <Link key={link.href} href={link.href} onClick={onClose}>
+          <Link key={link.href} href={link.href} prefetch={link.href === "/" ? undefined : false} onClick={onClose}>
             {link.label} <span>{link.index}</span>
           </Link>
         ))}
