@@ -4,7 +4,7 @@
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: var(--ink);
+  background: var(--color-brand-primary);
   display: grid;
   place-items: center;
   color: var(--paper);
@@ -16,13 +16,13 @@
 }
 
 .mark {
-  font-size: clamp(38px, 8vw, 120px);
-  letter-spacing: -.08em;
-  font-weight: 700;
+  width: clamp(56px, 9vw, 96px);
 }
 
-.mark span {
-  color: var(--acid);
+.markImage {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .line {
@@ -38,7 +38,7 @@
   display: block;
   width: 0;
   height: 100%;
-  background: var(--acid);
+  background: var(--paper);
   animation: loading 1.15s var(--ease) forwards;
 }
 

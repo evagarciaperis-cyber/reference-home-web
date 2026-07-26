@@ -15,6 +15,26 @@
   --serif: Georgia, "Times New Roman", serif;
   --pad: clamp(20px, 3vw, 48px);
   --ease: cubic-bezier(.22, 1, .36, 1);
+
+  /*
+    Paleta corporativa definitiva (docs/PALETA_CORPORATIVA.md, aprobada;
+    docs/REFERENCE_HOME_HOME_REDESIGN_MASTERPLAN.md, revisión 2). Tokens
+    NUEVOS y ADITIVOS -- no se toca ni se elimina ninguno de los de arriba,
+    que siguen siendo la paleta de paridad heredada y siguen alimentando
+    todas las secciones todavía sin rediseñar. Cada sección migra a estos
+    tokens en el momento en que se rediseña, empezando por el Hero
+    (docs/PALETA_CORPORATIVA.md, sección 8: "el color y el rediseño de
+    composición deben nacer juntos"). No renombrar ni reutilizar estos
+    nombres para otra cosa: el resto de secciones los irá adoptando tal
+    cual según avance el rediseño.
+  */
+  --color-bg-primary: #f0dfcf;
+  --color-bg-secondary: #4a5d5a;
+  --color-text-primary-inverse: #f0dfcf;
+  --color-brand-primary: #a11f48;
+  --color-brand-primary-dark: #7a1836;
+  --color-accent-secondary: #85b1b4;
+  --color-accent-exceptional: #f4c542;
 }
 
 /* Puerto literal de styles.css línea 221 (dentro de @media max-width:640px):

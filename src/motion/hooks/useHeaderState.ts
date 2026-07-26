@@ -57,15 +57,30 @@ export function useHeaderState(menuOpen: boolean): HeaderState {
     const update = () => {
       const y = window.scrollY;
       const isScrolled = y > SCROLLED_AFTER_Y;
-      const isHidden = y > lastScroll && y > HIDE_AFTER_Y && !menuOpenRef.current;
-      lastScroll = Math.max(0, y);
 
       let isOnDark = false;
+      let nearDarkSection = false;
       document.querySelectorAll(DARK_SECTION_SELECTOR).forEach((section) => {
-        if (isOnDark) return;
         const rect = section.getBoundingClientRect();
         if (rect.top <= SAMPLE_Y && rect.bottom >= SAMPLE_Y) isOnDark = true;
+        // Ventana más ancha que isOnDark (que solo mira una línea de
+        // muestreo a SAMPLE_Y): sigue siendo true mientras la sección
+        // oscura conserve CUALQUIER parte visible en el viewport, no solo
+        // esa línea. Cubre el hueco final del hand-off Hero -> Manifesto,
+        // donde el sticky del Hero ya ha soltado la línea de muestreo pero
+        // la sección siguiente (con z-index superior, ver Manifesto) aún
+        // no ha terminado de cubrir físicamente el header.
+        if (rect.bottom > 0 && rect.top < window.innerHeight) nearDarkSection = true;
       });
+
+      // El auto-ocultado por dirección de scroll no debe competir con una
+      // sección oscura inmersiva (Hero, WorkZoom) -- ahí el header se
+      // oculta de forma física (la siguiente sección lo cubre al subir,
+      // ver Manifesto), nunca por sí solo. Sin esto, un Hero alto (400vh)
+      // supera el umbral HIDE_AFTER_Y casi de inmediato y el header
+      // desaparece muy pronto dentro de su propio recorrido.
+      const isHidden = !nearDarkSection && y > lastScroll && y > HIDE_AFTER_Y && !menuOpenRef.current;
+      lastScroll = Math.max(0, y);
 
       setState({ isScrolled, isHidden, isOnDark });
     };

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useHeaderState } from "@/motion/hooks/useHeaderState";
+import logoBlanco from "../../../../images/logo-blanco.png";
 import styles from "./Header.module.css";
 
 type HeaderProps = {
@@ -30,13 +32,8 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
       data-header
     >
       <Link className={styles.brand} href="/" aria-label="Volver al inicio">
-        <span className={styles.brandWord}>REFERENCE</span>
-        <span className={styles.brandSub}>DIGITAL STUDY</span>
+        <Image src={logoBlanco} alt="Reference Home" width={130} height={44} className={styles.brandLogo} />
       </Link>
-
-      <div className={styles.headerMeta}>
-        Based in <strong>Valencia</strong>
-      </div>
 
       <nav className={styles.desktopNav} aria-label="Navegación principal">
         <Link href="/">Inicio</Link>
