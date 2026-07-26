@@ -12,6 +12,12 @@
   height: 400vh;
   min-height: 2400px;
   background: var(--color-bg-secondary);
+  /* Geometría bloqueada (corrección nº5, 2026-07-26): única fuente de
+     verdad del encuadre de las cuatro fotografías -- .bgImage lo lee vía
+     var(), nunca se recalcula por JS ni se declara por capa. El único
+     sitio donde este valor cambia es el media query de más abajo, que
+     sigue siendo UNA sola regla compartida por las cuatro capas. */
+  --hero-object-position: 58% center;
 }
 
 .sticky {
@@ -36,20 +42,40 @@
   overflow: hidden;
 }
 
-/* Corrección nº3 (2026-07-26) y verificación repetida al añadir
-   hero-tarde.png: las cuatro capas comparten EXACTAMENTE la misma regla de
-   caja/posición/recorte -- una única clase (.bgImage) aplicada a las
-   cuatro, nada de reglas por-imagen que puedan divergir en escala,
-   transform u object-position. .bgDay/.bgTarde/.bgDusk/.bgNight solo
-   añaden z-index y la opacidad (la única propiedad que debe variar entre
-   ellas). Verificado con Playwright (e2e/hero.spec.ts: "las cuatro capas
-   comparten caja, escala y recorte idénticos"). */
+/* Corrección nº5 (2026-07-26, imágenes definitivas 1536×768): geometría
+   bloqueada bit a bit. Las cuatro capas comparten esta ÚNICA clase para
+   TODAS las propiedades de caja/recorte/transformación -- no hay ninguna
+   regla por-imagen, ningún wrapper distinto, ningún filtro individual.
+   position/inset/width/height se declaran explícitamente aunque next/image
+   en modo fill ya los fije por su cuenta, precisamente para que no exista
+   ninguna ambigüedad sobre de dónde sale el valor. transform, scale y
+   translate se fijan a "none" explícitamente -- no es que no se animen,
+   es que la propiedad ni existe con otro valor. object-position se lee de
+   la variable definida una sola vez en .hero (arriba) -- nunca se
+   recalcula por JS y nunca se declara aquí por breakpoint (ver el media
+   query al final del archivo, que sobreescribe la variable, no esta
+   regla). .bgDay/.bgTarde/.bgDusk/.bgNight -- justo debajo -- son la ÚNICA
+   excepción permitida: solo tocan z-index y opacity, nunca ninguna otra
+   propiedad. Verificado con Playwright (e2e/hero.spec.ts) leyendo
+   getComputedStyle() de las cuatro capas en el navegador real. */
 .bgImage {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  /* Encuadre de escritorio/tablet: sin cifra cerrada en el spec (sección 4
-     solo fija el valor móvil) -- 58% mantiene la fachada bien encuadrada
-     sin perder tanto mar como el recorte a 70% pensado para retrato. */
-  object-position: 58% center;
+  object-position: var(--hero-object-position);
+  transform: none;
+  transform-origin: center;
+  scale: none;
+  translate: none;
+  filter: none;
+  clip-path: none;
+  will-change: opacity;
+  pointer-events: none;
 }
 
 .bgDay {
@@ -72,37 +98,60 @@
   opacity: var(--hero-night-opacity, 0);
 }
 
-/* Resplandor (corrección nº4, 2026-07-26; reposicionado 2026-07-26 nº2 al
-   incorporar hero-tarde.png). Construcción atmosférica de varias capas --
-   núcleo suave de baja opacidad, halo interior, halo exterior casi
-   imperceptible, sin borde definido, sin blanco puro -- con
-   mix-blend-mode: screen para integrarse en el cielo en vez de flotar
-   delante de la fotografía.
+/* Veladuras atmosféricas (corrección nº4, 2026-07-26): al acortar el
+   recorrido del sol, refuerzan la sensación de paso del tiempo por color
+   en vez de por movimiento -- una capa ámbar que crece hacia tarde/
+   atardecer y una azul que crece hacia noche, mix-blend-mode: overlay
+   (se apoyan en el tono real de la fotografía de debajo, no lo sustituyen)
+   y siempre sutiles (máximo ~0.16 de opacidad, ver useHero.ts). */
+.warmWash {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  background: #ff9d4d;
+  opacity: var(--hero-warm-wash, 0);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
 
-   Posición corregida con evidencia, no a ojo: se midió el color medio del
-   cielo en el cuadrante superior-derecho (junto a la cubierta) frente al
-   horizonte izquierdo (mar) en las cuatro fotografías -- el cuadrante de
-   la cubierta se mantiene frío/neutro en las CUATRO, el calor aparece
-   siempre sobre el horizonte izquierdo. Por eso el resplandor vive sobre
-   el mar, a baja altura (var(--hero-light-y), ~56-58%), con un
-   desplazamiento mínimo (useHero.ts: x entre 10% y 16%) -- nunca cerca del
-   30-100% horizontal donde está la casa, así que nunca puede pasar por
-   encima de la arquitectura. Lo que cambia de verdad es la opacidad
-   (protagonismo del cambio de luz, no del movimiento del sol). */
+.coolWash {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  background: #1a2b52;
+  opacity: var(--hero-cool-wash, 0);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+/* Sol (corrección nº6, 2026-07-26 -- reconstrucción visual: núcleo más
+   definido y más brillante, sobre todo en día, pero sin borde duro; centro
+   blanco cálido, nunca blanco puro; halo interior dorado; halo exterior
+   amplio y muy sutil; sin aspecto de círculo CSS plano, sin lens flare, sin
+   rayos dibujados). mix-blend-mode: screen sigue integrándolo en el cielo
+   en vez de flotar delante de la fotografía.
+
+   La trayectoria y la intensidad (SUN_KEYFRAMES/SUN_INTENSITY en
+   useHero.ts) están ancladas a los mismos siete puntos de corte de
+   progreso que gobiernan el crossfade de las cuatro fotografías -- el sol
+   se mueve solo cuando la fotografía está cambiando, nunca de forma
+   independiente. Verificado que en ningún punto del recorrido se solapa
+   con la silueta real de casa/olivo medida sobre hero-dia.png (ver informe
+   de cierre). */
 .light {
   position: absolute;
   z-index: 5;
-  left: var(--hero-light-x, 16%);
-  top: var(--hero-light-y, 56%);
-  width: clamp(280px, 26vw, 520px);
+  left: var(--hero-light-x, 50%);
+  top: var(--hero-light-y, 4%);
+  width: clamp(240px, 20vw, 420px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 214, 168, .4) 0%, rgba(255, 214, 168, 0) 26%),
-    radial-gradient(circle at 50% 50%, rgba(250, 180, 120, .2) 0%, rgba(250, 180, 120, 0) 50%),
-    radial-gradient(circle at 50% 50%, rgba(240, 150, 100, .09) 0%, rgba(240, 150, 100, 0) 100%);
-  filter: blur(30px);
-  opacity: var(--hero-light-opacity, 0);
+    radial-gradient(circle at 50% 50%, rgba(255, 250, 235, .72) 0%, rgba(255, 250, 235, 0) 24%),
+    radial-gradient(circle at 50% 50%, rgba(255, 208, 120, .38) 0%, rgba(255, 208, 120, 0) 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 175, 90, .17) 0%, rgba(255, 175, 90, 0) 100%);
+  filter: blur(20px);
+  opacity: var(--hero-light-opacity, 1);
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -126,6 +175,10 @@
   height: 58%;
   background: linear-gradient(to top, rgba(17, 17, 15, .82) 0%, rgba(17, 17, 15, .52) 38%, transparent 100%);
   pointer-events: none;
+  /* Corrección nº7, 2026-07-26: este velo se diseñó para un copy siempre
+     claro -- el copy vuelve a ser siempre blanco/marfil, así que el velo
+     vuelve a estar siempre a plena fuerza. */
+  opacity: 1;
 }
 
 /* Salida hacia Manifesto (corrección nº5, 2026-07-26 -- spec sección 14,
@@ -183,12 +236,19 @@
   transform: none;
 }
 
+/* Corrección nº7, 2026-07-26: legibilidad del copy por color, no por un
+   velo fijo. Titular y subtexto son siempre blanco/marfil durante todo el
+   recorrido -- la legibilidad se resuelve solo con la sombra, sin cambiar
+   de color según el estado de luz. .title em no declara su propio color:
+   hereda el de .title. */
 .title {
   font-size: clamp(32px, 4.3vw, 66px);
   font-weight: 600;
   letter-spacing: -.01em;
   line-height: 1.14;
   margin: 0;
+  color: #f8f5ef;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, .45), 0 8px 40px rgba(0, 0, 0, .3);
 }
 
 .title em {
@@ -203,6 +263,8 @@
   line-height: 1.5;
   margin: 18px 0 0;
   opacity: .92;
+  color: #f8f5ef;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, .55), 0 6px 30px rgba(0, 0, 0, .35);
 }
 
 .actions {
@@ -321,9 +383,13 @@
 @media (max-width: 767px) {
   /* Encuadre móvil definitivo, verificado (docs/HERO_REDESIGN_SPEC.md,
      sección 4): prioriza fachada, piscina, relación interior-exterior y
-     una presencia controlada del olivo, a costa del mar y el horizonte. */
-  .bgImage {
-    object-position: 70% center;
+     una presencia controlada del olivo, a costa del mar y el horizonte.
+     Corrección nº5: se sobreescribe la VARIABLE definida una vez en
+     .hero, no la regla .bgImage -- sigue siendo un único punto de cambio
+     compartido por las cuatro capas, ninguna capa declara su propio
+     object-position. */
+  .hero {
+    --hero-object-position: 70% center;
   }
 
   /* El resplandor subacuático de la piscina cae cerca del scrim a este
@@ -388,9 +454,20 @@
   }
 
   .light {
-    left: 12%;
-    top: 57%;
-    opacity: .78 !important;
+    /* Punto medido en hero-atardecer.png (el fondo estático elegido para
+       reduced-motion) -- la posición real del resplandor solar en esa
+       fotografía, no una estimación. */
+    left: 11.8%;
+    top: 41.4%;
+    opacity: .68 !important;
+  }
+
+  .warmWash {
+    opacity: .16 !important;
+  }
+
+  .coolWash {
+    opacity: 0 !important;
   }
 
   .exitOverlay {
@@ -406,4 +483,5 @@
   .content {
     transition: none;
   }
+
 }

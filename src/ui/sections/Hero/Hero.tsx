@@ -78,6 +78,8 @@ export function Hero() {
             loading="eager"
             className={cx(styles.bgImage, styles.bgNight)}
           />
+          <div className={styles.warmWash} data-hero-warm-wash />
+          <div className={styles.coolWash} data-hero-cool-wash />
           <div className={styles.light} data-hero-light />
           <div className={styles.scrimTop} />
           <div className={styles.scrimBottom} />
@@ -85,7 +87,7 @@ export function Hero() {
         </div>
 
         <div className={styles.topline}>
-          <span>Inmobiliaria independiente</span>
+          <span>Inmobiliaria en Valencia</span>
           <span>© 2026</span>
         </div>
 

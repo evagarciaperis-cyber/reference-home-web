@@ -7,10 +7,10 @@
   left: 0;
   right: 0;
   z-index: 900;
-  height: 86px;
+  height: 108px;
   padding: 18px var(--pad);
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto 1fr;
   align-items: center;
   transition: background .4s, color .4s, border-color .4s, transform .4s var(--ease);
   border-bottom: 1px solid transparent;
@@ -30,6 +30,10 @@
   color: var(--paper);
 }
 
+.onDark .brand {
+  text-shadow: 0 1px 10px rgba(0, 0, 0, .3);
+}
+
 .onDark.isScrolled {
   background: rgba(17, 17, 15, .84);
   border-color: var(--line-light);
@@ -37,21 +41,13 @@
 
 .brand {
   display: inline-flex;
-  flex-direction: column;
-  line-height: .85;
+  align-items: center;
   width: max-content;
 }
 
-.brandWord {
-  font-weight: 700;
-  letter-spacing: -.045em;
-  font-size: 19px;
-}
-
-.brandSub {
-  font-size: 7px;
-  letter-spacing: .26em;
-  margin-top: 8px;
+.brandLogo {
+  width: auto;
+  height: 62px;
 }
 
 .headerMeta {
@@ -142,8 +138,12 @@
 
 @media (max-width: 640px) {
   .header {
-    height: 72px;
+    height: 84px;
     padding-top: 12px;
     padding-bottom: 12px;
+  }
+
+  .brandLogo {
+    height: 50px;
   }
 }

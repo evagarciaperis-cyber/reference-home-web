@@ -46,8 +46,8 @@ button {
 }
 
 ::selection {
-  background: var(--acid);
-  color: var(--ink);
+  background: var(--color-brand-primary);
+  color: var(--paper);
 }
 
 .no-scroll {

@@ -19,23 +19,35 @@ async function scrollHeroFraction(page: import("@playwright/test").Page, frac: n
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
 
-// Corrección 2026-07-26, punto TERCERO del encargo: las tres capas de fondo
-// deben compartir exactamente la misma caja/escala/recorte -- ninguna
-// puede tener su propio transform, object-position o redondeo de
-// dimensiones distinto de las otras dos.
-test("las tres capas de fondo comparten caja, escala y recorte idénticos", async ({ page, baseURL }, testInfo) => {
+// Corrección 2026-07-26 nº5 (imágenes definitivas 1536×768): las cuatro
+// capas de fondo deben compartir bit a bit top/right/bottom/left/width/
+// height/objectFit/objectPosition/transform/transformOrigin/clipPath --
+// exactamente la lista pedida, leída con getComputedStyle() en el
+// navegador real, no inferida del CSS fuente.
+test("las cuatro capas de fondo comparten geometría idéntica (getComputedStyle)", async ({ page, baseURL }, testInfo) => {
   test.skip(isReduced(testInfo.project.name), "Solo hay una capa visible con reduced-motion (ver test dedicado)");
   await page.goto(new URL("/", baseURL).href);
   await page.waitForTimeout(300);
 
   const boxes = await page.locator("#inicio [aria-hidden='true'] img").evaluateAll((imgs) =>
     imgs.map((img) => {
-      const r = img.getBoundingClientRect();
       const cs = getComputedStyle(img);
-      return { x: r.x, y: r.y, w: r.width, h: r.height, objectFit: cs.objectFit, objectPosition: cs.objectPosition, transform: cs.transform };
+      return {
+        top: cs.top,
+        right: cs.right,
+        bottom: cs.bottom,
+        left: cs.left,
+        width: cs.width,
+        height: cs.height,
+        objectFit: cs.objectFit,
+        objectPosition: cs.objectPosition,
+        transform: cs.transform,
+        transformOrigin: cs.transformOrigin,
+        clipPath: cs.clipPath,
+      };
     }),
   );
-  expect(boxes).toHaveLength(3);
+  expect(boxes).toHaveLength(4);
   for (const box of boxes.slice(1)) {
     expect(box).toEqual(boxes[0]);
   }
@@ -195,9 +207,8 @@ test("ambos CTA son accesibles por teclado con foco visible", async ({ page, bas
   await expect(secondary).toHaveCSS("outline-style", "solid");
 });
 
-test("wordmark del Header: REFERENCE HOME", async ({ page, baseURL }) => {
+test("wordmark del Header: logotipo Reference Home", async ({ page, baseURL }) => {
   await page.goto(new URL("/", baseURL).href);
-  const brand = page.locator("[data-header] a", { hasText: "REFERENCE" }).first();
-  await expect(brand).toContainText("REFERENCE");
-  await expect(brand).toContainText("HOME");
+  const brand = page.locator("[data-header] a[aria-label='Volver al inicio']");
+  await expect(brand.locator("img")).toHaveAttribute("alt", "Reference Home");
 });
