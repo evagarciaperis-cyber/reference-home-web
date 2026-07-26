@@ -29,6 +29,16 @@ for (const route of ROUTES) {
   });
 
   test(`paridad — ${route.name}`, async ({ page, baseURL }, testInfo) => {
+    // El Hero definitivo (docs/HERO_REDESIGN_SPEC.md, aprobado 2026-07-26)
+    // sustituye por completo al Hero de paridad estricta que capturó este
+    // oráculo -- la paridad de píxel de "home" ya no aplica mientras dure
+    // el rediseño sección a sección de la Home (docs/
+    // REFERENCE_HOME_HOME_REDESIGN_MASTERPLAN.md). No se borra el oráculo
+    // ni este test (condición nº14 del encargo de implementación del
+    // Hero): se retoma con un oráculo nuevo cuando el rediseño de la Home
+    // esté aprobado sección a sección.
+    test.skip(route.name === "home", "Home en rediseño (Hero ya no tiene paridad de píxel con web-nueva/) — ver docs/HERO_REDESIGN_SPEC.md");
+
     const oraclePath = path.join(ORACLE_DIR, `${testInfo.project.name}-${route.name}.png`);
     test.skip(
       !existsSync(oraclePath),

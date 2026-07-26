@@ -1,149 +1,301 @@
-/* Puerto literal de .hero*, .circle-link* en web-nueva/assets/css/styles.css */
+/* Hero definitivo (docs/HERO_REDESIGN_SPEC.md, aprobado). Usa los tokens
+   corporativos nuevos y aditivos de src/ui/styles/tokens.css (sección
+   "Paleta corporativa definitiva") -- no los tokens de paridad heredados
+   (--ink/--paper/--acid/--wine), que siguen sirviendo al resto de
+   secciones todavía sin rediseñar. */
 
 .hero {
-  min-height: 100svh;
-  padding: 116px var(--pad) 24px;
   position: relative;
+  /* Corrección nº2 (revisión 2026-07-26): 400vh como punto de partida --
+     el usuario debe poder contemplar cada estado (día/atardecer/noche),
+     no solo atravesarlo. Los tramos exactos viven en useHero.ts (STAGE). */
+  height: 400vh;
+  min-height: 2400px;
+  background: var(--color-bg-secondary);
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  min-height: 640px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  background: var(--paper);
+  padding: 116px var(--pad) 24px;
+  color: var(--color-text-primary-inverse);
 }
 
-.orb {
+/* --- Fondo: cuatro fotografías en crossfade, mismo encuadre de cámara --- */
+
+.background {
   position: absolute;
-  width: min(58vw, 850px);
-  aspect-ratio: 1;
-  right: -12vw;
-  top: 6vh;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 40%, rgba(231, 255, 72, .98), rgba(201, 184, 170, .7) 42%, rgba(143, 23, 63, .45) 70%, transparent 72%);
-  filter: blur(1px);
-  opacity: .9;
-  animation: orb 8s ease-in-out infinite alternate;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
 }
 
-@keyframes orb {
-  to {
-    transform: translate(-4vw, 4vh) scale(1.06);
-  }
+/* Corrección nº3 (2026-07-26) y verificación repetida al añadir
+   hero-tarde.png: las cuatro capas comparten EXACTAMENTE la misma regla de
+   caja/posición/recorte -- una única clase (.bgImage) aplicada a las
+   cuatro, nada de reglas por-imagen que puedan divergir en escala,
+   transform u object-position. .bgDay/.bgTarde/.bgDusk/.bgNight solo
+   añaden z-index y la opacidad (la única propiedad que debe variar entre
+   ellas). Verificado con Playwright (e2e/hero.spec.ts: "las cuatro capas
+   comparten caja, escala y recorte idénticos"). */
+.bgImage {
+  object-fit: cover;
+  /* Encuadre de escritorio/tablet: sin cifra cerrada en el spec (sección 4
+     solo fija el valor móvil) -- 58% mantiene la fachada bien encuadrada
+     sin perder tanto mar como el recorte a 70% pensado para retrato. */
+  object-position: 58% center;
 }
+
+.bgDay {
+  z-index: 1;
+  opacity: var(--hero-day-opacity, 1);
+}
+
+.bgTarde {
+  z-index: 2;
+  opacity: var(--hero-tarde-opacity, 0);
+}
+
+.bgDusk {
+  z-index: 3;
+  opacity: var(--hero-dusk-opacity, 0);
+}
+
+.bgNight {
+  z-index: 4;
+  opacity: var(--hero-night-opacity, 0);
+}
+
+/* Resplandor (corrección nº4, 2026-07-26; reposicionado 2026-07-26 nº2 al
+   incorporar hero-tarde.png). Construcción atmosférica de varias capas --
+   núcleo suave de baja opacidad, halo interior, halo exterior casi
+   imperceptible, sin borde definido, sin blanco puro -- con
+   mix-blend-mode: screen para integrarse en el cielo en vez de flotar
+   delante de la fotografía.
+
+   Posición corregida con evidencia, no a ojo: se midió el color medio del
+   cielo en el cuadrante superior-derecho (junto a la cubierta) frente al
+   horizonte izquierdo (mar) en las cuatro fotografías -- el cuadrante de
+   la cubierta se mantiene frío/neutro en las CUATRO, el calor aparece
+   siempre sobre el horizonte izquierdo. Por eso el resplandor vive sobre
+   el mar, a baja altura (var(--hero-light-y), ~56-58%), con un
+   desplazamiento mínimo (useHero.ts: x entre 10% y 16%) -- nunca cerca del
+   30-100% horizontal donde está la casa, así que nunca puede pasar por
+   encima de la arquitectura. Lo que cambia de verdad es la opacidad
+   (protagonismo del cambio de luz, no del movimiento del sol). */
+.light {
+  position: absolute;
+  z-index: 5;
+  left: var(--hero-light-x, 16%);
+  top: var(--hero-light-y, 56%);
+  width: clamp(280px, 26vw, 520px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 214, 168, .4) 0%, rgba(255, 214, 168, 0) 26%),
+    radial-gradient(circle at 50% 50%, rgba(250, 180, 120, .2) 0%, rgba(250, 180, 120, 0) 50%),
+    radial-gradient(circle at 50% 50%, rgba(240, 150, 100, .09) 0%, rgba(240, 150, 100, 0) 100%);
+  filter: blur(30px);
+  opacity: var(--hero-light-opacity, 0);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/* Scrim constante (spec, secciones 3 y 9): garantiza contraste del header
+   y del titular en los cuatro estados de luz sin depender de que la
+   fotografía "coopere" -- por diseño, no varía con --hero-progress. */
+.scrimTop {
+  position: absolute;
+  z-index: 6;
+  inset: 0 0 auto 0;
+  height: 260px;
+  background: linear-gradient(to bottom, rgba(17, 17, 15, .58), transparent);
+  pointer-events: none;
+}
+
+.scrimBottom {
+  position: absolute;
+  z-index: 6;
+  inset: auto 0 0 0;
+  height: 58%;
+  background: linear-gradient(to top, rgba(17, 17, 15, .82) 0%, rgba(17, 17, 15, .52) 38%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Salida hacia Manifesto (corrección nº5, 2026-07-26 -- spec sección 14,
+   no implementada en la primera versión). La fotografía de noche permanece
+   visible y se cede progresivamente a un color sólido -- no a negro
+   genérico, sino al MISMO fondo que Manifesto usa hoy (var(--paper), el
+   token de paridad heredado: Manifesto todavía no se ha rediseñado, así
+   que igualar exactamente su color actual es lo único que garantiza
+   "sin salto de color" de verdad; migrar a --color-bg-primary cuando
+   Manifesto también migre). Dirigido por --hero-exit-opacity, que
+   useHero.ts solo empieza a subir a partir del tramo "noche estable"
+   (progreso > 0.92) -- la salida nunca empieza mientras la luz todavía
+   está cambiando. La sección permanece sticky (pinned) hasta el final de
+   sus 400vh, así que Manifesto no puede empujar la imagen fuera del
+   viewport antes de que este desvanecido termine. */
+.exitOverlay {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  background: var(--paper);
+  opacity: var(--hero-exit-opacity, 0);
+  pointer-events: none;
+}
+
+/* --- Contenido --- */
 
 .topline {
   position: relative;
-  z-index: 2;
+  z-index: 6;
   display: flex;
   justify-content: space-between;
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .14em;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid rgba(240, 223, 207, .35);
   padding-top: 10px;
+  /* Se apaga junto con la fotografía durante la salida (corrección nº5) --
+     no queda flotando sobre el rectángulo sólido de var(--paper). */
+  opacity: calc(1 - var(--hero-exit-opacity, 0));
 }
 
-.title {
+.content {
   position: relative;
-  z-index: 2;
+  z-index: 6;
   margin-top: auto;
-  margin-bottom: auto;
-  padding: 5vh 0;
+  max-width: 640px;
+  padding: 4vh 0;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 1.1s var(--ease), transform 1.1s var(--ease);
 }
 
-.line {
-  font-size: clamp(66px, 11.6vw, 195px);
-  font-weight: 600;
-  letter-spacing: -.082em;
-  line-height: .78;
-  overflow: hidden;
-}
-
-.line span {
-  display: block;
-  transform: translateY(112%);
-  transition: transform 1.25s var(--ease);
-}
-
-.isReady .line span {
+.isReady .content {
+  opacity: calc(1 - var(--hero-exit-opacity, 0));
   transform: none;
 }
 
-.line:nth-child(2) span {
-  transition-delay: .08s;
+.title {
+  font-size: clamp(32px, 4.3vw, 66px);
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.14;
+  margin: 0;
 }
 
-.line:nth-child(3) span {
-  transition-delay: .16s;
-}
-
-.lineIndent {
-  padding-left: 13vw;
-}
-
-.lineSerif {
+.title em {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
-  text-align: right;
-  padding-right: 7vw;
 }
 
-.footer {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 20px;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 18px;
+.lead {
+  max-width: 46ch;
+  font-size: clamp(14px, 1.3vw, 18px);
+  line-height: 1.5;
+  margin: 18px 0 0;
+  opacity: .92;
 }
 
-.footer p {
-  max-width: 440px;
-  margin: 0 0 8px;
-  font-size: clamp(14px, 1.25vw, 19px);
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 36px;
 }
 
-.circleLink {
-  width: 112px;
-  height: 112px;
-  border: 1px solid currentColor;
+.primaryCta {
+  width: clamp(150px, 15vw, 190px);
+  aspect-ratio: 1;
+  border: 1px solid var(--color-text-primary-inverse);
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  position: relative;
-  transition: background .35s, color .35s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  padding: 12px;
+  color: inherit;
+  transition: background .35s, color .35s, border-color .35s;
 }
 
-.circleLink:hover {
-  background: var(--ink);
-  color: var(--acid);
-}
-
-.circleLink span {
-  font-size: 11px;
+.primaryCta span {
+  font-size: clamp(12px, 1vw, 14px);
   text-transform: uppercase;
-  letter-spacing: .1em;
+  letter-spacing: .07em;
+  line-height: 1.3;
+  max-width: 9ch;
 }
 
-.circleLink svg {
-  position: absolute;
-  width: 21px;
-  right: 22px;
-  top: 20px;
+.primaryCta svg {
+  width: 18px;
+  height: 18px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
 }
 
+.primaryCta:hover,
+.primaryCta:focus-visible {
+  background: var(--color-brand-primary);
+  color: var(--color-bg-primary);
+  border-color: transparent;
+}
+
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  font-size: clamp(13px, 1.1vw, 15px);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color .3s;
+}
+
+.secondaryCta b {
+  font-weight: 400;
+  display: inline-block;
+  transition: transform .3s, color .3s;
+}
+
+.secondaryCta:hover,
+.secondaryCta:focus-visible {
+  color: var(--color-accent-exceptional);
+}
+
+.secondaryCta:hover b,
+.secondaryCta:focus-visible b {
+  transform: translate(2px, -2px);
+}
+
+.primaryCta:focus-visible,
+.secondaryCta:focus-visible {
+  outline: 2px solid var(--color-accent-exceptional);
+  outline-offset: 4px;
+}
+
 .services {
   position: relative;
-  z-index: 2;
+  z-index: 6;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid rgba(240, 223, 207, .25);
   font-size: 12px;
+  opacity: calc(1 - var(--hero-exit-opacity, 0));
 }
 
 .services div {
@@ -152,7 +304,7 @@
 }
 
 .services span {
-  opacity: .45;
+  opacity: .55;
 }
 
 @media (max-width: 900px) {
@@ -161,53 +313,49 @@
     row-gap: 10px;
   }
 
-  .line {
-    font-size: clamp(62px, 13vw, 130px);
+  .title {
+    font-size: clamp(30px, 6vw, 46px);
+  }
+}
+
+@media (max-width: 767px) {
+  /* Encuadre móvil definitivo, verificado (docs/HERO_REDESIGN_SPEC.md,
+     sección 4): prioriza fachada, piscina, relación interior-exterior y
+     una presencia controlada del olivo, a costa del mar y el horizonte. */
+  .bgImage {
+    object-position: 70% center;
+  }
+
+  /* El resplandor subacuático de la piscina cae cerca del scrim a este
+     encuadre en el estado noche (spec, sección 17) -- scrim más alto y más
+     opaco solo en este breakpoint para garantizar el contraste ahí. */
+  .scrimBottom {
+    height: 66%;
+    background: linear-gradient(to top, rgba(17, 17, 15, .88) 0%, rgba(17, 17, 15, .6) 45%, transparent 100%);
   }
 }
 
 @media (max-width: 640px) {
   .hero {
-    padding-top: 95px;
-    min-height: 100svh;
+    min-height: 1100px;
   }
 
-  .orb {
-    width: 88vw;
-    right: -30vw;
-    top: 14vh;
+  .sticky {
+    padding-top: 95px;
   }
 
   .title {
-    padding: 7vh 0;
+    font-size: clamp(28px, 8vw, 38px);
   }
 
-  .line {
-    font-size: clamp(48px, 14vw, 82px);
-    line-height: .82;
+  .actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
   }
 
-  .lineIndent {
-    padding-left: 3vw;
-  }
-
-  .lineSerif {
-    padding-right: 0;
-  }
-
-  .footer {
-    grid-template-columns: 1fr;
-  }
-
-  .circleLink {
-    width: 84px;
-    height: 84px;
-    justify-self: end;
-  }
-
-  .circleLink svg {
-    right: 15px;
-    top: 14px;
+  .primaryCta {
+    width: 132px;
   }
 
   .services {
@@ -217,7 +365,45 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .line span {
-    transform: none;
+  /* Estado estático (spec, sección 15): atardecer, sin crossfade ni
+     desplazamiento del punto de luz. !important porque debe ganar desde
+     el primer pintado, con independencia de si useHero llegó a ejecutarse
+     -- el hook ya no adjunta listeners bajo reduced-motion (ver
+     useHero.ts), pero el CSS es quien de verdad garantiza el estado
+     correcto, no un efecto secundario de que el JS se quede callado. */
+  .bgDay {
+    opacity: 0 !important;
+  }
+
+  .bgTarde {
+    opacity: 0 !important;
+  }
+
+  .bgDusk {
+    opacity: 1 !important;
+  }
+
+  .bgNight {
+    opacity: 0 !important;
+  }
+
+  .light {
+    left: 12%;
+    top: 57%;
+    opacity: .78 !important;
+  }
+
+  .exitOverlay {
+    opacity: 0 !important;
+  }
+
+  .topline,
+  .content,
+  .services {
+    opacity: 1 !important;
+  }
+
+  .content {
+    transition: none;
   }
 }

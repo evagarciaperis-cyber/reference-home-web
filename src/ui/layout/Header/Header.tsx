@@ -31,7 +31,7 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
     >
       <Link className={styles.brand} href="/" aria-label="Volver al inicio">
         <span className={styles.brandWord}>REFERENCE</span>
-        <span className={styles.brandSub}>DIGITAL STUDY</span>
+        <span className={styles.brandSub}>HOME</span>
       </Link>
 
       <div className={styles.headerMeta}>
