@@ -62,8 +62,23 @@ async function scrollTo(page: import("@playwright/test").Page, y: number) {
 // ---------------------------------------------------------------------
 // Paridad visual
 // ---------------------------------------------------------------------
+//
+// Corrección 2026-07-27: estos dos tests comparan contra el oráculo de
+// web-nueva/ (el sitio estático original de la migración de paridad
+// estricta, Fases 0-16, cerrada hace muchas rondas). El header lleva
+// varias rondas de rediseño deliberado desde entonces -- logo más
+// grande, menú reubicado, copy nuevo ("Inmobiliaria en Valencia" en vez
+// de "Based in Valencia") -- así que ya no hay ningún oráculo válido
+// contra el que comparar: no es que falten regenerar, es que el propio
+// concepto de "paridad con el sitio estático" dejó de aplicar al header,
+// igual que le pasó al Hero (ver e2e/hero.legacy.spec.ts, mismo
+// precedente). Se desactivan aquí en vez de borrarse, por si hiciera
+// falta consultar el criterio de comparación original más adelante.
 
-test("header: paridad visual en el estado inicial (aislado)", async ({ page, baseURL }, testInfo) => {
+test.skip("header: paridad visual en el estado inicial (aislado) [OBSOLETO -- ver comentario de arriba]", async ({
+  page,
+  baseURL,
+}, testInfo) => {
   const oraclePath = path.join(ORACLE_DIR, `header-${testInfo.project.name}-home.png`);
   test.skip(!existsSync(oraclePath), `No existe oráculo para "header-${testInfo.project.name}". Ejecuta "npm run parity:update-oracle-header".`);
   const oracleBuf = readFileSync(oraclePath);
@@ -87,7 +102,10 @@ test("header: paridad visual en el estado inicial (aislado)", async ({ page, bas
   expect(diffRatio, "paridad visual del header — revisa el diff adjunto").toBeLessThan(PARITY_THRESHOLD);
 });
 
-test("mobile-menu: paridad visual abierto", async ({ page, baseURL }, testInfo) => {
+test.skip("mobile-menu: paridad visual abierto [OBSOLETO -- ver comentario junto al test de header de arriba]", async ({
+  page,
+  baseURL,
+}, testInfo) => {
   test.skip(
     !viewportHasToggle(testInfo.project.name),
     "El botón de menú solo existe en viewports ≤900px",

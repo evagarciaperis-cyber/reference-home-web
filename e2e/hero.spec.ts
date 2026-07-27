@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { HERO_NARRATIVE_VH } from "../src/motion/core/heroGeometry";
 
 // Hero definitivo (docs/HERO_REDESIGN_SPEC.md, aprobado 2026-07-26). El
 // Hero de paridad estricta anterior vive, deshabilitado, en
@@ -8,13 +9,20 @@ function isReduced(projectName: string): boolean {
   return projectName.endsWith("-reduced");
 }
 
+// Corrección 2026-07-27: la distancia de la narrativa (día/tarde/
+// atardecer/noche) ya NO es "altura total del Hero menos un viewport" --
+// desde que el contenedor del Hero mide HERO_TOTAL_VH viewports (500vh,
+// heroGeometry.ts) en vez de 400vh, esa resta ya no coincide con la
+// distancia real que usa useHero.ts. Se importa la misma constante que
+// usa el propio hook para no volver a desincronizarse (fue exactamente
+// el bug que causó el movimiento del Hero, corregido esta misma sesión).
 async function scrollHeroFraction(page: import("@playwright/test").Page, frac: number) {
-  const { heroHeight, viewportHeight } = await page.evaluate(() => ({
-    heroHeight: document.querySelector("#inicio")!.getBoundingClientRect().height,
+  const { heroDocTop, viewportHeight } = await page.evaluate(() => ({
+    heroDocTop: window.scrollY + document.querySelector("#inicio")!.getBoundingClientRect().top,
     viewportHeight: window.innerHeight,
   }));
-  const distance = heroHeight - viewportHeight;
-  await page.evaluate((y) => window.scrollTo({ top: y, left: 0, behavior: "instant" }), Math.round(distance * frac));
+  const distance = HERO_NARRATIVE_VH * viewportHeight;
+  await page.evaluate((y) => window.scrollTo({ top: y, left: 0, behavior: "instant" }), Math.round(heroDocTop + distance * frac));
   // Dos rAF para dar tiempo a que useHero recalcule tras el scroll.
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
@@ -53,25 +61,63 @@ test("las cuatro capas de fondo comparten geometría idéntica (getComputedStyle
   }
 });
 
-// Corrección 2026-07-26, punto QUINTO: la salida hacia Manifesto no puede
-// empezar mientras la luz todavía está cambiando -- solo a partir de que
-// la noche ya está resuelta al 100% (progreso > 0.88).
-test("la salida hacia Manifesto no empieza antes de que la noche esté resuelta", async ({ page, baseURL }, testInfo) => {
+// Corrección 2026-07-27 (revisión definitiva): la salida del Hero ya NO
+// es un fundido de color propio -- --hero-exit-opacity queda
+// permanentemente en 0 (útil solo si algún día hiciera falta revertir) y
+// es Manifesto, con z-index superior, quien lo cubre físicamente al
+// subir. Este test sustituye al anterior ("no empieza antes de que la
+// noche esté resuelta"), que comprobaba exactamente el mecanismo que se
+// eliminó.
+test("el Hero nunca se difumina por su cuenta -- Manifesto lo cubre físicamente, no por fundido", async ({
+  page,
+  baseURL,
+}, testInfo) => {
   test.skip(isReduced(testInfo.project.name), "reduced-motion no tiene tramo de salida (ver test dedicado)");
   await page.goto(new URL("/", baseURL).href);
+  await page.waitForSelector('[data-shell="preloader"]', { state: "hidden", timeout: 3000 }).catch(() => {});
   await page.waitForTimeout(300);
 
   const readExit = () =>
     page.locator("#inicio").evaluate((el) => Number(getComputedStyle(el).getPropertyValue("--hero-exit-opacity")));
 
-  await scrollHeroFraction(page, 0.75); // noche recién resuelta
-  expect(await readExit()).toBe(0);
+  // --hero-exit-opacity se mantiene en 0 en todo el recorrido, incluida
+  // la propia ventana de cobertura de Manifesto -- nunca hay fundido.
+  for (const frac of [0, 0.5, 0.9, 1, 1.2]) {
+    await scrollHeroFraction(page, frac);
+    expect(await readExit()).toBe(0);
+  }
 
-  await scrollHeroFraction(page, 0.87); // todavía dentro del tramo "noche estable"
-  expect(await readExit()).toBe(0);
+  // El header, físicamente: visible mientras Manifesto no ha llegado
+  // arriba, cubierto (no por su propio opacity/transform, que siguen
+  // intactos) una vez Manifesto completa su ascenso.
+  const isHeaderPhysicallyVisible = () =>
+    page.evaluate(() => {
+      const header = document.querySelector("[data-header]")!;
+      const rect = header.getBoundingClientRect();
+      const topEl = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return !!(topEl && topEl.closest("[data-header]"));
+    });
+  const headerOwnStyle = () =>
+    page.locator("[data-header]").evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { opacity: cs.opacity, transform: cs.transform };
+    });
 
-  await scrollHeroFraction(page, 0.94); // dentro del tramo de salida
-  expect(await readExit()).toBeGreaterThan(0);
+  await scrollHeroFraction(page, 0.5);
+  expect(await isHeaderPhysicallyVisible()).toBe(true);
+  expect(await headerOwnStyle()).toEqual({ opacity: "1", transform: "none" });
+
+  // El wipe empieza en frac=1 (scrollY=HERO_NARRATIVE_VH viewports) y dura
+  // 1 viewport más -- en términos de esta misma escala de frac (relativa
+  // a HERO_NARRATIVE_VH viewports), eso es frac=1+1/HERO_NARRATIVE_VH.
+  // Un poco más allá para dar margen al asentamiento del arrastre
+  // amortiguado (useManifestoRise.ts).
+  await scrollHeroFraction(page, 1 + 1.15 / HERO_NARRATIVE_VH);
+  await page.waitForTimeout(700); // deja asentar el seguidor críticamente amortiguado
+  expect(await isHeaderPhysicallyVisible()).toBe(false);
+  // El header en sí sigue intacto detrás -- lo que cambió es qué hay
+  // delante, nunca su propio opacity/transform.
+  expect(await headerOwnStyle()).toEqual({ opacity: "1", transform: "none" });
 });
 
 test("copy definitivo: titular, énfasis serif, texto secundario y ambos CTA", async ({ page, baseURL }) => {
@@ -90,10 +136,10 @@ test("copy definitivo: titular, énfasis serif, texto secundario y ambos CTA", a
   await expect(secondary).toBeVisible();
 });
 
-test("fondo: las tres fotografías de la vivienda están presentes", async ({ page, baseURL }) => {
+test("fondo: las cuatro fotografías de la vivienda están presentes", async ({ page, baseURL }) => {
   await page.goto(new URL("/", baseURL).href);
   const bgImages = page.locator("#inicio [aria-hidden='true'] img");
-  await expect(bgImages).toHaveCount(3);
+  await expect(bgImages).toHaveCount(4);
   for (const img of await bgImages.all()) {
     await expect(img).toHaveAttribute("alt", "");
   }
@@ -104,8 +150,9 @@ test("crossfade: el estado día domina al inicio del recorrido del Hero", async 
   await page.goto(new URL("/", baseURL).href);
   await page.waitForTimeout(300);
 
+  // Orden real en el DOM (Hero.tsx): día(0), tarde(1), atardecer(2), noche(3).
   const day = page.locator("#inicio img").nth(0);
-  const night = page.locator("#inicio img").nth(2);
+  const night = page.locator("#inicio img").nth(3);
   await expect
     .poll(async () => Number(await day.evaluate((el) => getComputedStyle(el).opacity)))
     .toBeGreaterThan(0.9);
@@ -118,12 +165,14 @@ test("crossfade: el estado noche domina al final del recorrido del Hero", async 
   test.skip(isReduced(testInfo.project.name), "reduced-motion fija el estado atardecer (ver test dedicado)");
   await page.goto(new URL("/", baseURL).href);
 
-  const heroHeight = await page.locator("#inicio").evaluate((el) => el.getBoundingClientRect().height);
-  await page.evaluate((y) => window.scrollTo({ top: y, left: 0, behavior: "instant" }), heroHeight);
+  // Corrección 2026-07-27: hay que llegar al final de la NARRATIVA
+  // (HERO_NARRATIVE_VH viewports), no al final del contenedor de 500vh
+  // -- este último incluye el tramo de cola donde el Hero ya no cambia.
+  await scrollHeroFraction(page, 1);
   await page.waitForTimeout(400);
 
   const day = page.locator("#inicio img").nth(0);
-  const night = page.locator("#inicio img").nth(2);
+  const night = page.locator("#inicio img").nth(3);
   await expect
     .poll(async () => Number(await day.evaluate((el) => getComputedStyle(el).opacity)))
     .toBeLessThan(0.1);
@@ -136,10 +185,13 @@ test("reduced-motion: estado estático en atardecer, sin día ni noche visibles"
   test.skip(!isReduced(testInfo.project.name), "Solo aplica con prefers-reduced-motion");
   await page.goto(new URL("/", baseURL).href);
 
+  // Orden real en el DOM (Hero.tsx): día(0), tarde(1), atardecer(2), noche(3).
   const day = page.locator("#inicio img").nth(0);
-  const dusk = page.locator("#inicio img").nth(1);
-  const night = page.locator("#inicio img").nth(2);
+  const tarde = page.locator("#inicio img").nth(1);
+  const dusk = page.locator("#inicio img").nth(2);
+  const night = page.locator("#inicio img").nth(3);
   await expect(day).toHaveCSS("opacity", "0");
+  await expect(tarde).toHaveCSS("opacity", "0");
   await expect(dusk).toHaveCSS("opacity", "1");
   await expect(night).toHaveCSS("opacity", "0");
 });

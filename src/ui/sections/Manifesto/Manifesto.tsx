@@ -4,6 +4,7 @@ import { SectionLabel } from "@/ui/primitives/SectionLabel";
 import { Eyebrow } from "@/ui/primitives/Eyebrow";
 import { useSplitReveal } from "@/motion/hooks/useSplitReveal";
 import { useParallax } from "@/motion/hooks/useParallax";
+import { useManifestoRise } from "@/motion/hooks/useManifestoRise";
 import styles from "./Manifesto.module.css";
 
 // Puerto literal del texto de .manifesto__statement (index.html). El
@@ -17,9 +18,10 @@ const STATEMENT_WORDS = STATEMENT.split(/\s+/);
 export function Manifesto() {
   const statementRef = useSplitReveal<HTMLDivElement>();
   const visualRef = useParallax<HTMLDivElement>(0.08);
+  const riseRef = useManifestoRise<HTMLElement>();
 
   return (
-    <section className={styles.manifesto} id="estudio">
+    <section className={styles.manifesto} id="estudio" ref={riseRef}>
       <SectionLabel number="01">El estudio</SectionLabel>
       <div className={styles.grid}>
         <Eyebrow>Una arquitectura pensada para avanzar</Eyebrow>

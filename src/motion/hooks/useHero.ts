@@ -3,6 +3,7 @@
 import { useEffect, type RefObject } from "react";
 import { easeInOutCubic } from "../core/easing";
 import { prefersReducedMotion } from "../core/media";
+import { HERO_NARRATIVE_VH } from "../core/heroGeometry";
 
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -207,7 +208,21 @@ export function useHero({ sectionRef }: Refs): void {
       const { day, tarde, dusk, night } = computeLayers(p);
       const light = computeLight(p);
       const atmosphere = computeAtmosphere(p);
-      const exitOpacity = p <= STAGE.nightEnd ? 0 : easeInOutCubic((p - STAGE.nightEnd) / (1 - STAGE.nightEnd));
+      // Desactivado (corrección 2026-07-27): este fundido a var(--paper)
+      // se diseñó cuando la salida del Hero no tenía ninguna cobertura
+      // física real detrás -- disolverlo por color era el único recurso
+      // disponible. Ahora Manifesto lo cubre físicamente (z-index +
+      // superficie sólida, ver Manifesto.tsx/useManifestoRise.ts), y
+      // como este fundido terminaba de resolverse en p=1 -- que con
+      // start/distance de este hook corresponde a un scrollY MUY
+      // anterior al final real del recorrido de Manifesto -- el Hero
+      // llegaba ya blanqueado antes de que el borde sólido de Manifesto
+      // lo alcanzara físicamente: se veía como un velo, no como una
+      // superficie opaca subiendo. Mantener la fotografía con sus
+      // colores reales hasta que Manifesto la tape es precisamente lo
+      // que se pide ahora, así que este fundido queda permanentemente en
+      // 0 en vez de eliminarse (por si hiciera falta revertir).
+      const exitOpacity = 0;
 
       section.style.setProperty("--hero-progress", p.toFixed(4));
       section.style.setProperty("--hero-day-opacity", day.toFixed(4));
@@ -228,7 +243,16 @@ export function useHero({ sectionRef }: Refs): void {
 
     const measure = () => {
       start = window.scrollY + section.getBoundingClientRect().top;
-      distance = Math.max(1, section.offsetHeight - window.innerHeight);
+      // Corrección 2026-07-27: ya NO se deriva de section.offsetHeight.
+      // Antes, `alturaTotal - 1 viewport` era a la vez la distancia de la
+      // narrativa Y el punto en el que el sticky del Hero se soltaba --
+      // coincidían porque eran el mismo número. Al alargar el contenedor
+      // (Hero.module.css, 500vh) para darle sitio al ascenso de Manifesto
+      // sin que el Hero se desenganche antes de tiempo, esos dos números
+      // debían dejar de ser el mismo: la narrativa sigue durando
+      // exactamente HERO_NARRATIVE_VH viewports, como durante toda la
+      // vida de este componente (antes 400vh - 1 viewport = 3 viewports).
+      distance = Math.max(1, HERO_NARRATIVE_VH * window.innerHeight);
       requestRender();
     };
 

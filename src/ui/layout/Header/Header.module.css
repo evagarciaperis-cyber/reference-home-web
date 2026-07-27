@@ -17,6 +17,11 @@
   align-items: center;
   transition: background .4s, color .4s, border-color .4s;
   border-bottom: 1px solid transparent;
+  /* Negro carbón cálido -- nunca el --ink de paridad (frío) ni el burdeos
+     corporativo, que se reserva para acentos puntuales (ver .active,
+     :hover, sup). Sobre el Hero y fondos oscuros, .onDark lo sustituye por
+     blanco/marfil; el fundido entre ambos lo da la transition de arriba. */
+  color: #3a2f2b;
 }
 
 .isScrolled {
@@ -71,6 +76,15 @@
 .desktopNav a {
   position: relative;
   padding: 8px 0;
+  transition: color .25s var(--ease);
+}
+
+.desktopNav a:hover,
+.desktopNav a[aria-current="page"] {
+  /* Único uso de burdeos en el texto del menú: el enlace activo y el
+     hover puntual, nunca el conjunto del menú (sección 8 de
+     PALETA_CORPORATIVA.md: el acento se gasta en un solo sitio). */
+  color: var(--color-brand-primary);
 }
 
 .desktopNav a::after {
@@ -80,13 +94,14 @@
   right: 0;
   bottom: 3px;
   height: 1px;
-  background: currentColor;
+  background: var(--color-brand-primary);
   transform: scaleX(0);
   transform-origin: right;
   transition: transform .35s var(--ease);
 }
 
-.desktopNav a:hover::after {
+.desktopNav a:hover::after,
+.desktopNav a[aria-current="page"]::after {
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -95,6 +110,7 @@
   font-size: 8px;
   top: -.6em;
   position: relative;
+  color: var(--color-brand-primary);
 }
 
 .menuToggle {

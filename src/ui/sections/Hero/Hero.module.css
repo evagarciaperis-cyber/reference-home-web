@@ -8,9 +8,17 @@
   position: relative;
   /* Corrección nº2 (revisión 2026-07-26): 400vh como punto de partida --
      el usuario debe poder contemplar cada estado (día/atardecer/noche),
-     no solo atravesarlo. Los tramos exactos viven en useHero.ts (STAGE). */
-  height: 400vh;
-  min-height: 2400px;
+     no solo atravesarlo. Los tramos exactos viven en useHero.ts (STAGE).
+     Corrección 2026-07-27: 500vh, no 400vh -- el quinto viewport es un
+     tramo de cola donde el Hero sigue pinneado (sticky) mientras
+     Manifesto completa su ascenso por encima (ver src/motion/core/
+     heroGeometry.ts, HERO_TOTAL_VH). La narrativa día/tarde/atardecer/
+     noche sigue durando exactamente lo mismo en píxeles reales -- useHero
+     ya no deriva su progreso de esta altura total, sino de
+     HERO_NARRATIVE_VH directamente, así que este quinto viewport no la
+     estira. */
+  height: 500vh;
+  min-height: 3000px;
   background: var(--color-bg-secondary);
   /* Geometría bloqueada (corrección nº5, 2026-07-26): única fuente de
      verdad del encuadre de las cuatro fotografías -- .bgImage lo lee vía
@@ -403,7 +411,8 @@
 
 @media (max-width: 640px) {
   .hero {
-    min-height: 1100px;
+    /* Escalado en proporción al cambio de 400vh -> 500vh (5/4). */
+    min-height: 1375px;
   }
 
   .sticky {

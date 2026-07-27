@@ -4,6 +4,14 @@
    primitivo compartido cuando una segunda sección lo necesite. */
 
 .manifesto {
+  position: relative;
+  /* Por encima del header fijo (z-index 900, Header.module.css): el header
+     no se oculta por sí mismo (sin opacity/visibility/transform propios,
+     ver Header.module.css) -- simplemente queda detrás de esta sección
+     cuando, al hacer scroll, su borde superior la alcanza y la sobrepasa.
+     Por debajo de NoiseOverlay (1000)/CustomCursor (1500)/Preloader
+     (2000), que deben seguir por encima de todo el contenido. */
+  z-index: 910;
   background: var(--paper);
   padding: clamp(90px, 12vw, 180px) var(--pad);
 }
