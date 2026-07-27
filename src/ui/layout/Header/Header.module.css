@@ -2,6 +2,9 @@
    .menu-toggle* en web-nueva/assets/css/styles.css */
 
 .header {
+  /* Barra de navegación fija sobre toda la página -- siempre visible,
+     nunca se oculta, no se desmonta, no cambia de posición. Solo su tono
+     (ver .onDark/.isScrolled) reacciona al contenido que pasa por debajo. */
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +15,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  transition: background .4s, color .4s, border-color .4s, transform .4s var(--ease);
+  transition: background .4s, color .4s, border-color .4s;
   border-bottom: 1px solid transparent;
 }
 
@@ -20,10 +23,6 @@
   background: rgba(236, 233, 225, .88);
   backdrop-filter: blur(16px);
   border-color: var(--line);
-}
-
-.isHidden {
-  transform: translateY(-100%);
 }
 
 .onDark {

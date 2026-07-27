@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { HEADER_TONE_REFRESH_EVENT } from "../core/events";
 
-// Puerto literal de updateHeader() en main.js (mismos umbrales numéricos).
 const SCROLLED_AFTER_Y = 20;
-const HIDE_AFTER_Y = 500;
 const SAMPLE_Y = 44;
 
 // El original identifica las secciones "oscuras" con una lista fija de
@@ -27,62 +25,34 @@ const DARK_SECTION_SELECTOR = '[data-header-tone="dark"]';
 
 export type HeaderState = {
   isScrolled: boolean;
-  isHidden: boolean;
   isOnDark: boolean;
 };
 
 /**
- * Recalcula el estado visual del header en cada scroll. `menuOpen` sustituye
- * la lectura directa de `document.body.classList.contains('no-scroll')` del
- * original por el estado de React que ya controla esa clase (ver
- * SiteHeader), evitando leer del DOM algo que ya tenemos como estado.
+ * Recalcula el estado visual del header en cada scroll. El header en sí es
+ * una barra fija (position:fixed, Header.module.css) siempre visible --
+ * este hook solo decide su TONO (claro/oscuro) según lo que hay detrás en
+ * ese instante, nunca si se muestra u oculta.
  */
-export function useHeaderState(menuOpen: boolean): HeaderState {
+export function useHeaderState(): HeaderState {
   const [state, setState] = useState<HeaderState>({
     isScrolled: false,
-    isHidden: false,
     isOnDark: false,
   });
 
-  const menuOpenRef = useRef(menuOpen);
   useEffect(() => {
-    menuOpenRef.current = menuOpen;
-  }, [menuOpen]);
-
-  useEffect(() => {
-    // Persiste durante toda la vida del componente, igual que la variable de
-    // módulo `lastScroll` del original -- no se resetea en cada scroll.
-    let lastScroll = 0;
-
     const update = () => {
       const y = window.scrollY;
       const isScrolled = y > SCROLLED_AFTER_Y;
 
       let isOnDark = false;
-      let nearDarkSection = false;
       document.querySelectorAll(DARK_SECTION_SELECTOR).forEach((section) => {
+        if (isOnDark) return;
         const rect = section.getBoundingClientRect();
         if (rect.top <= SAMPLE_Y && rect.bottom >= SAMPLE_Y) isOnDark = true;
-        // Ventana más ancha que isOnDark (que solo mira una línea de
-        // muestreo a SAMPLE_Y): sigue siendo true mientras la sección
-        // oscura conserve CUALQUIER parte visible en el viewport, no solo
-        // esa línea. Cubre el hueco final del hand-off Hero -> Manifesto,
-        // donde el sticky del Hero ya ha soltado la línea de muestreo pero
-        // la sección siguiente (con z-index superior, ver Manifesto) aún
-        // no ha terminado de cubrir físicamente el header.
-        if (rect.bottom > 0 && rect.top < window.innerHeight) nearDarkSection = true;
       });
 
-      // El auto-ocultado por dirección de scroll no debe competir con una
-      // sección oscura inmersiva (Hero, WorkZoom) -- ahí el header se
-      // oculta de forma física (la siguiente sección lo cubre al subir,
-      // ver Manifesto), nunca por sí solo. Sin esto, un Hero alto (400vh)
-      // supera el umbral HIDE_AFTER_Y casi de inmediato y el header
-      // desaparece muy pronto dentro de su propio recorrido.
-      const isHidden = !nearDarkSection && y > lastScroll && y > HIDE_AFTER_Y && !menuOpenRef.current;
-      lastScroll = Math.max(0, y);
-
-      setState({ isScrolled, isHidden, isOnDark });
+      setState({ isScrolled, isOnDark });
     };
 
     window.addEventListener("scroll", update, { passive: true });

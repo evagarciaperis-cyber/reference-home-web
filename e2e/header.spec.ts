@@ -139,34 +139,24 @@ test.describe("comportamiento de escritorio", () => {
       .not.toBe(initialBg);
   });
 
-  test("se oculta al hacer scroll hacia abajo pasados 500px y reaparece al subir", async ({ page, baseURL }, testInfo) => {
+  test("permanece fijo y visible durante todo el scroll, sin ocultarse ni desvanecerse", async ({ page, baseURL }, testInfo) => {
     test.skip(viewportHasToggle(testInfo.project.name), "Solo aplica >900px");
     await page.goto(new URL("/", baseURL).href);
-    // Deja asentada la secuencia de entrada antes de cualquier scroll
-    // propio del test -- mismo criterio que en ProjectsGallery/WorkZoom/
-    // BrandStory (fases 7/9/10), aplicado aquí también: sin esto, un
-    // cambio de layout tardío durante la hidratación (fuentes/imágenes
-    // aún cargando) puede disparar un reajuste de scroll-anchoring del
-    // propio navegador después de que el test ya haya hecho su scroll,
-    // visto por useHeaderState como un evento 'scroll' más -- mismo
-    // scrollY, pero suficiente para que "y > lastScroll" se vuelva falso
-    // y el header se muestre de nuevo (ver investigación completa en
-    // scrollTo(), más abajo).
     await page.waitForSelector('[data-shell="preloader"]', { state: "hidden", timeout: 3000 }).catch(() => {});
     await page.waitForTimeout(300);
     await addScrollSpacer(page);
     const header = page.locator("[data-header]");
 
-    await scrollTo(page, 300);
-    await scrollTo(page, 900);
-    // .header no declara transform propio; solo .isHidden lo añade
-    // (translateY(-100%)), así que "deja de ser none" basta para detectarlo
-    // sin depender de a cuántos píxeles equivale ese -100% (86px o 72px
-    // según el breakpoint de altura del header).
-    await expect.poll(() => header.evaluate((el) => getComputedStyle(el).transform)).not.toBe("none");
-
-    await scrollTo(page, 850);
-    await expect.poll(() => header.evaluate((el) => getComputedStyle(el).transform)).toBe("none");
+    // Corrección: el header es una barra fija normal -- nunca se oculta
+    // (transform), ni se desvanece (opacity), ni cambia de posición,
+    // pase lo que pase con el scroll (antes había un umbral a los 500px
+    // que lo ocultaba; ya no existe ninguna lógica de ese tipo).
+    for (const y of [300, 900, 2500, 850, 0]) {
+      await scrollTo(page, y);
+      await expect(header).toHaveCSS("transform", "none");
+      await expect(header).toHaveCSS("opacity", "1");
+      await expect(header).toHaveCSS("position", "fixed");
+    }
   });
 
   test("hover en un enlace de navegación activa el subrayado", async ({ page, baseURL }, testInfo) => {
@@ -248,7 +238,7 @@ test.describe("comportamiento móvil y menú", () => {
 test("navegación: los enlaces apuntan a las rutas esperadas", async ({ page, baseURL }) => {
   await page.goto(new URL("/", baseURL).href);
 
-  await expect(page.locator('[data-header] a', { hasText: "REFERENCE" }).first()).toHaveAttribute("href", "/");
+  await expect(page.locator('[data-header] a[aria-label="Volver al inicio"]')).toHaveAttribute("href", "/");
 
   const expected: Record<string, string> = {
     Inicio: "/",
