@@ -12,32 +12,149 @@
      Por debajo de NoiseOverlay (1000)/CustomCursor (1500)/Preloader
      (2000), que deben seguir por encima de todo el contenido. */
   z-index: 910;
-  background: var(--paper);
+  /* Fondo base exacto del ambiente de Manifesto (2026-07-27, cuarta
+     corrección) -- valor propio de este bloque, no el token --paper
+     compartido con el resto del sitio. */
+  background: #f4efe8;
   padding: clamp(90px, 12vw, 180px) var(--pad);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  gap: 5vw;
-  margin-top: 14vh;
+/* Envoltorio de la microcabecera + manifiesto (solo esa parte, no
+   .visual/.aside): contexto de posicionamiento propio para
+   .ambientLayer, así las formas de fondo quedan acotadas a este bloque de
+   texto y no se extienden sobre la imagen/aside de más abajo. */
+.textBlock {
+  position: relative;
+}
+
+/* Profundidad ambiental detrás del texto (2026-07-27, octava corrección):
+   sustituye toda la implementación anterior basada en divs/CSS (formas
+   circulares, border-radius animado, transform rígido) por una única
+   superficie líquida renderizada en WebGL -- ver
+   src/motion/webgl/liquidBackground.ts y
+   src/motion/hooks/useAmbientLiquid.ts. Un único <canvas>, detrás de todo
+   el contenido de .textBlock (z-index negativo), sin interceptar el
+   puntero. El propio shader dibuja el desenfoque de borde (smoothstep) y
+   la deformación orgánica -- nada de esto es CSS ya. */
+.liquidCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Microcabecera y manifiesto: réplica visual del bloque "En nuestra
+   agencia" de Cosmosia (auditoría 2026-07-27, ver docs de la conversación
+   -- valores tomados por DevTools, no estimados). Sustituye a SectionLabel
+   + Eyebrow + .grid solo en este bloque; el resto de .manifesto (.visual,
+   .aside) no se toca. */
+
+.preTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 500;
+  font-size: clamp(12px, 1.05vw, 16px);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.preTitleLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+
+.preTitleIcon {
+  width: 1em;
+  height: 1em;
+  color: var(--color-brand-primary);
+  flex-shrink: 0;
+}
+
+.preTitleCopyright {
+  color: rgba(17, 17, 15, .55);
+  text-align: center;
+}
+
+.preTitleCoords {
+  color: var(--ink);
+  text-align: right;
 }
 
 .statement {
-  font-size: clamp(34px, 5.1vw, 82px);
-  letter-spacing: -.055em;
-  line-height: 1.02;
-  max-width: 1300px;
+  margin: clamp(32px, 5vw, 64px) auto 0;
+  max-width: min(920px, 90vw);
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 500;
+  font-size: clamp(27px, 4vw, 57px);
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.statementParagraph {
+  margin: 0;
+}
+
+.statementParagraphBreak {
+  margin: .85em 0 0;
 }
 
 .word {
   display: inline-block;
-  opacity: .16;
-  transition: opacity .45s;
+  opacity: 1;
 }
 
-.word[data-visible] {
+.wordScript {
+  display: inline-block;
   opacity: 1;
+  font-family: var(--font-manifesto-script), cursive;
+  font-weight: 400;
+  font-size: 1.05em;
+  line-height: .9em;
+  letter-spacing: -0.04em;
+}
+
+/* Jerarquía tipográfica editorial (2026-07-27): variación de
+   peso/tamaño/familia dentro de las tres familias ya cargadas -- ninguna
+   familia nueva. .emphasisSerifItalic reutiliza el mismo registro que
+   Hero.module.css .title em (var(--serif), italic, 400): es "el registro
+   editorial ya disponible" del proyecto, no uno nuevo. */
+.emphasisBase400 {
+  font-weight: 400;
+}
+
+.emphasisLight {
+  font-weight: 400;
+  color: rgba(17, 17, 15, .68);
+}
+
+.emphasisHeavy {
+  font-weight: 600;
+}
+
+.emphasisHeavyLarge {
+  font-weight: 600;
+  font-size: 1.08em;
+}
+
+.emphasisSerifLarge {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.22em;
+  letter-spacing: -0.01em;
+}
+
+.emphasisSerifItalic {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
 }
 
 .visual {

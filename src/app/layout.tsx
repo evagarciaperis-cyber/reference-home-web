@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Inter, Nunito_Sans, Great_Vibes } from "next/font/google";
 import "./globals.css";
 import { PreloaderProvider } from "@/motion/PreloaderProvider";
+import { SmoothScrollProvider } from "@/motion/SmoothScrollProvider";
 import { Preloader } from "@/ui/layout/Preloader";
 import { NoiseOverlay } from "@/ui/layout/NoiseOverlay";
 import { CustomCursor } from "@/ui/layout/CustomCursor";
@@ -22,6 +24,39 @@ export const viewport: Viewport = {
   themeColor: "#11110f",
 };
 
+// Réplica visual del bloque "En nuestra agencia" de Cosmosia (Manifesto,
+// 2026-07-27): las tres familias que usa ese bloque real (inspeccionadas
+// vía DevTools, no estimadas) -- Inter para el cuerpo del manifiesto,
+// Nunito Sans 500 para la microcabecera, Great Vibes 400 para las palabras
+// destacadas en cursiva. Las tres son de licencia libre (SIL OFL, Google
+// Fonts) -- next/font/google las autohospeda en build, sin peticiones a
+// Google en runtime. Ningún otro bloque del sitio las usa todavía.
+//
+// Corrección 2026-07-27 (jerarquía editorial): Inter pasa de un solo peso
+// (500) a tres (400/500/600) para la variación de énfasis palabra a
+// palabra del manifiesto (Manifesto.module.css .emphasisLight/.emphasisBase400/
+// .emphasisHeavy*) -- siguen siendo la MISMA familia, no una nueva.
+const manifestoSans = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-manifesto-sans",
+  display: "swap",
+});
+
+const manifestoMicro = Nunito_Sans({
+  subsets: ["latin"],
+  weight: ["500"],
+  variable: "--font-manifesto-micro",
+  display: "swap",
+});
+
+const manifestoScript = Great_Vibes({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-manifesto-script",
+  display: "swap",
+});
+
 // Header/MobileMenu viven en el layout raíz por ahora porque es la única
 // superficie que existe todavía. docs/ARQUITECTURA.md (sección 4) los sitúa
 // en app/(marketing)/layout.tsx junto al Footer; ese route group se crea
@@ -33,15 +68,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html
+      lang="es"
+      className={`${manifestoSans.variable} ${manifestoMicro.variable} ${manifestoScript.variable}`}
+    >
       <body>
-        <PreloaderProvider>
-          <Preloader />
-          <NoiseOverlay />
-          <CustomCursor />
-          <SiteHeader />
-          {children}
-        </PreloaderProvider>
+        <SmoothScrollProvider>
+          <PreloaderProvider>
+            <Preloader />
+            <NoiseOverlay />
+            <CustomCursor />
+            <SiteHeader />
+            {children}
+          </PreloaderProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   );

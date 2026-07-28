@@ -7,7 +7,13 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Corrección 2026-07-27: el suavizado del scroll (incluida la
+     navegación por anclas) lo hace ahora Lenis en su totalidad
+     (SmoothScrollProvider.tsx, anchors:true) -- "smooth" nativo aquí
+     competiría con él (doble suavizado). Bajo prefers-reduced-motion,
+     donde Lenis no se instancia, "auto" es también la elección más
+     accesible (evita animar el salto). */
+  scroll-behavior: auto;
   background: var(--ink);
   overflow-x: clip;
   overscroll-behavior-x: none;
