@@ -33,6 +33,13 @@ export type HeaderState = {
  * una barra fija (position:fixed, Header.module.css) siempre visible --
  * este hook solo decide su TONO (claro/oscuro) según lo que hay detrás en
  * ese instante, nunca si se muestra u oculta.
+ *
+ * También escucha "resize" (2026-07-28, bug encontrado validando el logo
+ * del header): sin él, redimensionar la ventana a mitad de scroll podía
+ * dejar isOnDark desactualizado -- ninguna sección cambia de tamaño por sí
+ * sola al hacer resize sin disparar antes un scroll real, así que sin este
+ * listener el header podía quedarse mostrando el tono/logo equivocado
+ * hasta el siguiente scroll del usuario.
  */
 export function useHeaderState(): HeaderState {
   const [state, setState] = useState<HeaderState>({
@@ -56,11 +63,13 @@ export function useHeaderState(): HeaderState {
     };
 
     window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
     window.addEventListener(HEADER_TONE_REFRESH_EVENT, update);
     update();
 
     return () => {
       window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
       window.removeEventListener(HEADER_TONE_REFRESH_EVENT, update);
     };
   }, []);

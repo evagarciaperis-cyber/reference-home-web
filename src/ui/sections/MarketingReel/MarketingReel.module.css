@@ -1,0 +1,504 @@
+/* Escena de vídeo a pantalla completa -> composición final de tres
+   vídeos con el mismo peso visual (2026-07-28). Sustituye por completo
+   al antiguo bloque .visual de Manifesto -- no convive con él. */
+
+.reel {
+  position: relative;
+  background: var(--paper);
+}
+
+.stickyStage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Panel 02 -- Marketing: posición/tamaño respecto a la transición ya
+   aprobada (width/height animados por GSAP en useMarketingReel.ts).
+   2026-07-28: el centrado (-50%,-50%) pasa a ser propiedad de GSAP
+   (xPercent/yPercent, gsap.set en el setup del hook) en vez de un
+   transform estático en CSS -- necesario para que la salida escalonada
+   pueda animar y/scale/rotateZ sobre este mismo nodo sin pisar el
+   centrado. Nada de la contracción width/height cambia. */
+.videoShell {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  border-radius: 0;
+  will-change: width, height, transform;
+}
+
+/* Paneles 01/03 -- mismo tamaño final que el destino de la contracción
+   del panel 02 (28vw x 58vh, ver PANEL_WIDTH_FRAC/PANEL_HEIGHT_FRAC en
+   useMarketingReel.ts). Posición ANCLADA por left/top; el centrado
+   (-50%,-50%) y la animación de entrada (opacity/x/y/scale) los escribe
+   GSAP vía xPercent/yPercent.
+
+   2026-07-28 (cuarta ronda): el panel 02 termina un +4% más grande
+   (PANEL2_WIDTH_FRAC/PANEL2_HEIGHT_FRAC en useMarketingReel.ts) -- su
+   media anchura real pasa de 14vw a 14.56vw. El offset de 01/03 se
+   recalcula sobre esa medida (no sobre los 14vw de antes) para mantener
+   el MISMO hueco de 28px, sin reducir el tamaño de 01/03 ni apretarlos
+   contra el borde. */
+.panelMotionWrapper {
+  position: absolute;
+  top: 50%;
+  width: 28vw;
+  height: 58vh;
+  border-radius: 26px;
+  overflow: hidden;
+  will-change: transform, opacity;
+  /* 2026-07-28: el cursor de "clicable" solo aparece cuando la
+     composición final está formada (ver [data-panels-ready] más abajo y
+     PANELS_READY_ENTER/EXIT en useMarketingReel.ts) -- durante fullscreen
+     o contracción el panel no se comporta como una pieza interactiva. */
+  cursor: default;
+}
+
+.panelMotionWrapper[data-panel="left"] {
+  left: calc(50% - 14.56vw - 28px - 14vw);
+}
+
+.panelMotionWrapper[data-panel="right"] {
+  left: calc(50% + 14.56vw + 28px + 14vw);
+}
+
+.videoShell {
+  cursor: default;
+}
+
+/* 2026-07-28: única puerta de entrada a TODA la interacción de hover de
+   los tres paneles (overlay, CTA, dim del copy, zoom del vídeo, cursor).
+   [data-panels-ready] vive en .stickyStage y lo controla
+   useMarketingReel.ts vía un atributo estable (no React state por
+   frame) cuando la composición final de los tres paneles está
+   prácticamente asentada -- nunca durante fullscreen, inmersión o
+   contracción. Sin esta gate, ninguna regla de :hover/:focus-within de
+   más abajo puede activarse. */
+[data-panels-ready="true"] .panelMotionWrapper,
+[data-panels-ready="true"] .videoShell {
+  cursor: pointer;
+}
+
+/* Segundo nivel: solo recorte (overflow/border-radius). Sin flotación, sin
+   tilt, sin ningún transform propio -- ni CSS ni JS. Nunca es el mismo
+   nodo que anima ScrollTrigger (videoShell/panelMotionWrapper). */
+.panelFrame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* El propio <video>: único movimiento permitido en hover es un zoom
+   uniforme (scale), nunca traslación/parallax/tilt. Duraciones asimétricas
+   -- la regla base define la SALIDA (1 -> ... al desactivar hover) y la
+   regla :hover define la ENTRADA.
+   Capa 0 del apilamiento (ver .hoverOverlay/.panelCopy/.discoverCta). */
+.video {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  transform: scale(1);
+  transform-origin: center center;
+  will-change: transform;
+  transition: transform 520ms cubic-bezier(.22, 1, .36, 1);
+}
+
+[data-panels-ready="true"] .panelMotionWrapper:hover .video,
+[data-panels-ready="true"] .panelMotionWrapper:focus-within .video,
+[data-panels-ready="true"] .videoShell:hover .video,
+[data-panels-ready="true"] .videoShell:focus-within .video {
+  transform: scale(1.025);
+  transition-duration: 700ms;
+}
+
+/* 2026-07-28: rediseño de la interacción de hover -- oscurecimiento del
+   vídeo + CTA "Descubrir" centrado, en vez del indicador de esquina
+   inferior izquierda. Capa dedicada solo para el oscurecimiento (nunca
+   negro puro, sin blur, sin backdrop-filter) -- entrada/salida asimétricas. */
+.hoverOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(20, 18, 16, .38);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms cubic-bezier(.22, 1, .36, 1);
+}
+
+[data-panels-ready="true"] .panelMotionWrapper:hover .hoverOverlay,
+[data-panels-ready="true"] .panelMotionWrapper:focus-within .hoverOverlay,
+[data-panels-ready="true"] .videoShell:hover .hoverOverlay,
+[data-panels-ready="true"] .videoShell:focus-within .hoverOverlay {
+  opacity: 1;
+  transition-duration: 420ms;
+}
+
+.copyOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 24px;
+  text-align: center;
+  color: #f8f5ef;
+  pointer-events: none;
+}
+
+.headline {
+  margin: 0;
+  max-width: 18ch;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(28px, 4.2vw, 54px);
+  line-height: 1.15;
+  letter-spacing: -.01em;
+  /* Sombra muy suave solo para legibilidad sobre el vídeo -- no es un
+     glow (blur bajo, opacidad baja), aplicada al titular en concreto, no
+     al contenedor completo. */
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .22), 0 1px 3px rgba(0, 0, 0, .16);
+}
+
+.subtext {
+  margin: 0;
+  font-size: clamp(13px, 1.2vw, 17px);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  opacity: .92;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .20), 0 1px 2px rgba(0, 0, 0, .14);
+}
+
+/* Copy inferior de cada panel -- misma tipografía/tamaño/peso/posición en
+   los tres. Este nodo (.panelCopy) es el que anima GSAP en el panel 02
+   (entrada del copy de Marketing, useMarketingReel.ts) -- un estilo
+   inline de GSAP siempre gana sobre una regla de :hover en CSS, así que
+   el oscurecimiento de hover NUNCA puede vivir aquí. Por eso el
+   contenido real va en .panelCopyInner, un segundo nodo que ningún
+   ScrollTrigger toca y que sí puede reaccionar a :hover con normalidad
+   en los tres paneles por igual. */
+.panelCopy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  padding: 22px 22px 26px;
+  color: #f8f5ef;
+  background: linear-gradient(to top, rgba(10, 9, 7, .68) 0%, rgba(10, 9, 7, .32) 55%, rgba(10, 9, 7, 0) 100%);
+  pointer-events: none;
+}
+
+/* 2026-07-28: en hover pierde presencia (opacity + translateY) para ceder
+   protagonismo al CTA "Descubrir" centrado, sin desaparecer del todo -- la
+   información del panel sigue percibiéndose. */
+.panelCopyInner {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 320ms cubic-bezier(.22, 1, .36, 1), transform 320ms cubic-bezier(.22, 1, .36, 1);
+}
+
+[data-panels-ready="true"] .panelMotionWrapper:hover .panelCopyInner,
+[data-panels-ready="true"] .panelMotionWrapper:focus-within .panelCopyInner,
+[data-panels-ready="true"] .videoShell:hover .panelCopyInner,
+[data-panels-ready="true"] .videoShell:focus-within .panelCopyInner {
+  opacity: .42;
+  transform: translateY(5px);
+}
+
+.panelNumber {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--sand, #e8c7a3);
+  margin-bottom: 8px;
+}
+
+.panelTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -.01em;
+  color: #f8f5ef;
+}
+
+.panelBody {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: rgba(248, 245, 239, .82);
+}
+
+/* CTA "Descubrir" centrado (2026-07-28) -- reemplaza al indicador de
+   esquina inferior izquierda. Íntegramente resuelto en CSS
+   (:hover/:focus-within), sin ningún sistema JS/ticker detrás. Capa
+   superior del apilamiento: nunca puede quedar detrás de .panelCopy. */
+.discoverCta {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  transform: translate(-50%, calc(-50% + 12px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  /* visibility además de opacity/pointer-events (2026-07-28): refuerzo
+     explícito para que el CTA quede completamente fuera de la escena
+     mientras el vídeo de Marketing sigue fullscreen/contrayéndose, no
+     solo invisible por falta de :hover. El retraso en la transición de
+     visibility hace que se oculte solo DESPUÉS del fade (no de golpe) y
+     se muestre de inmediato al activarse. */
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+  color: #f4efe8;
+  transition: opacity 320ms cubic-bezier(.22, 1, .36, 1), transform 320ms cubic-bezier(.22, 1, .36, 1), visibility 0ms linear 320ms;
+}
+
+[data-panels-ready="true"] .panelMotionWrapper:hover .discoverCta,
+[data-panels-ready="true"] .panelMotionWrapper:focus-within .discoverCta,
+[data-panels-ready="true"] .videoShell:hover .discoverCta,
+[data-panels-ready="true"] .videoShell:focus-within .discoverCta {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%);
+  transition-duration: 420ms, 420ms, 0ms;
+}
+
+.discoverCtaRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.discoverCtaText {
+  display: inline-block;
+  font-size: clamp(16px, 1.3vw, 18px);
+  font-weight: 500;
+  letter-spacing: .01em;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: transform 420ms cubic-bezier(.22, 1, .36, 1), opacity 420ms cubic-bezier(.22, 1, .36, 1);
+}
+
+[data-panels-ready="true"] .panelMotionWrapper:hover .discoverCtaText,
+[data-panels-ready="true"] .panelMotionWrapper:focus-within .discoverCtaText,
+[data-panels-ready="true"] .videoShell:hover .discoverCtaText,
+[data-panels-ready="true"] .videoShell:focus-within .discoverCtaText {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.discoverCtaArrow {
+  width: 18px;
+  height: 10px;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: transform 360ms cubic-bezier(.22, 1, .36, 1) 70ms, opacity 360ms cubic-bezier(.22, 1, .36, 1) 70ms;
+}
+
+[data-panels-ready="true"] .panelMotionWrapper:hover .discoverCtaArrow,
+[data-panels-ready="true"] .panelMotionWrapper:focus-within .discoverCtaArrow,
+[data-panels-ready="true"] .videoShell:hover .discoverCtaArrow,
+[data-panels-ready="true"] .videoShell:focus-within .discoverCtaArrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.discoverCtaLine {
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 460ms cubic-bezier(.22, 1, .36, 1) 40ms;
+}
+
+[data-panels-ready="true"] .panelMotionWrapper:hover .discoverCtaLine,
+[data-panels-ready="true"] .panelMotionWrapper:focus-within .discoverCtaLine,
+[data-panels-ready="true"] .videoShell:hover .discoverCtaLine,
+[data-panels-ready="true"] .videoShell:focus-within .discoverCtaLine {
+  transform: scaleX(1);
+}
+
+@media (max-width: 900px) {
+  .panelMotionWrapper {
+    width: 34vw;
+    height: 52vh;
+  }
+
+  .panelMotionWrapper[data-panel="left"] {
+    left: calc(50% - 14.56vw - 20px - 17vw);
+  }
+
+  .panelMotionWrapper[data-panel="right"] {
+    left: calc(50% + 14.56vw + 20px + 17vw);
+  }
+}
+
+/* Sin hover táctil: no hay overlay de oscurecimiento permanente ni zoom de
+   vídeo -- el CTA "Descubrir" pasa a fijo, discreto, en la esquina
+   inferior derecha, sin ocultar el copy principal. Móvil además pasa de
+   composición de tres columnas a secuencia vertical -- el panel 02
+   conserva su mecánica (fullscreen -> contracción, misma timeline); los
+   paneles 01/03 pasan a flujo normal, apilados debajo, ancho ~90vw. */
+@media (max-width: 640px) {
+  .stickyStage {
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 32px;
+  }
+
+  .panelMotionWrapper {
+    position: static;
+    width: 90vw;
+    height: 62vw;
+    margin-top: 24px;
+  }
+
+  .panelMotionWrapper[data-panel="left"],
+  .panelMotionWrapper[data-panel="right"] {
+    left: auto;
+  }
+
+  .panelTitle {
+    font-size: 17px;
+  }
+
+  .panelBody {
+    font-size: 12.5px;
+  }
+
+  .video {
+    transition: none;
+  }
+
+  .panelMotionWrapper:hover .video,
+  .videoShell:hover .video {
+    transform: scale(1); /* "sin zoom del vídeo" en móvil */
+  }
+
+  .hoverOverlay {
+    opacity: 0; /* "sin overlay adicional permanente" en móvil */
+  }
+
+  /* El CTA fijo de móvil también depende de [data-panels-ready] -- solo
+     se muestra permanente una vez formada la composición final, igual
+     que en escritorio (2026-07-28). */
+  .discoverCta {
+    left: auto;
+    right: 16px;
+    top: auto;
+    bottom: 16px;
+    align-items: flex-end;
+    transform: none;
+  }
+
+  [data-panels-ready="true"] .discoverCta {
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+  }
+
+  [data-panels-ready="true"] .discoverCtaText,
+  [data-panels-ready="true"] .discoverCtaArrow {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  [data-panels-ready="true"] .discoverCtaLine {
+    transform: scaleX(1);
+    transition: none;
+  }
+}
+
+/* Sin desplazamientos ni zoom: el overlay aparece directamente (sin
+   transición), el CTA solo cambia por opacity (transform fijo en su
+   posición final) y la línea se muestra completa, sin animación. */
+@media (prefers-reduced-motion: reduce) {
+  .video {
+    transition: none;
+  }
+
+  .panelMotionWrapper:hover .video,
+  .videoShell:hover .video {
+    transform: scale(1);
+  }
+
+  .hoverOverlay {
+    transition: opacity 1ms linear;
+  }
+
+  .panelCopyInner {
+    transition: opacity 200ms linear;
+    transform: none;
+  }
+
+  .panelMotionWrapper:hover .panelCopyInner,
+  .panelMotionWrapper:focus-within .panelCopyInner,
+  .videoShell:hover .panelCopyInner,
+  .videoShell:focus-within .panelCopyInner {
+    transform: none;
+  }
+
+  .discoverCta {
+    transform: translate(-50%, -50%);
+    /* visibility fija en "visible" (2026-07-28): bajo reduced-motion
+       data-panels-ready es siempre "true" (estado final estático, sin
+       ScrollTrigger), así que aquí el CTA solo debe alternar por
+       opacity -- sin esto, la regla base visibility:hidden nunca se
+       revertiría porque las reglas de :hover de más abajo no la tocan. */
+    visibility: visible;
+    transition: opacity 200ms linear;
+  }
+
+  .panelMotionWrapper:hover .discoverCta,
+  .panelMotionWrapper:focus-within .discoverCta,
+  .videoShell:hover .discoverCta,
+  .videoShell:focus-within .discoverCta {
+    transform: translate(-50%, -50%);
+  }
+
+  .discoverCtaText,
+  .discoverCtaArrow {
+    transition: opacity 200ms linear;
+    transform: none;
+  }
+
+  .panelMotionWrapper:hover .discoverCtaText,
+  .panelMotionWrapper:focus-within .discoverCtaText,
+  .videoShell:hover .discoverCtaText,
+  .videoShell:focus-within .discoverCtaText,
+  .panelMotionWrapper:hover .discoverCtaArrow,
+  .panelMotionWrapper:focus-within .discoverCtaArrow,
+  .videoShell:hover .discoverCtaArrow,
+  .videoShell:focus-within .discoverCtaArrow {
+    transform: none;
+  }
+
+  .discoverCtaLine {
+    transform: scaleX(1);
+    transition: none;
+  }
+}

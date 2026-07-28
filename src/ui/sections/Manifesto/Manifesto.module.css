@@ -17,6 +17,15 @@
      compartido con el resto del sitio. */
   background: #f4efe8;
   padding: clamp(90px, 12vw, 180px) var(--pad);
+  /* 2026-07-28: el vacío superior era estructural (el padding-top de la
+     propia sección), no algo que debiera corregirse desplazando
+     .statement con un margen negativo -- esa vía se revirtió (ver
+     .statement más abajo). -105px en escritorio/portátil (primera
+     prueba pedida, dentro del rango -90/-120); el padding-bottom no se
+     toca, así que el hueco liberado queda "por debajo" en términos
+     relativos. Bajo 640px sigue mandando el padding-top:85px fijo de su
+     propio @media, sin tocar. */
+  padding-top: calc(clamp(90px, 12vw, 180px) - 105px);
 }
 
 /* Envoltorio de la microcabecera + manifiesto (solo esa parte, no
@@ -54,7 +63,12 @@
 .preTitleRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* 2026-07-28: era space-between repartiendo label/copyright/coords;
+     solo queda la firma editorial ("En Reference Home") y debe seguir
+     pegada al borde izquierdo, no centrarse -- explícito en vez de
+     depender de que space-between con un único hijo se comporte como
+     flex-start. */
+  justify-content: flex-start;
   gap: 24px;
   font-family: var(--font-manifesto-micro), var(--sans);
   font-weight: 500;
@@ -77,17 +91,12 @@
   flex-shrink: 0;
 }
 
-.preTitleCopyright {
-  color: rgba(17, 17, 15, .55);
-  text-align: center;
-}
-
-.preTitleCoords {
-  color: var(--ink);
-  text-align: right;
-}
-
 .statement {
+  /* 2026-07-28: vuelve al valor original -- el ajuste de espacio vacío
+     superior ahora vive en el padding-top de .manifesto (estructural),
+     no en un margen negativo parcheado aquí encima del microheader. Este
+     margen es solo la separación "cómoda" entre la firma editorial y
+     "Vender una vivienda", sin más función que esa. */
   margin: clamp(32px, 5vw, 64px) auto 0;
   max-width: min(920px, 90vw);
   font-family: var(--font-manifesto-sans), var(--sans);
@@ -157,93 +166,13 @@
   font-weight: 400;
 }
 
-.visual {
-  display: grid;
-  grid-template-columns: minmax(0, 2.3fr) minmax(260px, .7fr);
-  gap: 4vw;
-  margin-top: 14vh;
-  align-items: end;
-}
-
-.frame {
-  position: relative;
-  overflow: hidden;
-  background: #d2cec5;
-}
-
-.frame img {
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  will-change: transform;
-}
-
-.caption {
-  position: absolute;
-  left: 16px;
-  right: 16px;
-  bottom: 14px;
-  display: flex;
-  justify-content: space-between;
-  color: white;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-}
-
-.aside {
-  padding-bottom: 18px;
-}
-
-.aside p {
-  font-family: var(--serif);
-  font-size: clamp(20px, 2.2vw, 34px);
-  line-height: 1.2;
-  margin: 0 0 36px;
-}
-
-.textLink {
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--ink);
-  padding-bottom: 10px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-}
-
-@media (max-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .visual {
-    grid-template-columns: 1fr;
-  }
-
-  .aside {
-    max-width: 600px;
-  }
-}
-
 @media (max-width: 640px) {
   .manifesto {
     padding-top: 85px;
     padding-bottom: 85px;
   }
 
-  .grid {
-    margin-top: 9vh;
-  }
-
   .statement {
     font-size: 33px;
-  }
-
-  .visual {
-    margin-top: 9vh;
-  }
-
-  .aside p {
-    font-size: 22px;
   }
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Hero } from "@/ui/sections/Hero";
 import { Manifesto } from "@/ui/sections/Manifesto";
+import { MarketingReel } from "@/ui/sections/MarketingReel";
+import { SellingErrors } from "@/ui/sections/SellingErrors";
 import { Solutions } from "@/ui/sections/Solutions";
 import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
 import { Process } from "@/ui/sections/Process";
@@ -53,6 +55,8 @@ export default function Home() {
       <main>
         <Hero />
         <Manifesto />
+        <MarketingReel />
+        <SellingErrors />
         <Solutions />
         <ProjectsGallery />
         <Process />

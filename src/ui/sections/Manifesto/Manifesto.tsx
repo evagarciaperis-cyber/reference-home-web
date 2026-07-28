@@ -1,6 +1,5 @@
 "use client";
 
-import { useParallax } from "@/motion/hooks/useParallax";
 import { useManifestoRise } from "@/motion/hooks/useManifestoRise";
 import { useWordReveal } from "@/motion/hooks/useWordReveal";
 import { useAmbientLiquid } from "@/motion/hooks/useAmbientLiquid";
@@ -63,7 +62,6 @@ function renderLine(tokens: Token[], lineKey: string) {
 
 export function Manifesto() {
   const statementRef = useWordReveal<HTMLDivElement>();
-  const visualRef = useParallax<HTMLDivElement>(0.08);
   const riseRef = useManifestoRise<HTMLElement>();
   const { containerRef: ambientRef, canvasRef: liquidCanvasRef } = useAmbientLiquid<HTMLDivElement>();
 
@@ -78,8 +76,6 @@ export function Manifesto() {
             </svg>
             <span>En Reference Home</span>
           </div>
-          <div className={styles.preTitleCopyright}>(© 2026)</div>
-          <div className={styles.preTitleCoords}>Valencia — 39°28′11″N</div>
         </div>
         <div className={styles.statement} ref={statementRef}>
           {LINE_GROUPS.map((group, gi) => (
@@ -92,21 +88,6 @@ export function Manifesto() {
               ))}
             </p>
           ))}
-        </div>
-      </div>
-      <div className={styles.visual}>
-        <div className={styles.frame} ref={visualRef}>
-          <img src="/images/studio-object.svg" alt="Composición digital abstracta creada para el proyecto" />
-          <div className={styles.caption}>
-            <span>Objeto digital 01</span>
-            <span>Valencia — 2026</span>
-          </div>
-        </div>
-        <div className={styles.aside}>
-          <p>No acumulamos efectos. Construimos ritmo, jerarquía y tensión visual para que la experiencia tenga dirección.</p>
-          <a className={styles.textLink} href="#proceso">
-            Conoce el proceso <span>↗</span>
-          </a>
         </div>
       </div>
     </section>

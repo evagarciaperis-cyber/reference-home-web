@@ -1,0 +1,325 @@
+/* Nueva sección editorial (2026-07-28), arquitectura inspirada en "Why
+   smooth scroll?" de Lenis: gran título fijo a la izquierda + columna
+   derecha que asciende en secuencia. Se añade DESPUÉS de la salida de
+   MarketingReel -- no sustituye ni elimina nada. Fase 1: sin objeto, sin
+   imagen, sin WebGL -- solo tipografía. El fondo/objeto 3D se estudia en
+   una fase posterior.
+
+   2026-07-28 (corrección de continuidad): comparte EXACTAMENTE el mismo
+   fondo beige/nude que el bloque de los tres vídeos -- mismo token,
+   var(--paper), el que ya usa MarketingReel.module.css .reel. Ya no hay
+   cortina/barrido de color: la sensación debe ser que el fondo no cambia
+   ni se mueve, y que la nueva narrativa nace tipográficamente (opacity +
+   máscaras + translateY) sobre el mismo escenario. Por eso todo el texto
+   pasa de los tokens "inverse" (pensados para fondo oscuro) a --ink y sus
+   variantes, igual que Manifesto sobre el mismo tono de fondo. */
+
+.section {
+  position: relative;
+  background: var(--paper);
+}
+
+.stage {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--ink);
+}
+
+/* Columna izquierda -- ancla narrativa fija, nunca asciende ni desaparece
+   entre capítulos (a diferencia de la derecha). */
+.left {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 8%;
+  width: 42%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.labelLine {
+  width: 28px;
+  height: 1px;
+  background: var(--color-brand-primary);
+  flex-shrink: 0;
+}
+
+.label {
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 500;
+  font-size: clamp(11px, .9vw, 13px);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: .62;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(34px, 4.6vw, 64px);
+  line-height: 1.12;
+  letter-spacing: -.02em;
+}
+
+.titleLineMask {
+  display: block;
+  overflow: hidden;
+}
+
+.titleLine {
+  display: block;
+  opacity: 0;
+  transform: translateY(36px);
+}
+
+/* Juego tipográfico editorial contenido (2026-07-28): cuatro tramos de
+   texto con tratamiento distinto dentro de las mismas dos familias ya
+   cargadas (Inter/manifesto-sans + --serif) -- ninguna fuente nueva,
+   ningún peso condensado/industrial. */
+.titleLight {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 400;
+  color: rgba(17, 17, 15, .55);
+}
+
+.titleSerif {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-style: normal;
+}
+
+.titleMain {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+}
+
+.titleSerifItalic {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Columna derecha -- se desarrolla secuencialmente (intro -> 4 capítulos),
+   un único protagonista a la vez. La zona central entre .left y .right
+   queda vacía a propósito (dirección editorial, no se rellena todavía). */
+.right {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 58%;
+  width: 34%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.rightViewport {
+  position: relative;
+  width: 100%;
+  /* Altura de "ventana de lectura": suficiente para el texto más largo
+     (intro) sin recortarlo, igual para los cuatro capítulos. */
+  min-height: 260px;
+}
+
+.introBlock,
+.chapter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(40px);
+  will-change: transform, opacity;
+}
+
+.introText {
+  margin: 0 0 20px;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 400;
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.introClose {
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(17px, 1.6vw, 21px);
+  color: var(--ink);
+}
+
+.chapterNumber {
+  display: block;
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .1em;
+  margin-bottom: 14px;
+  /* Burdeos puntual (2026-07-28): único uso de masa de color en toda la
+     sección, reservado al número del capítulo activo -- ver
+     useSellingErrors.ts, que solo añade data-chapter-active="true" al
+     capítulo en pantalla. */
+  color: rgba(17, 17, 15, .4);
+  transition: color .3s var(--ease);
+}
+
+.chapter[data-chapter-active="true"] .chapterNumber {
+  color: var(--color-brand-primary);
+}
+
+.chapterTitle {
+  margin: 0 0 12px;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+  font-size: clamp(22px, 2.1vw, 30px);
+  letter-spacing: -.01em;
+  color: var(--ink);
+}
+
+.chapterBody {
+  margin: 0;
+  max-width: 40ch;
+  font-size: clamp(15px, 1.25vw, 17px);
+  line-height: 1.55;
+  color: rgba(17, 17, 15, .68);
+}
+
+@media (max-width: 1100px) {
+  .left {
+    left: 6%;
+    width: 44%;
+  }
+
+  .right {
+    left: 54%;
+    width: 40%;
+  }
+}
+
+/* Móvil (2026-07-28): sin pin extenso, sin composición lateral. Título en
+   position:sticky nativo (CSS, no GSAP) durante un recorrido corto;
+   capítulos en flujo vertical normal, revelo individual simple (ver
+   useSellingErrors.ts, rama móvil -- ScrollTrigger por capítulo, sin
+   pin, sin efectos complejos). Mismo fondo --paper que en escritorio --
+   .section ya lo lleva siempre, no hace falta nada aquí. */
+@media (max-width: 640px) {
+  .stage {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .left {
+    position: sticky;
+    top: 0;
+    left: auto;
+    width: 100%;
+    height: 46vh;
+    min-height: 260px;
+    padding: 32px var(--pad) 24px;
+    justify-content: flex-end;
+    gap: 18px;
+  }
+
+  .title {
+    font-size: clamp(28px, 8vw, 38px);
+  }
+
+  .right {
+    position: static;
+    left: auto;
+    width: 100%;
+    padding: 12px var(--pad) 72px;
+    display: block;
+  }
+
+  .rightViewport {
+    min-height: 0;
+  }
+
+  .introBlock {
+    position: static;
+    margin-bottom: 56px;
+  }
+
+  .chapter {
+    position: static;
+    margin-bottom: 48px;
+  }
+
+  .chapter:last-child {
+    margin-bottom: 0;
+  }
+
+  .chapterBody {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .left {
+    position: static;
+    width: 100%;
+    padding: clamp(48px, 8vw, 96px) var(--pad) 32px;
+    gap: 18px;
+  }
+
+  .right {
+    position: static;
+    left: auto;
+    width: 100%;
+    max-width: 640px;
+    padding: 0 var(--pad) clamp(64px, 8vw, 120px);
+  }
+
+  .rightViewport {
+    min-height: 0;
+  }
+
+  .labelRow,
+  .titleLine,
+  .introBlock,
+  .chapter {
+    opacity: 1;
+    transform: none;
+  }
+
+  .introBlock {
+    position: static;
+    margin-bottom: 48px;
+  }
+
+  .chapter {
+    position: static;
+    margin-bottom: 40px;
+  }
+
+  .chapter:last-child {
+    margin-bottom: 0;
+  }
+
+  .chapterBody {
+    max-width: none;
+  }
+}

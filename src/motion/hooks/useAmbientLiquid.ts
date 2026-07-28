@@ -14,94 +14,97 @@ function lerp(from: number, to: number, t: number): number {
   return from + (to - from) * t;
 }
 
-// #E8C7A3 / #86AFAE en 0..1 -- los dos únicos colores de la superficie,
-// sin añadir ninguno nuevo.
+// #E8C7A3 / #86AFAE en 0..1 -- únicos colores.
 const WARM_COLOR: [number, number, number] = [0xe8 / 255, 0xc7 / 255, 0xa3 / 255];
 const TEAL_COLOR: [number, number, number] = [0x86 / 255, 0xaf / 255, 0xae / 255];
 
-const EDGE_PX = 42; // "transición exterior difuminada de aproximadamente 35-55px"
-
 const SCROLL_RANGE_PX = 1800;
-const SCROLL_AMP_WARM = { x: 20, y: 28 };
-const SCROLL_AMP_TEAL = { x: -24, y: -18 };
 
-const MOBILE_FRAME_INTERVAL_MS = 1000 / 30; // "limitar el render a 30fps" en móvil
-
-type PointDef = {
-  offset: { x: number; y: number }; // posición de reposo relativa al centro del grupo
-  radius: number;
-  lerp: number; // núcleo: 0.055-0.075; cercanos: 0.035-0.05; retrasados: 0.018-0.032
-  pointerMax: number; // desplazamiento máximo por puntero, px (núcleo hasta 90, cola hasta 130)
-  idleAmp: { x: number; y: number }; // 6-12px escritorio (4-6px móvil, aplicado aparte)
-  idlePeriodSec: number; // 12-20s
-  idlePhase: number;
-};
-
-// Cinco puntos cálidos (núcleo + 4 secundarios) / cuatro verdes (núcleo +
-// 3 secundarios), distribución irregular a propósito -- nunca una
-// cuadrícula ni una simetría entre puntos.
-const WARM_POINTS: PointDef[] = [
-  { offset: { x: 0, y: 0 }, radius: 95, lerp: 0.065, pointerMax: 90, idleAmp: { x: 9, y: 7 }, idlePeriodSec: 15, idlePhase: 0 },
-  { offset: { x: -70, y: -40 }, radius: 55, lerp: 0.045, pointerMax: 105, idleAmp: { x: 11, y: 8 }, idlePeriodSec: 18, idlePhase: 1.1 },
-  { offset: { x: 65, y: -55 }, radius: 45, lerp: 0.04, pointerMax: 100, idleAmp: { x: 7, y: 12 }, idlePeriodSec: 13, idlePhase: 2.6 },
-  { offset: { x: -45, y: 60 }, radius: 50, lerp: 0.025, pointerMax: 125, idleAmp: { x: 10, y: 6 }, idlePeriodSec: 20, idlePhase: 3.4 },
-  { offset: { x: 80, y: 45 }, radius: 40, lerp: 0.02, pointerMax: 130, idleAmp: { x: 6, y: 10 }, idlePeriodSec: 17, idlePhase: 4.8 },
-];
-
-const TEAL_POINTS: PointDef[] = [
-  { offset: { x: 0, y: 0 }, radius: 90, lerp: 0.06, pointerMax: 90, idleAmp: { x: 8, y: 9 }, idlePeriodSec: 16, idlePhase: 0.6 },
-  { offset: { x: 60, y: -45 }, radius: 50, lerp: 0.042, pointerMax: 105, idleAmp: { x: 12, y: 7 }, idlePeriodSec: 19, idlePhase: 2.0 },
-  { offset: { x: -55, y: -35 }, radius: 42, lerp: 0.028, pointerMax: 120, idleAmp: { x: 7, y: 11 }, idlePeriodSec: 14, idlePhase: 3.7 },
-  { offset: { x: 40, y: 55 }, radius: 46, lerp: 0.022, pointerMax: 125, idleAmp: { x: 9, y: 6 }, idlePeriodSec: 21, idlePhase: 5.2 },
-];
-
-type PointState = { x: number; y: number };
-
-type GroupRuntime = {
-  points: PointDef[];
-  state: PointState[];
-  prevCore: { x: number; y: number };
-  centerFrac: { x: number; y: number }; // fracción del canvas -- "centro-izquierda"/"centro-derecha"
-  invert: boolean;
-  scrollAmp: { x: number; y: number };
+type WaveConfig = {
+  centerFrac: { x: number; y: number };
+  sizeFrac: { w: number; h: number }; // fracción del bloque
+  rotationDeg: number; // inclinación fija, no dinámica -- "no quiero física compleja"
+  opacity: number;
   color: [number, number, number];
-  positionsBuf: Float32Array;
-  radiiBuf: Float32Array;
+  scrollAmp: { x: number; y: number };
+  pointerMax: { x: number; y: number };
+  pointerLerp: number;
+  invert: boolean;
+  mobileSizeScale: number; // "más contenidas" en móvil
+  breathePeriodSec: number;
+  breathePhase: number;
 };
+
+// Dos ondas anchas y difuminadas -- no una gota, no una silueta. Cada una
+// es UN solo campo gaussiano (ver liquidBackground.ts): sin física de
+// estiramiento/cola/rotación dinámica, solo posición + escala + opacidad,
+// cada una con una contribución pequeña de scroll, puntero y una
+// respiración muy lenta.
+const WARM: WaveConfig = {
+  centerFrac: { x: 0.34, y: 0.26 },
+  sizeFrac: { w: 0.58, h: 0.3 },
+  rotationDeg: -8,
+  opacity: 0.18,
+  color: WARM_COLOR,
+  scrollAmp: { x: 10, y: 16 },
+  pointerMax: { x: 8, y: 6 },
+  pointerLerp: 0.06,
+  invert: false,
+  mobileSizeScale: 0.7,
+  breathePeriodSec: 21,
+  breathePhase: 0,
+};
+
+const TEAL: WaveConfig = {
+  centerFrac: { x: 0.68, y: 0.58 },
+  sizeFrac: { w: 0.44, h: 0.26 },
+  rotationDeg: 15,
+  opacity: 0.12,
+  color: TEAL_COLOR,
+  scrollAmp: { x: -14, y: -10 },
+  pointerMax: { x: 10, y: 8 },
+  pointerLerp: 0.045,
+  invert: true,
+  mobileSizeScale: 0.65,
+  breathePeriodSec: 24,
+  breathePhase: 2.6,
+};
+
+const BREATHE_CENTER_AMP = 4; // px
+const BREATHE_SCALE_AMP = 0.015; // ±1.5%
+const BREATHE_OPACITY_AMP = 0.015;
+
+type WaveState = { x: number; y: number };
 
 /**
- * Superficie líquida del fondo de Manifesto (2026-07-27, octava
- * corrección): sustituye por completo la implementación anterior basada
- * en divs/CSS (blobs, clusters, border-radius animado) por un único
- * <canvas> WebGL renderizado mediante un campo de metaballs (ver
- * liquidBackground.ts) -- nueve puntos de influencia en total (5 cálidos,
- * 4 verde agua) que se funden en una silueta orgánica por color.
+ * Fondo ambiental de Manifesto (2026-07-28, décima corrección --
+ * reemplaza la gota líquida por dos ondas anchas y difuminadas, sin
+ * silueta ni física compleja): cada onda es un único campo gaussiano
+ * (liquidBackground.ts), sin puntos de influencia ni deformación
+ * anisótropa. El movimiento de cada onda es la suma de tres
+ * contribuciones pequeñas, todas calculadas dentro del mismo callback:
+ *   1. deriva ligada al progreso local de scroll (directa, sin lerp
+ *      propio -- el suavizado ya lo aporta Lenis en window.scrollY);
+ *   2. respuesta al puntero, con su propio lerp (más lenta y en
+ *      dirección contraria para la onda verde, igual que en todas las
+ *      rondas anteriores);
+ *   3. una respiración muy lenta (seno/coseno de baja frecuencia sobre
+ *      el mismo timestamp del ticker) que mueve el centro, la escala y
+ *      la opacidad en cantidades mínimas, con fase y periodo propios por
+ *      onda.
  *
- * Elección técnica: WebGL puro, sin librería. El proyecto no tenía OGL ni
- * Three.js instalados (comprobado en package.json); para un único plano
- * a pantalla completa con un único shader personalizado, WebGL a pelo es
- * más ligero que cualquiera de las dos (0 bytes de dependencia añadida
- * frente a los ~30-40KB de OGL o los varios cientos de KB de Three.js) y
- * ofrece control total sobre el shader, que es exactamente lo que pide
- * este efecto -- "la solución más ligera y controlable" del encargo
- * original se cumple con más margen así que con cualquiera de las dos
- * opciones sugeridas como referencia.
+ * Un único suscriptor al requestAnimationFrame COMPARTIDO de
+ * frameTicker.ts (el mismo bucle que SmoothScrollProvider.tsx mantiene
+ * vivo para lenis.raf()) -- nunca un bucle propio. Sin listeners en
+ * window, sin springs, sin CSS transition, solo refs mutables (nunca
+ * setState) escritas directamente en uniforms de WebGL.
  *
- * Arquitectura de movimiento: un único suscriptor al requestAnimationFrame
- * COMPARTIDO de frameTicker.ts (el mismo bucle que SmoothScrollProvider.tsx
- * ya mantiene vivo para lenis.raf()) -- nunca un bucle propio, nunca
- * renderer.setAnimationLoop. Cada punto interpola su posición hacia un
- * objetivo (centro del grupo + desplazamiento de reposo + atracción del
- * puntero) con su propio lerp -- núcleo más estable (0.055-0.075),
- * secundarios cercanos (0.035-0.05) y retrasados (0.018-0.032), nunca el
- * mismo valor -- y ese propio lerp hace que seguir moviéndose unos
- * instantes tras soltar el puntero, la "cola" y la oscilación residual
- * salgan de la física en sí, no de un temporizador aparte. La velocidad
- * (para el estiramiento/compresión anisótropo del shader) se lee del
- * propio desplazamiento del núcleo entre este frame y el anterior -- no
- * hay un sistema de velocidad independiente. Posiciones/velocidades viven
- * en objetos mutables (nunca useState) leídos y escritos directamente
- * dentro del callback del ticker.
+ * Bajo prefers-reduced-motion no se suscribe al ticker ni añade
+ * listeners de puntero: se renderiza una sola vez con ambas ondas en su
+ * posición/escala/opacidad de reposo, sin respiración. En dispositivos
+ * sin hover fino (canHover() = false) no hay respuesta al puntero, el
+ * scroll se reduce al 50% y el tamaño de ambas ondas se reduce (más
+ * contenidas en una pantalla estrecha).
  */
 export function useAmbientLiquid<T extends HTMLElement>() {
   const containerRef = useRef<T>(null);
@@ -114,29 +117,15 @@ export function useAmbientLiquid<T extends HTMLElement>() {
     if (!container || !canvas || !hero) return;
 
     const renderer: LiquidRenderer | null = createLiquidRenderer(canvas);
-    if (!renderer) return; // sin soporte WebGL -- el fondo queda en el color base de CSS, sin efecto
+    if (!renderer) return;
 
     const reducedMotion = prefersReducedMotion();
     const canPointerInteract = !reducedMotion && canHover();
     const dpr = Math.min(window.devicePixelRatio || 1, canHover() ? 1.5 : 1);
+    const mobileScrollScale = canPointerInteract ? 1 : 0.5;
 
     let canvasWidth = 0;
     let canvasHeight = 0;
-
-    const makeRuntime = (points: PointDef[], centerFrac: { x: number; y: number }, invert: boolean, scrollAmp: { x: number; y: number }, color: [number, number, number]): GroupRuntime => ({
-      points,
-      state: points.map((p) => ({ x: p.offset.x, y: p.offset.y })),
-      prevCore: { x: 0, y: 0 },
-      centerFrac,
-      invert,
-      scrollAmp,
-      color,
-      positionsBuf: new Float32Array(points.length * 2),
-      radiiBuf: new Float32Array(points.map((p) => p.radius)),
-    });
-
-    const warm = makeRuntime(WARM_POINTS, { x: 0.32, y: 0.38 }, false, SCROLL_AMP_WARM, WARM_COLOR);
-    const teal = makeRuntime(TEAL_POINTS, { x: 0.7, y: 0.56 }, true, SCROLL_AMP_TEAL, TEAL_COLOR);
 
     const resize = () => {
       const rect = container!.getBoundingClientRect();
@@ -172,119 +161,68 @@ export function useAmbientLiquid<T extends HTMLElement>() {
       container.addEventListener("pointerleave", onPointerLeave);
     }
 
-    const idleAmpScale = canPointerInteract ? 1 : 0.5; // "amplitud máxima de 4-6px" en móvil frente a 6-12px en escritorio
+    const warmPointer: WaveState = { x: 0, y: 0 };
+    const tealPointer: WaveState = { x: 0, y: 0 };
 
-    const renderGroup = (group: GroupRuntime, t: number, local: number) => {
-      const centerX = group.centerFrac.x * canvasWidth;
-      const centerY = group.centerFrac.y * canvasHeight;
+    const computeWave = (config: WaveConfig, pointerState: WaveState, t: number, local: number) => {
+      const sizeScale = canPointerInteract ? 1 : config.mobileSizeScale;
+      const scrollScale = mobileScrollScale;
+      const scrollAmpX = config.scrollAmp.x * scrollScale;
+      const scrollAmpY = config.scrollAmp.y * scrollScale;
+      const scrollX = clamp((local / SCROLL_RANGE_PX) * scrollAmpX, -Math.abs(scrollAmpX), Math.abs(scrollAmpX));
+      const scrollY = clamp((local / SCROLL_RANGE_PX) * scrollAmpY, -Math.abs(scrollAmpY), Math.abs(scrollAmpY));
 
-      const scrollX = clamp((local / SCROLL_RANGE_PX) * group.scrollAmp.x, -Math.abs(group.scrollAmp.x), Math.abs(group.scrollAmp.x));
-      const scrollY = clamp((local / SCROLL_RANGE_PX) * group.scrollAmp.y, -Math.abs(group.scrollAmp.y), Math.abs(group.scrollAmp.y));
+      const vx = config.invert ? -pointerTarget.x : pointerTarget.x;
+      const vy = config.invert ? -pointerTarget.y : pointerTarget.y;
+      pointerState.x = lerp(pointerState.x, vx * config.pointerMax.x, config.pointerLerp);
+      pointerState.y = lerp(pointerState.y, vy * config.pointerMax.y, config.pointerLerp);
 
-      const px = group.invert ? -pointerTarget.x : pointerTarget.x;
-      const py = group.invert ? -pointerTarget.y : pointerTarget.y;
+      const breatheOmega = (2 * Math.PI) / config.breathePeriodSec;
+      const breatheX = Math.sin(t * breatheOmega + config.breathePhase) * BREATHE_CENTER_AMP;
+      const breatheY = Math.cos(t * breatheOmega * 1.3 + config.breathePhase) * BREATHE_CENTER_AMP;
+      const breatheScale = 1 + Math.sin(t * breatheOmega * 0.7 + config.breathePhase) * BREATHE_SCALE_AMP;
+      const breatheOpacity = Math.sin(t * breatheOmega * 0.5 + config.breathePhase * 1.2) * BREATHE_OPACITY_AMP;
 
-      for (let i = 0; i < group.points.length; i++) {
-        const def = group.points[i];
-        const idleOmega = (2 * Math.PI) / def.idlePeriodSec;
-        const idleX = Math.sin(t * idleOmega + def.idlePhase) * def.idleAmp.x * idleAmpScale;
-        const idleY = Math.cos(t * idleOmega * 1.2 + def.idlePhase) * def.idleAmp.y * idleAmpScale;
+      const centerX = config.centerFrac.x * canvasWidth + scrollX + pointerState.x + breatheX;
+      const centerY = config.centerFrac.y * canvasHeight + scrollY + pointerState.y + breatheY;
+      const halfW = (config.sizeFrac.w * canvasWidth * sizeScale * breatheScale) / 2;
+      const halfH = (config.sizeFrac.h * canvasHeight * sizeScale * breatheScale) / 2;
+      const opacity = clamp(config.opacity + (canPointerInteract ? breatheOpacity : 0), 0, 1);
 
-        const targetX = centerX + scrollX + def.offset.x + idleX + px * def.pointerMax;
-        const targetY = centerY + scrollY + def.offset.y + idleY + py * def.pointerMax;
-
-        const st = group.state[i];
-        st.x = lerp(st.x, targetX, def.lerp);
-        st.y = lerp(st.y, targetY, def.lerp);
-
-        // Coordenadas de canvas WebGL: origen abajo-izquierda, en píxeles
-        // físicos (dpr aplicado); las de arriba están en píxeles CSS con
-        // origen arriba-izquierda (mismo espacio que el puntero).
-        group.positionsBuf[i * 2] = st.x * dpr;
-        group.positionsBuf[i * 2 + 1] = (canvasHeight - st.y) * dpr;
-      }
-
-      const core = group.state[0];
-      const velX = core.x - group.prevCore.x;
-      const velY = core.y - group.prevCore.y;
-      group.prevCore.x = core.x;
-      group.prevCore.y = core.y;
-
-      const speed = Math.hypot(velX, velY);
-      const maxStretch = 0.12;
-      const maxSquash = 0.08;
-      // Sensibilidad calibrada para que una velocidad "de barrido normal"
-      // (unos 15-25px de desplazamiento del núcleo entre frames a 60fps)
-      // ya alcance una fracción visible del máximo, sin llegar a él con
-      // cualquier microvibración -- "limita la velocidad para evitar
-      // deformaciones violentas".
-      const stretchAmt = clamp(speed * 0.006, 0, maxStretch);
-      const squashAmt = clamp(speed * 0.004, 0, maxSquash);
-      const dir: [number, number] = speed > 0.01 ? [velX / speed, -velY / speed] : [1, 0]; // -y: pasa de espacio CSS (y abajo) a espacio GL (y arriba)
-
-      return { stretchDir: dir, stretchAmt, squashAmt };
+      return {
+        center: [centerX * dpr, (canvasHeight - centerY) * dpr] as [number, number],
+        halfSize: [halfW * dpr, halfH * dpr] as [number, number],
+        rotation: (config.rotationDeg * Math.PI) / 180,
+        opacity,
+        color: config.color,
+      };
     };
-
-    let lastMobileFrameTime = 0;
 
     const onFrame = (time: number) => {
       if (!isVisible) return;
-      if (!canPointerInteract) {
-        if (time - lastMobileFrameTime < MOBILE_FRAME_INTERVAL_MS) return;
-        lastMobileFrameTime = time;
-      }
 
       const heroDocTop = window.scrollY + hero!.getBoundingClientRect().top;
       const wipeStart = heroDocTop + HERO_NARRATIVE_VH * window.innerHeight;
       const local = window.scrollY - wipeStart;
       const t = time / 1000;
 
-      const warmDeform = renderGroup(warm, t, local);
-      const tealDeform = renderGroup(teal, t, local);
-
       renderer.render({
         time: t,
-        edgePx: EDGE_PX * dpr,
-        warm: {
-          points: warm.positionsBuf,
-          radii: warm.radiiBuf.map((r) => r * dpr),
-          stretchDir: warmDeform.stretchDir,
-          stretchAmt: warmDeform.stretchAmt,
-          squashAmt: warmDeform.squashAmt,
-          color: warm.color,
-        },
-        teal: {
-          points: teal.positionsBuf,
-          radii: teal.radiiBuf.map((r) => r * dpr),
-          stretchDir: tealDeform.stretchDir,
-          stretchAmt: tealDeform.stretchAmt,
-          squashAmt: tealDeform.squashAmt,
-          color: teal.color,
-        },
+        warm: computeWave(WARM, warmPointer, t, local),
+        teal: computeWave(TEAL, tealPointer, t, local),
       });
     };
 
     let unsubscribe: (() => void) | null = null;
     if (reducedMotion) {
-      // Una única imagen estática del campo orgánico, en reposo (sin
-      // puntero, sin scroll, sin drift): nunca se suscribe al ticker.
-      const staticFrame = (group: GroupRuntime) => {
-        const centerX = group.centerFrac.x * canvasWidth;
-        const centerY = group.centerFrac.y * canvasHeight;
-        for (let i = 0; i < group.points.length; i++) {
-          const def = group.points[i];
-          group.positionsBuf[i * 2] = (centerX + def.offset.x) * dpr;
-          group.positionsBuf[i * 2 + 1] = (canvasHeight - (centerY + def.offset.y)) * dpr;
-        }
-      };
-      staticFrame(warm);
-      staticFrame(teal);
-      renderer.render({
-        time: 0,
-        edgePx: EDGE_PX * dpr,
-        warm: { points: warm.positionsBuf, radii: warm.radiiBuf.map((r) => r * dpr), stretchDir: [1, 0], stretchAmt: 0, squashAmt: 0, color: warm.color },
-        teal: { points: teal.positionsBuf, radii: teal.radiiBuf.map((r) => r * dpr), stretchDir: [1, 0], stretchAmt: 0, squashAmt: 0, color: teal.color },
+      const restWave = (config: WaveConfig) => ({
+        center: [config.centerFrac.x * canvasWidth * dpr, canvasHeight * (1 - config.centerFrac.y) * dpr] as [number, number],
+        halfSize: [(config.sizeFrac.w * canvasWidth * dpr) / 2, (config.sizeFrac.h * canvasHeight * dpr) / 2] as [number, number],
+        rotation: (config.rotationDeg * Math.PI) / 180,
+        opacity: config.opacity,
+        color: config.color,
       });
+      renderer.render({ time: 0, warm: restWave(WARM), teal: restWave(TEAL) });
     } else {
       unsubscribe = subscribeFrame(onFrame);
     }

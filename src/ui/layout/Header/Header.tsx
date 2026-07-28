@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useHeaderState } from "@/motion/hooks/useHeaderState";
 import logoBlanco from "../../../../images/logo-blanco.png";
+import logoRojo from "../../../../images/logo-rojo.png";
 import styles from "./Header.module.css";
 
 type HeaderProps = {
@@ -32,7 +33,29 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
       data-header
     >
       <Link className={styles.brand} href="/" aria-label="Volver al inicio">
-        <Image src={logoBlanco} alt="Reference Home" width={130} height={44} className={styles.brandLogo} />
+        {/* 2026-07-28: dos logos apilados (blanco/rojo) en vez de un único
+            asset con filtro CSS -- se cruzan en opacidad según el tono de
+            la escena bajo el header (isOnDark, useHeaderState.ts), nunca
+            por luminosidad automática del contenido de fondo. Mismo
+            selector .onDark ya usado para el color del texto del header
+            (ver Header.module.css). Solo el logo visible queda expuesto al
+            árbol de accesibilidad. */}
+        <span className={styles.brandLogoStack}>
+          <Image
+            src={logoBlanco}
+            alt="Reference Home"
+            fill
+            aria-hidden={!isOnDark}
+            className={cx(styles.brandLogo, styles.brandLogoWhite)}
+          />
+          <Image
+            src={logoRojo}
+            alt="Reference Home"
+            fill
+            aria-hidden={isOnDark}
+            className={cx(styles.brandLogo, styles.brandLogoRed)}
+          />
+        </span>
       </Link>
 
       <nav className={styles.desktopNav} aria-label="Navegación principal">
