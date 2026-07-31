@@ -25,11 +25,16 @@ const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boo
 // artefacto propio de Next.js con rutas que aún no existen. No cambia la
 // navegación real: al hacer click, sigue yendo a la 404 tal cual debe.
 export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
-  const { isScrolled, isOnDark } = useHeaderState();
+  const { isScrolled, isOnDark, isHidden } = useHeaderState();
 
   return (
     <header
-      className={cx(styles.header, isScrolled && styles.isScrolled, isOnDark && styles.onDark)}
+      className={cx(
+        styles.header,
+        isScrolled && styles.isScrolled,
+        isOnDark && styles.onDark,
+        isHidden && styles.isHidden,
+      )}
       data-header
     >
       <Link className={styles.brand} href="/" aria-label="Volver al inicio">

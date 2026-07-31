@@ -2,9 +2,12 @@
    .menu-toggle* en web-nueva/assets/css/styles.css */
 
 .header {
-  /* Barra de navegación fija sobre toda la página -- siempre visible,
-     nunca se oculta, no se desmonta, no cambia de posición. Solo su tono
-     (ver .onDark/.isScrolled) reacciona al contenido que pasa por debajo. */
+  /* Barra de navegación fija sobre toda la página -- nunca se desmonta, no
+     cambia de posición en el flujo. Su tono (ver .onDark/.isScrolled)
+     reacciona al contenido que pasa por debajo; desde 2026-07-29 (BrandPause)
+     también puede salir de pantalla temporalmente vía transform (.isHidden)
+     cuando una sección lo pide explícitamente (data-header-hide="true",
+     useHeaderState.ts) -- sigue siendo la misma barra, nunca una segunda. */
   position: fixed;
   top: 0;
   left: 0;
@@ -15,13 +18,23 @@
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  transition: background .4s, color .4s, border-color .4s;
+  transition: background .4s, color .4s, border-color .4s, transform .5s var(--ease), opacity .4s var(--ease);
   border-bottom: 1px solid transparent;
   /* Negro carbón cálido -- nunca el --ink de paridad (frío) ni el burdeos
      corporativo, que se reserva para acentos puntuales (ver .active,
      :hover, sup). Sobre el Hero y fondos oscuros, .onDark lo sustituye por
      blanco/marfil; el fundido entre ambos lo da la transition de arriba. */
   color: #3a2f2b;
+}
+
+.isHidden {
+  /* Triple garantía (2026-07-29, refuerzo): transform saca la barra del
+     viewport, pero opacity:0 + pointer-events:none aseguran que no quede
+     ni un resto visible (franja de fondo/blur) ni interacción, incluso si
+     por cualquier motivo el transform no llegara a aplicarse a tiempo. */
+  transform: translateY(-160%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .isScrolled {
@@ -67,7 +80,7 @@
 /* Blanco visible sobre fondo oscuro (mismo .onDark que ya cambia el color
    del texto del header); rojo visible el resto del tiempo -- nunca decidido
    por luminosidad automática, solo por la escena que marca data-header-tone
-   (Hero, Solutions, Process, Contact, Footer, WorkZoom, MarketingReel). */
+   (Hero, Process, Contact, Footer, WorkZoom, MarketingReel). */
 .brandLogoWhite {
   opacity: 0;
 }

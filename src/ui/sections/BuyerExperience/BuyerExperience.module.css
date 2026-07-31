@@ -1,0 +1,249 @@
+/* Escena "comprar" -- transición de telón (2026-08-13) + continuidad
+   "apertura por el centro" (2026-08-18, reescrita -- ver
+   useBuyerExperience.ts). Un panel blanco sólido (.curtain) cubre el
+   vídeo, ya reproduciéndose fijo debajo, y se desliza hacia arriba
+   (yPercent 0 -> -100) para revelarlo; el mismo vídeo -- un único
+   elemento, sin dividir, del primer frame al último -- es después el
+   que abre un hueco central vía clip-path para revelar TestSection.
+   Nunca aparece un segundo vídeo, nunca hay costura visible mientras la
+   escena está cerrada porque no hay ninguna división real hasta que el
+   propio clip-path la crea. */
+
+/* Altura calibrada (no un valor redondo) para que el telón termine de
+   abrirse (posición 0.45 del timeline) coincida con el final de la
+   aproximación natural de .sticky hacia el viewport (siempre exactamente
+   1 viewport de scroll, inevitable en cualquier sticky que no es lo
+   primero de la página) -- evita que el telón se quede mostrando pantalla
+   blanca sin apenas moverse durante ese tramo. 310vh cubre las fases
+   1-4 (telón, texto, apertura -- terminan en t=1.4 de
+   useBuyerExperience.ts, sin tocar). Los +70vh (2026-08-19) son la pausa
+   de lectura de la fase 5 (tween vacío, mismo ScrollTrigger, sin pin
+   nuevo): con .sticky ya fijo durante las fases 1-4, extender solo la
+   altura total mantiene la escena pineada ese tramo extra antes de
+   liberar el scroll -- sin spacer, sin otro 100svh, sin ScrollTrigger
+   nuevo. En móvil (holdDuration menor en el hook) el hold equivalente es
+   ~42vh, dentro de 35vh-50vh -- de ahí la altura menor del breakpoint. */
+.buyer {
+  position: relative;
+  height: 380vh;
+  background: #fff;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* TestSection real -- capa base, se revela por oclusión cuando el
+   clip-path del vídeo abre un hueco central, nunca anima por su cuenta. */
+.testLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Todo lo que antes cubría el vídeo a pantalla completa (vídeo, overlay,
+   texto/CTA, telón) vive en esta capa. pointer-events:none -- aunque el
+   clip-path del vídeo ya haya abierto un hueco central revelando
+   TestSection visualmente, esta caja (inset:0, position:absolute) sigue
+   ocupando todo el viewport y seguía interceptando pointerenter/move/
+   leave antes de que llegaran a TestSection, debajo. pointer-events es
+   una propiedad heredada -- con esto en el ancestro, .video/.overlay/
+   .curtain quedan sin capacidad de intercepción por defecto; .cta
+   recupera pointer-events:auto explícitamente más abajo (única capa que
+   debe seguir siendo clicable mientras es visible). */
+.videoStage {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Único <video>, de principio a fin -- nunca se monta, cruza ni duplica
+   ningún otro elemento. En reposo su clip-path (ver useBuyerExperience.ts)
+   no recorta nada, así que se ve como un vídeo normal a pantalla
+   completa: sin costura posible porque no existe ninguna división real
+   hasta que la propia apertura la crea. */
+.video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  will-change: clip-path;
+  /* El archivo (public/videos/) todavía no existe -- fondo neutro de
+     respaldo, nunca bloquea nada. */
+  background: #16140f;
+}
+
+/* Overlay discreto -- solo lo necesario para leer el mensaje central
+   sobre el vídeo; oculto hasta que el telón termina de subir, y se
+   desvanece de nuevo antes de que el vídeo se abra por el centro. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(17, 17, 15, .42);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.copy {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 var(--pad);
+  pointer-events: none;
+}
+
+.micro {
+  display: block;
+  margin-bottom: clamp(16px, 2vh, 24px);
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 500;
+  font-size: clamp(11px, .95vw, 13px);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(248, 245, 239, .82);
+}
+
+.headline {
+  margin: 0 0 clamp(28px, 3.5vw, 44px);
+  font-size: clamp(34px, 4.6vw, 68px);
+  line-height: 1.06;
+  letter-spacing: -.02em;
+  color: #f8f5ef;
+}
+
+/* Mismo lenguaje tipográfico que SellingErrors/BrandPause: sans principal
+   en peso fuerte para la estructura, serif editorial itálica en el
+   fragmento con intención. Ninguna tipografía nueva -- sin Great Vibes
+   aquí. */
+.headlineMain {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+}
+
+.headlineAccent {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* CTA sin caja ni botón rectangular -- línea que se extiende en hover,
+   mismo gesto ya usado en el proyecto (MarketingReel .discoverCtaLine). */
+.cta {
+  position: relative;
+  z-index: 3;
+  pointer-events: auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #f8f5ef;
+  text-decoration: none;
+}
+
+.ctaText {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 500;
+  font-size: clamp(13px, 1.05vw, 16px);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.ctaLine {
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform-origin: center;
+  transform: scaleX(.4);
+  transition: transform .4s var(--ease);
+}
+
+.cta:hover .ctaLine,
+.cta:focus-visible .ctaLine {
+  transform: scaleX(1);
+}
+
+/* Telón -- panel blanco sólido, por encima de todo (vídeo/overlay/copy),
+   cubriendo el escenario en reposo. Único mecanismo de revelación inicial:
+   yPercent (transform, GPU) -- nunca opacity. Sin relación con la
+   apertura final por el centro, que anima el clip-path del vídeo mismo,
+   no este panel. */
+.curtain {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: #fff;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@media (max-width: 900px) {
+  /* Fases 1-4 (310vh) sin override -- ese cálculo es relativo a vh, no al
+     ancho, y una altura menor ahí reintroduciría el desajuste del
+     viewport en blanco. Solo la pausa de lectura (fase 5) es más corta
+     en móvil (holdDuration menor en useBuyerExperience.ts, ~42vh aquí,
+     dentro de 35vh-50vh) -- 310 + 42 = 352vh. */
+  .buyer {
+    height: 352vh;
+  }
+
+  .headline {
+    font-size: clamp(30px, 7.5vw, 44px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buyer {
+    height: auto;
+  }
+
+  .sticky {
+    position: relative;
+    height: auto;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Orden visual (no de documento): vídeo primero, TestSection debajo --
+     mismo resultado que verían dos secciones separadas sin animación. */
+  .videoStage {
+    position: relative;
+    height: 100svh;
+    order: 1;
+  }
+
+  .testLayer {
+    position: relative;
+    order: 2;
+  }
+
+  .curtain {
+    display: none;
+  }
+
+  .overlay {
+    opacity: 1;
+  }
+
+  .micro,
+  .headline,
+  .cta {
+    opacity: 1;
+    transform: none;
+  }
+}

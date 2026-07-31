@@ -1,0 +1,27 @@
+/* Prueba aislada de useThreeScene.ts (2026-08-19) -- sin uso en
+   producción, ver ThreeSceneTest.tsx. Contenedor autónomo, tamaño fijo
+   razonable para poder soltarlo en cualquier página de desarrollo sin
+   que dependa del layout que lo rodee. */
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: transparent;
+}
+
+.canvasHost {
+  position: absolute;
+  inset: 0;
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-size: 13px;
+  color: rgba(17, 17, 15, .5);
+}

@@ -105,7 +105,17 @@ export function useHorizontalGallery({ sectionRef, trackRef, viewportRef }: Refs
       // La altura se calcula a partir del recorrido horizontal real. Así la
       // sección permanece fijada exactamente el tiempo necesario,
       // independientemente de pantalla o contenido.
-      const scrollTravel = Math.max(horizontalMaxX + window.innerHeight * 0.55, window.innerHeight * 1.8);
+      // 2026-08-16 (corrección de la pantalla blanca final): antes,
+      // `+ window.innerHeight * 0.55` y el suelo `window.innerHeight * 1.8`
+      // añadían hasta 1.55+ alturas de viewport de scroll SIN
+      // desplazamiento horizontal real, por encima del `+ window.innerHeight`
+      // que ya reserva el propio sticky más abajo -- ese colchón (ligado a
+      // la altura de pantalla, no al recorrido real) era la causa directa
+      // del hueco entre el paso 05 asentado y el inicio de BuyerExperience.
+      // Ahora la pausa final es proporcional al recorrido real
+      // (horizontalMaxX), no a la altura de pantalla: termina justo cuando
+      // el paso 05 queda asentado, con solo un ~7% de colchón.
+      const scrollTravel = horizontalMaxX * 1.07;
       section.style.setProperty("--projects-scroll-height", `${Math.ceil(window.innerHeight + scrollTravel)}px`);
 
       measureFrame = requestAnimationFrame(() => {

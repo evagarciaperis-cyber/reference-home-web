@@ -2,7 +2,7 @@ import styles from "./Footer.module.css";
 
 // Puerto literal de <footer class="site-footer"> de index.html. Está en la
 // lista original de "secciones oscuras" de main.js, así que lleva
-// data-header-tone="dark" (mismo mecanismo que Solutions/Process/Contact).
+// data-header-tone="dark" (mismo mecanismo que Process/Contact).
 // Vive fuera de <main> -- igual que en el original, es hermano de <main>,
 // no un hijo (ver Home en page.tsx). data-site-footer es un atributo
 // nuevo, solo para identificación estable en tests -- el original no
@@ -25,7 +25,6 @@ export function Footer() {
         <div>
           <h3>Enlaces</h3>
           <a href="#inicio">Inicio</a>
-          <a href="#soluciones">Soluciones</a>
           <a href="#proyectos">Proyectos</a>
         </div>
         <div>

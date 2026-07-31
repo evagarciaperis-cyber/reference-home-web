@@ -1,0 +1,74 @@
+/* Bloque "valoración de vivienda" (2026-08-19) -- titular + mancha
+   orgánica de varios lóbulos (Canvas 2D, useTestSectionCanvasReveal.ts)
+   que revela una imagen arquitectónica. Sustituye la versión anterior
+   basada en `clip-path: ellipse()` + custom properties CSS (--mask-rx/
+   --mask-ry/--mask-rotate) -- por mucho que se deformara, seguía
+   leyéndose como una forma geométrica única, no como una mancha líquida.
+   El propio canvas pinta la fotografía siempre nítida (nunca blur) y la
+   recorta con una máscara auxiliar. Mismo lenguaje tipográfico que el
+   resto de la web: sans principal en peso fuerte + serif editorial
+   itálica en el fragmento con intención -- sin Great Vibes aquí. */
+
+.section {
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Único elemento que pinta la revelación -- tamaño real de la sección
+   (ajustado a devicePixelRatio, máx. 2, en el hook), sin participar en
+   el layout ni en el hit-testing. */
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.textLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(48px, 8vh, 96px) var(--pad);
+  pointer-events: none;
+}
+
+.micro {
+  display: block;
+  margin-bottom: clamp(16px, 2.4vh, 26px);
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 500;
+  font-size: clamp(11px, .95vw, 13px);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--color-brand-primary);
+}
+
+.headline {
+  margin: 0;
+  max-width: 18ch;
+  font-size: clamp(36px, 5.2vw, 76px);
+  line-height: 1.12;
+  letter-spacing: -.02em;
+  color: var(--ink);
+}
+
+.headlineMain {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+}
+
+.headlineAccent {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+}

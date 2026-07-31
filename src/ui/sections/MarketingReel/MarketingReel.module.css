@@ -12,6 +12,30 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  /* 2026-07-28 (corrección de continuidad nº3): GSAP reserva, por
+     defecto, la altura natural de un elemento pinned (100vh) COMO EXTRA
+     tras liberar el pin, además de la distancia de scroll del propio
+     "+=300%" -- comprobado con precisión (ScrollTrigger.create + medición
+     de posición/opacidad de los paneles): la animación de salida y el pin
+     terminan realmente 100vh ANTES de que el pin-spacer libere el
+     siguiente bloque. Ese tramo sobrante son 100vh de fondo beige vacío
+     sin ninguna animación -- la causa real del hueco reportado, no un
+     problema de timing. Este margin-bottom negativo cancela exactamente
+     esa reserva sobrante (técnica estándar de GSAP para este caso) sin
+     tocar la duración del pin ni ningún valor de la salida escalonada. */
+  margin-bottom: -100vh;
+  /* 2026-07-28 (corrección de continuidad nº4): el margin-bottom de
+     arriba, al eliminar el hueco, hace que la posición natural (sin
+     pinnear) de SellingErrors quede solapada en el documento con el
+     tramo final en que este stage TODAVÍA está pinneado saliendo -- sin
+     un z-index explícito, el orden por defecto (más tarde en el DOM gana)
+     hacía que SellingErrors tapara los paneles todavía en movimiento. Un
+     z-index positivo aquí basta para que este stage, mientras esté
+     activo (pinned o no), quede siempre por encima del .stage de
+     SellingErrors en su estado por defecto (ver SellingErrors.module.css
+     .stage, que solo sube su propio z-index por encima de este cuando su
+     PROPIO pin está realmente activo, useSellingErrors.ts onToggle). */
+  z-index: 5;
 }
 
 /* Panel 02 -- Marketing: posición/tamaño respecto a la transición ya
@@ -353,32 +377,72 @@
   }
 }
 
-/* Sin hover táctil: no hay overlay de oscurecimiento permanente ni zoom de
-   vídeo -- el CTA "Descubrir" pasa a fijo, discreto, en la esquina
-   inferior derecha, sin ocultar el copy principal. Móvil además pasa de
-   composición de tres columnas a secuencia vertical -- el panel 02
-   conserva su mecánica (fullscreen -> contracción, misma timeline); los
-   paneles 01/03 pasan a flujo normal, apilados debajo, ancho ~90vw. */
+/* Móvil (2026-07-28, corrección dedicada): solución propia, no una
+   compresión de la composición de escritorio. Sin pin, sin fullscreen,
+   sin contracción -- los tres vídeos ya nacen en su tamaño de tarjeta
+   final (useMarketingReel.ts, rama isMobileViewport). Orden VISUAL
+   Marketing -> Valoración -> Negociación vía `order` de flexbox (el orden
+   real en el DOM/JSX no cambia: panel1, videoShell, panel3 -- solo se
+   reordena visualmente). Cada tarjeta sale de verdad hacia arriba
+   (translateY real por scroll, ver setupMobileCard en el hook), nunca
+   tapada por una capa: aquí no hay ningún elemento position:fixed/pinned
+   que pueda cubrirla. */
 @media (max-width: 640px) {
+  .reel {
+    overflow-x: clip;
+  }
+
   .stickyStage {
+    position: static;
+    width: 100%;
     height: auto;
-    min-height: 100vh;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0 0 32px;
+    gap: 20px;
+    padding: 24px 0 16px;
+    /* Neutraliza el margin-bottom:-100vh de la regla base (2026-07-28,
+       corrección móvil): esa compensación existe solo para cancelar la
+       reserva extra que GSAP añade tras liberar un pin -- en móvil no hay
+       pin ni spacer que compensar, así que aplicarla arrastraría el
+       siguiente bloque una pantalla entera hacia arriba. */
+    margin-bottom: 0;
+    /* Sin pin no hay ninguna disputa de apilamiento con SellingErrors --
+       el z-index de escritorio no hace falta aquí. */
+    z-index: auto;
   }
 
+  .videoShell,
   .panelMotionWrapper {
-    position: static;
-    width: 90vw;
-    height: 62vw;
-    margin-top: 24px;
+    position: relative;
+    top: auto;
+    left: auto;
+    width: calc(100vw - 2 * var(--pad));
+    height: auto;
+    aspect-ratio: 4 / 5;
+    border-radius: 24px;
+    margin-top: 0;
   }
 
-  .panelMotionWrapper[data-panel="left"],
+  .videoShell {
+    order: 0;
+  }
+
+  /* left:auto explícito en las dos reglas de abajo (2026-07-28, corrección
+     de overflow horizontal): [data-panel="left"/"right"] tienen más
+     especificidad que la regla general .panelMotionWrapper de arriba, así
+     que sin repetir "left:auto" aquí, el left:calc(...) de escritorio
+     (fuera de este media query pero con la MISMA especificidad) seguía
+     ganando y empujaba el panel 03 fuera del viewport. */
+  .panelMotionWrapper[data-panel="left"] {
+    left: auto;
+    order: 1;
+  }
+
   .panelMotionWrapper[data-panel="right"] {
     left: auto;
+    order: 2;
   }
 
   .panelTitle {
@@ -402,14 +466,19 @@
     opacity: 0; /* "sin overlay adicional permanente" en móvil */
   }
 
-  /* El CTA fijo de móvil también depende de [data-panels-ready] -- solo
-     se muestra permanente una vez formada la composición final, igual
-     que en escritorio (2026-07-28). */
+  /* El CTA fijo de móvil también depende de [data-panels-ready] -- en
+     móvil se marca "true" desde el montaje (useMarketingReel.ts), así que
+     el enlace queda visible de inmediato, sin depender de hover ni de
+     ningún estado "grande" previo (ya no existe fase fullscreen).
+     2026-07-28: se mueve de la esquina inferior derecha (colisionaba con
+     panelBody cuando la descripción ocupa dos líneas) a la esquina
+     superior derecha, lejos del bloque de texto -- posición segura
+     independientemente de cuánto ocupe cada copy. */
   .discoverCta {
     left: auto;
     right: 16px;
-    top: auto;
-    bottom: 16px;
+    top: 16px;
+    bottom: auto;
     align-items: flex-end;
     transform: none;
   }

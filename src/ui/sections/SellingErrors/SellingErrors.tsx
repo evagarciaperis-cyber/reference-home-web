@@ -13,6 +13,11 @@ type Chapter = {
 // ronda (2026-07-28) -- narrativa/tipografía en fase de aprobación, el
 // fondo visual y cualquier objeto 3D quedan aplazados a una fase
 // posterior.
+//
+// 2026-07-30: la ronda de imágenes (banda inferior, luego fondo fotográfico
+// a pantalla completa) se retiró por completo -- no aprobada. Vuelta a la
+// arquitectura de referencia de Lenis, solo tipografía: número/título/
+// descripción de la columna derecha crecen en escala en su lugar.
 const CHAPTERS: Chapter[] = [
   {
     number: "01",
@@ -48,10 +53,48 @@ const CHAPTERS: Chapter[] = [
 // ningún nodo de fondo propio aquí; .section ya lo pinta directamente
 // (SellingErrors.module.css).
 export function SellingErrors() {
-  const { sectionRef, stageRef, labelRef, titleLine1Ref, titleLine2Ref, introRef, chapterRefs } = useSellingErrors(CHAPTERS.length);
+  const {
+    sectionRef,
+    stageRef,
+    labelRef,
+    titleLine1Ref,
+    titleLine2Ref,
+    introRef,
+    chapterRefs,
+    earlyRevealRef,
+    earlyLabelRef,
+    earlyTitleLine1Ref,
+    earlyTitleLine2Ref,
+  } = useSellingErrors(CHAPTERS.length);
 
   return (
     <section className={styles.section} ref={sectionRef}>
+      {/* Capa eco (2026-07-28): ver SellingErrors.module.css .earlyReveal.
+          Duplica visualmente la etiqueta + título reales (mismas clases,
+          mismo texto) para poder revelarse MIENTRAS el bloque de los tres
+          vídeos todavía está saliendo -- .stage, más abajo, no puede
+          hacerlo por sí solo (su pin no se activa hasta que el anterior
+          libera el espacio). aria-hidden: es un eco visual, el contenido
+          real (accesible) es el de dentro de .stage. */}
+      <div className={styles.earlyReveal} ref={earlyRevealRef} aria-hidden="true">
+        <div className={styles.labelRow} ref={earlyLabelRef}>
+          <span className={styles.labelLine} aria-hidden="true" />
+          <span className={styles.label}>Por qué una vivienda pierde oportunidades</span>
+        </div>
+        <h2 className={styles.title}>
+          <span className={styles.titleLineMask}>
+            <span className={styles.titleLine} ref={earlyTitleLine1Ref}>
+              <span className={styles.titleLight}>No es</span> <span className={styles.titleSerif}>el mercado.</span>
+            </span>
+          </span>
+          <span className={styles.titleLineMask}>
+            <span className={styles.titleLine} ref={earlyTitleLine2Ref}>
+              <span className={styles.titleMain}>Es cómo</span> <span className={styles.titleSerifItalic}>se vende.</span>
+            </span>
+          </span>
+        </h2>
+      </div>
+
       <div className={styles.stage} ref={stageRef}>
         <div className={styles.left}>
           <div className={styles.labelRow} ref={labelRef}>

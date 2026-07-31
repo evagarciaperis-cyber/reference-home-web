@@ -47,3 +47,9 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# vídeos grandes -- se quedan en disco (localhost los sigue sirviendo
+# igual), pero no versionados: superan el límite de 100MB de GitHub
+images/video_marketing.mp4
+public/videos/comprar-inmuebles.mp4
+public/videos/video_marketing.mp4

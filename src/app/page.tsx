@@ -3,8 +3,9 @@ import { Hero } from "@/ui/sections/Hero";
 import { Manifesto } from "@/ui/sections/Manifesto";
 import { MarketingReel } from "@/ui/sections/MarketingReel";
 import { SellingErrors } from "@/ui/sections/SellingErrors";
-import { Solutions } from "@/ui/sections/Solutions";
+import { BrandPause } from "@/ui/sections/BrandPause";
 import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
+import { BuyerExperience } from "@/ui/sections/BuyerExperience";
 import { Process } from "@/ui/sections/Process";
 import { WorkZoom } from "@/ui/sections/WorkZoom";
 import { BrandStory } from "@/ui/sections/BrandStory";
@@ -57,8 +58,9 @@ export default function Home() {
         <Manifesto />
         <MarketingReel />
         <SellingErrors />
-        <Solutions />
+        <BrandPause />
         <ProjectsGallery />
+        <BuyerExperience />
         <Process />
         <WorkZoom />
         <BrandStory />

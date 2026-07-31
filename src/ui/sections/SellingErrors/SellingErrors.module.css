@@ -17,6 +17,13 @@
 .section {
   position: relative;
   background: var(--paper);
+  /* 2026-07-30 (centrado vertical): altura real de la barra fija del
+     header (Header.module.css .header, 108px en desktop) -- necesaria
+     para centrar el conjunto dentro del área ÚTIL del viewport (por
+     debajo del header), no dentro de los 100vh completos ignorándolo.
+     Valor local, no un token global: si el header cambia de altura algún
+     día, se actualiza aquí también. */
+  --header-height: 108px;
 }
 
 .stage {
@@ -27,18 +34,91 @@
   color: var(--ink);
 }
 
+@media (min-width: 1024px) {
+  .stage {
+    /* 2026-08-02: cancela la reserva extra (altura natural de .stage,
+       100vh) que el pin-spacer de GSAP añade tras liberar el pin -- sin
+       esto, la posición natural en flujo de BrandPause (justo después de
+       esta sección) queda 100vh por debajo de donde termina el pin, y
+       liberar el handoff exactamente al final del ScrollTrigger (sin
+       ninguna espera manual) dejaba ver una segunda franja verde al seguir
+       bajando el resto de ese tramo. Con esto, el final real del
+       ScrollTrigger ya coincide con la posición natural de BrandPause --
+       misma técnica que MarketingReel.module.css .stickyStage. */
+    margin-bottom: -100vh;
+  }
+}
+
+/* Banda vertical verde en el borde izquierdo (2026-07-30): puramente
+   decorativa -- pseudo-elemento, sin nodo nuevo en el DOM, sin afectar a
+   .left/.right (siguen absolutos, ninguno depende del flujo). Estática,
+   sin animación, sin tocar capítulos ni BrandPause. */
+.stage::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: clamp(40px, 4vw, 80px);
+  height: 100%;
+  background: var(--color-bg-secondary);
+  pointer-events: none;
+}
+
+/* "Capa eco" (2026-07-28, corrección de continuidad nº3): un GSAP
+   pin:true nunca puede activarse antes de que el pin anterior libere su
+   espacio -- comprobado empíricamente (el pin-spacer de esta sección
+   siempre se inserta en su posición natural, sea cual sea el "start" que
+   se le dé). Esta capa es la única forma real de que la etiqueta/título
+   aparezcan MIENTRAS el último vídeo de MarketingReel sigue visible: vive
+   fuera de .stage, siempre en position:fixed, y una segunda ScrollTrigger
+   (no pinned, sin spacer, en useSellingErrors.ts) la revela usando
+   posiciones de scroll absolutas dentro de la cola de MarketingReel.
+   Mismas clases que .left para el texto real -- mismo aspecto exacto --
+   así que en el instante en que el pin real se activa, el relevo es
+   invisible (ambas muestran lo mismo, en el mismo sitio). oculta a
+   lectores de pantalla: es un eco visual del contenido real.
+   2026-07-30 (centrado vertical): mismo top/transform que .left, más
+   abajo -- ambas deben coincidir pixel a pixel en el momento del relevo,
+   igual que antes con el padding-top compartido. */
+.earlyReveal {
+  position: fixed;
+  z-index: 6;
+  top: calc(50% + var(--header-height) / 2);
+  left: 8%;
+  width: 40%;
+  height: auto;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  color: var(--ink);
+  pointer-events: none;
+  visibility: hidden;
+}
+
 /* Columna izquierda -- ancla narrativa fija, nunca asciende ni desaparece
-   entre capítulos (a diferencia de la derecha). */
+   entre capítulos (a diferencia de la derecha).
+   2026-07-30 (centrado vertical, corrección): el conjunto quedaba
+   demasiado alto (top:0 + padding-top:27vh no tenía en cuenta el header, y
+   .right centraba su propio contenido de forma independiente -- centros
+   verticales distintos entre columnas). Ahora ambas columnas comparten
+   exactamente el mismo eje: top:50% del área útil (100vh menos el header,
+   ver --header-height en .section) + transform:translateY(-50%) sobre su
+   propia altura (auto, la que dé el contenido) -- así sus centros
+   coinciden aunque su alto interno no sea igual. El mismo top/transform
+   posiciona la "capa eco" (.earlyReveal) para que coincida pixel a pixel
+   con esta columna en el momento del relevo. */
 .left {
   position: absolute;
   z-index: 1;
-  top: 0;
+  top: calc(50% + var(--header-height) / 2);
   left: 8%;
-  width: 42%;
-  height: 100%;
+  width: 40%;
+  height: auto;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 28px;
 }
 
@@ -114,24 +194,39 @@
 
 /* Columna derecha -- se desarrolla secuencialmente (intro -> 4 capítulos),
    un único protagonista a la vez. La zona central entre .left y .right
-   queda vacía a propósito (dirección editorial, no se rellena todavía). */
+   queda vacía a propósito (dirección editorial, no se rellena todavía).
+   2026-07-30: crece de 34% a 40% de ancho (rango pedido 38%-42%) -- el
+   capítulo activo debe ocupar mucho más superficie del viewport, ya no un
+   bloque pequeño y perdido.
+   2026-07-30 (centrado vertical, corrección): mismo top/transform que
+   .left -- antes cada columna centraba su propio contenido de forma
+   independiente (esta con align-items:center sobre el 100% de altura,
+   .left anclada arriba con padding-top), así que sus centros no
+   coincidían. Ahora comparten exactamente el mismo eje. */
 .right {
   position: absolute;
   z-index: 1;
-  top: 0;
-  left: 58%;
-  width: 34%;
-  height: 100%;
-  display: flex;
-  align-items: center;
+  top: calc(50% + var(--header-height) / 2);
+  left: 55%;
+  width: 40%;
+  height: auto;
+  transform: translateY(-50%);
 }
 
 .rightViewport {
   position: relative;
   width: 100%;
-  /* Altura de "ventana de lectura": suficiente para el texto más largo
-     (intro) sin recortarlo, igual para los cuatro capítulos. */
-  min-height: 260px;
+  /* Altura de "ventana de lectura" (2026-07-30, ajustada): cada capítulo
+     (.chapter, más abajo) se ancla a top:0 DENTRO de esta caja -- así que
+     si la caja es más alta que el contenido real, el sobrante queda
+     siempre debajo, y eso desplaza el centro visual del texto hacia
+     arriba del verdadero centro de .right (el bug de "conjunto demasiado
+     alto" de esta ronda). Valor ajustado para acercarse a la altura real
+     del contenido típico (número + título de 1-2 líneas + descripción) en
+     vez de sobrar espacio de forma sistemática; el capítulo más largo
+     (título de dos líneas) puede superar levemente esta altura sin
+     recortarse (sin overflow:hidden aquí). */
+  min-height: clamp(260px, 32vh, 340px);
 }
 
 .introBlock,
@@ -143,6 +238,16 @@
   opacity: 0;
   transform: translateY(40px);
   will-change: transform, opacity;
+}
+
+/* 2026-07-29 (corrección de ritmo): refuerzo explícito además de opacity
+   -- un capítulo inactivo no debe dejar ningún residuo (número, título o
+   descripción) ni siquiera técnicamente presente. useSellingErrors.ts
+   alterna esto con tl.set() exactamente en los mismos puntos en que
+   opacity llega a 0/empieza a subir de 0, nunca a mitad de una fase
+   visible -- por eso nunca se nota el salto de golpe. */
+.chapter {
+  visibility: hidden;
 }
 
 .introText {
@@ -163,88 +268,121 @@
   color: var(--ink);
 }
 
+/* 2026-07-30: crece de 13px a un tamaño monumental (número editorial, no
+   decorativo diminuto) -- "situado detrás o por encima del título", gris
+   piedra, siempre (nunca burdeos, sigue siendo del título en exclusiva). */
 .chapterNumber {
   display: block;
   font-family: var(--font-manifesto-micro), var(--sans);
   font-weight: 700;
-  font-size: 13px;
-  letter-spacing: .1em;
-  margin-bottom: 14px;
-  /* Burdeos puntual (2026-07-28): único uso de masa de color en toda la
-     sección, reservado al número del capítulo activo -- ver
-     useSellingErrors.ts, que solo añade data-chapter-active="true" al
-     capítulo en pantalla. */
-  color: rgba(17, 17, 15, .4);
-  transition: color .3s var(--ease);
+  font-size: clamp(52px, 5.5vw, 88px);
+  line-height: 1;
+  letter-spacing: -.01em;
+  margin-bottom: 8px;
+  color: rgba(17, 17, 15, .35);
 }
 
-.chapter[data-chapter-active="true"] .chapterNumber {
+/* 2026-07-30: segundo gran foco visual tras el titular izquierdo -- crece
+   de clamp(22px,2.1vw,30px) a clamp(48px,4.2vw,78px), line-height
+   compacto, permite dos líneas cuando el título lo necesita (sin
+   max-width propio: el ancho lo da .right/.rightViewport, ya ampliados). */
+.chapterTitle {
+  margin: 0 0 20px;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+  font-size: clamp(48px, 4.2vw, 78px);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  /* 2026-07-29 (corrección de ritmo, confirmado explícitamente): pasa de
+     --ink a burdeos -- único cambio de color de esa ronda, pedido y
+     confirmado por el usuario tras señalar la contradicción con "no
+     modificar colores aprobados". */
   color: var(--color-brand-primary);
 }
 
-.chapterTitle {
-  margin: 0 0 12px;
-  font-family: var(--font-manifesto-sans), var(--sans);
-  font-weight: 600;
-  font-size: clamp(22px, 2.1vw, 30px);
-  letter-spacing: -.01em;
-  color: var(--ink);
-}
-
+/* 2026-07-30: crece de clamp(15px,1.25vw,17px) a clamp(21px,1.55vw,30px),
+   line-height más suelto (1.3) -- bloque editorial claro, medida en
+   caracteres (36ch) para que la línea no se alargue en exceso incluso a
+   tamaños grandes. */
 .chapterBody {
   margin: 0;
-  max-width: 40ch;
-  font-size: clamp(15px, 1.25vw, 17px);
-  line-height: 1.55;
+  max-width: 36ch;
+  font-size: clamp(21px, 1.55vw, 30px);
+  line-height: 1.3;
   color: rgba(17, 17, 15, .68);
 }
 
 @media (max-width: 1100px) {
   .left {
     left: 6%;
-    width: 44%;
+    width: 42%;
   }
 
   .right {
-    left: 54%;
-    width: 40%;
+    left: 52%;
+    width: 42%;
   }
 }
 
-/* Móvil (2026-07-28): sin pin extenso, sin composición lateral. Título en
-   position:sticky nativo (CSS, no GSAP) durante un recorrido corto;
-   capítulos en flujo vertical normal, revelo individual simple (ver
-   useSellingErrors.ts, rama móvil -- ScrollTrigger por capítulo, sin
-   pin, sin efectos complejos). Mismo fondo --paper que en escritorio --
-   .section ya lo lleva siempre, no hace falta nada aquí. */
+/* Móvil (2026-07-28, corrección dedicada): solución propia, no una
+   compresión de la composición de escritorio. Preferencia explícita del
+   encargo -- flujo vertical normal, sin pin, sin sticky, un único orden
+   real: etiqueta -> título -> introducción -> capítulos 01-04 (ya es el
+   orden del DOM: .left antes que .right). Los reveals individuales por
+   elemento ya existían (useSellingErrors.ts, rama isMobile) -- lo único
+   que rompía la lectura era que .left seguía en position:sticky,
+   quedándose fija sobre el resto del contenido durante todo el scroll
+   restante. Aquí pasa a un bloque estático más, como .right. */
 @media (max-width: 640px) {
+  .section {
+    /* Respiración corta y real (16-32px), no basada en vh (2026-07-28):
+       el hueco entre el último vídeo y la etiqueta lo reparten a partes
+       iguales el padding-bottom de .stickyStage en MarketingReel (16px)
+       y el padding-top de .left aquí abajo (16px). */
+    overflow-x: clip;
+  }
+
   .stage {
     position: static;
+    width: 100%;
     height: auto;
     overflow: visible;
   }
 
+  /* .stage deja de ser un bloque de 100vh -- la banda ("toda la altura
+     visible del bloque") no aplica a este layout apilado. */
+  .stage::before {
+    display: none;
+  }
+
+  /* Capa eco completamente desactivada en móvil (2026-07-28): aquí no
+     hay ningún pin previo del que solaparse -- el reveal se resuelve por
+     flujo, spacing y timing reales (useSellingErrors.ts, rama isMobile),
+     nunca duplicando el título ni con position:fixed. */
+  .earlyReveal {
+    display: none;
+  }
+
   .left {
-    position: sticky;
-    top: 0;
+    position: static;
+    top: auto;
     left: auto;
     width: 100%;
-    height: 46vh;
-    min-height: 260px;
-    padding: 32px var(--pad) 24px;
-    justify-content: flex-end;
-    gap: 18px;
+    height: auto;
+    padding: 16px var(--pad) 20px;
+    gap: 14px;
   }
 
   .title {
-    font-size: clamp(28px, 8vw, 38px);
+    font-size: clamp(26px, 7.5vw, 34px);
+    line-height: 1.18;
   }
 
   .right {
     position: static;
     left: auto;
     width: 100%;
-    padding: 12px var(--pad) 72px;
+    padding: 4px var(--pad) 64px;
     display: block;
   }
 
@@ -254,12 +392,19 @@
 
   .introBlock {
     position: static;
-    margin-bottom: 56px;
+    margin-bottom: 48px;
   }
 
   .chapter {
     position: static;
-    margin-bottom: 48px;
+    margin-bottom: 44px;
+    /* Móvil usa su propio reveal por elemento (opacity/translateY, sin
+       pin, useSellingErrors.ts rama isMobile) -- nunca toca visibility,
+       así que el visibility:hidden de base (pensado para el alternado de
+       escritorio) se anula aquí para no dejar los capítulos ocultos para
+       siempre. Sin el mismo riesgo de solapamiento: en flujo normal cada
+       uno ya se revela por turnos según el scroll natural. */
+    visibility: visible;
   }
 
   .chapter:last-child {
@@ -276,6 +421,10 @@
     position: static;
     height: auto;
     overflow: visible;
+  }
+
+  .stage::before {
+    display: none;
   }
 
   .left {
@@ -303,6 +452,12 @@
   .chapter {
     opacity: 1;
     transform: none;
+  }
+
+  /* Anula el visibility:hidden de base -- bajo reduced-motion los cuatro
+     capítulos están simultáneamente en flujo normal, no alternados. */
+  .chapter {
+    visibility: visible;
   }
 
   .introBlock {

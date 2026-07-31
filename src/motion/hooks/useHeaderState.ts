@@ -23,16 +23,27 @@ const SAMPLE_Y = 44;
 // si el usuario deja de hacer scroll justo en el umbral).
 const DARK_SECTION_SELECTOR = '[data-header-tone="dark"]';
 
+// 2026-07-29 (BrandPause): mismo mecanismo genérico que DARK_SECTION_SELECTOR
+// -- cualquier sección puede pedir que el header se oculte mientras la cubre,
+// marcándose con data-header-hide="true", sin que este hook sepa nada de
+// BrandPause en concreto. El header sigue siendo la misma barra fija de
+// siempre (Header.module.css): esto no la desmonta ni crea una segunda, solo
+// añade una clase que la desplaza fuera de pantalla con transform, reversible
+// en cada recálculo de scroll igual que isOnDark.
+const HIDE_SECTION_SELECTOR = '[data-header-hide="true"]';
+
 export type HeaderState = {
   isScrolled: boolean;
   isOnDark: boolean;
+  isHidden: boolean;
 };
 
 /**
  * Recalcula el estado visual del header en cada scroll. El header en sí es
- * una barra fija (position:fixed, Header.module.css) siempre visible --
- * este hook solo decide su TONO (claro/oscuro) según lo que hay detrás en
- * ese instante, nunca si se muestra u oculta.
+ * una barra fija (position:fixed, Header.module.css) que normalmente
+ * permanece siempre visible -- este hook decide su TONO (claro/oscuro) y,
+ * desde 2026-07-29, también si debe ocultarse temporalmente (isHidden) según
+ * lo que hay detrás en ese instante.
  *
  * También escucha "resize" (2026-07-28, bug encontrado validando el logo
  * del header): sin él, redimensionar la ventana a mitad de scroll podía
@@ -45,6 +56,7 @@ export function useHeaderState(): HeaderState {
   const [state, setState] = useState<HeaderState>({
     isScrolled: false,
     isOnDark: false,
+    isHidden: false,
   });
 
   useEffect(() => {
@@ -59,7 +71,14 @@ export function useHeaderState(): HeaderState {
         if (rect.top <= SAMPLE_Y && rect.bottom >= SAMPLE_Y) isOnDark = true;
       });
 
-      setState({ isScrolled, isOnDark });
+      let isHidden = false;
+      document.querySelectorAll(HIDE_SECTION_SELECTOR).forEach((section) => {
+        if (isHidden) return;
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= SAMPLE_Y && rect.bottom >= SAMPLE_Y) isHidden = true;
+      });
+
+      setState({ isScrolled, isOnDark, isHidden });
     };
 
     window.addEventListener("scroll", update, { passive: true });

@@ -1,0 +1,253 @@
+/* Pausa de marca (2026-07-30, una sola pantalla): separación cromática
+   entre SellingErrors (beige) y ProjectsGallery -- campo verde corporativo
+   sólido, titular monumental centrado como protagonista, acompañado de una
+   etiqueta editorial. Única capa decorativa: la filigrana de fondo
+   (.filigrana, imagen "fondofiligrana") entre el color base y el texto --
+   sin SVG, trazos ni overlays añadidos. Tokens ya existentes en el proyecto
+   (--color-bg-secondary, --color-text-primary-inverse, --color-brand-primary,
+   --serif, --font-manifesto-sans, --font-manifesto-micro), nada nuevo.
+
+   Sin pin (ver useBrandPause.ts): el bloque ocupa una única pantalla
+   (100svh) y el reveal ocurre por scroll normal dentro de esa altura --
+   nunca por una capa position:fixed, así que no puede tapar SellingErrors
+   mientras sigue saliendo ni dejar ningún residuo de pin-spacing hacia
+   ProjectsGallery. */
+
+.section {
+  position: relative;
+  background: var(--color-bg-secondary);
+  overflow-x: clip;
+}
+
+.stage {
+  position: relative;
+  /* Una única pantalla (2026-07-30): antes 132svh -- el sobrante por
+     encima de 100svh es justo lo que generaba la sensación de "segunda
+     pantalla" de fondo verde vacío tras terminar el reveal (el ScrollTrigger
+     de useBrandPause.ts recorre exactamente 1 viewport, "top bottom" ->
+     "top top", así que el resto de min-height quedaba como tramo muerto). */
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Centrado vertical real dentro de la única pantalla -- margen horizontal
+     simétrico, bien compensado. */
+  padding: 0 4vw;
+  color: var(--color-text-primary-inverse);
+}
+
+/* Filigrana decorativa (2026-07-29): capa intermedia entre el verde de
+   fondo (.section) y el contenido tipográfico (z-index:1, más abajo) --
+   orden de capas exacto pedido: color -> filigrana -> texto. A sangre
+   sobre todo el bloque (inset:0 dentro de .stage), object-fit:cover.
+   Opacidad baja para que quede como textura sutil, nunca protagonista ni
+   en competencia con el titular o con "cómo". */
+.filigrana {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  object-fit: cover;
+  object-position: center;
+  opacity: .16;
+  pointer-events: none;
+}
+
+.eyebrow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(28px, 4.4vh, 56px);
+  opacity: 0;
+  transform: translateY(24px);
+  will-change: transform, opacity;
+}
+
+.eyebrowNumber {
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--color-text-primary-inverse);
+}
+
+.eyebrowLine {
+  width: 40px;
+  height: 1px;
+  background: var(--color-brand-primary);
+}
+
+.eyebrowText {
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(240, 223, 207, .72);
+}
+
+.title {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  width: 100%;
+  font-size: clamp(100px, 11.8vw, 224px);
+  line-height: .8;
+  letter-spacing: -.055em;
+  text-align: left;
+}
+
+/* Máscara de línea -- overflow:hidden real, el contenido revela con un
+   translateY en píxeles (no yPercent: con yPercent, un transform de CSS
+   en % como base entra en conflicto con el tracking interno de GSAP y la
+   opacity llega a 1 pero el translateY se queda clavado en el valor
+   inicial -- comprobado en la ronda anterior). Mismo patrón en píxeles ya
+   usado en SellingErrors/Manifesto: nunca el word-reveal letra a letra.
+   La altura de la máscara la da el propio contenido (line-height:normal en
+   .line2Row), así que "cómo" -- más grande que el resto -- nunca se recorta
+   durante el reveal. */
+.lineMask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: .06em;
+}
+
+.segment {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(110px);
+  will-change: transform, opacity;
+}
+
+/* Segunda línea: fila propia con line-height suelto (no hereda el .8 del
+   título) para dar sitio real a "cómo", más grande que el resto -- si
+   heredara el interlineado ajustado del título, su ascendente/descendente
+   quedaría recortado por .lineMask. Ligero desplazamiento a la derecha
+   (2026-07-29): tensión editorial entre las dos líneas, no dos líneas
+   idénticas sin relación.
+
+   display:block (NO flex) a propósito: con flex, los nodos de texto de
+   solo-espacio ({" "} entre segmentos, BrandPause.tsx) se tratan como
+   "anonymous flex items" de solo whitespace y el navegador los descarta --
+   las palabras quedaban pegadas ("encómose hace."), comprobado en esta
+   misma ronda. En flujo inline normal el espacio se renderiza tal cual, y
+   la alineación por línea base entre los distintos tamaños de fuente
+   (.como más grande) ya es el comportamiento por defecto de vertical-align. */
+.line2Row {
+  display: block;
+  line-height: 1;
+  margin-top: -.1em;
+  margin-left: .03em;
+}
+
+.sansMain {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+}
+
+.sansLight {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 500;
+  opacity: .72;
+}
+
+/* "en" (solo escritorio) tratado como palabra menor -- no solo más clara,
+   también más pequeña -- para romper la sensación de "dos líneas
+   convencionales" y dar más tensión jerárquica antes de que entre "cómo"
+   (2026-07-29, refuerzo). En móvil "está en" es una frase real, no un
+   conector de dos letras, así que conserva el tamaño normal de .sansLight
+   -- por eso esta clase es un añadido aparte, no una modificación de
+   .sansLight en sí. */
+.enWord {
+  font-size: .56em;
+}
+
+/* Gesto editorial principal (2026-07-29): "cómo" en serif itálica, en
+   crema -- el contraste tipográfico sans/serif basta, sin necesidad de
+   recurrir al burdeos ("por ahora no usar el rojo en la palabra 'cómo'",
+   decisión de la ronda anterior, sigue vigente). */
+.serifItalic {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* "cómo" como protagonista real (2026-07-29, pedido explícito de esta
+   ronda): más grande que el resto de la frase, no solo un color/estilo
+   distinto -- invade ópticamente parte del espacio de "en" y "se hace."
+   mediante márgenes negativos, generando la tensión pedida, sin dejar de
+   ser perfectamente legible (misma familia/peso itálico, solo escala). */
+.como {
+  font-size: 1.4em;
+  margin: 0 -.06em;
+  position: relative;
+  top: .02em;
+}
+
+.mobileTitle {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .stage {
+    min-height: 100svh;
+    padding: 24px 22px;
+  }
+
+  .filigrana {
+    opacity: .13;
+  }
+
+  .eyebrow {
+    margin-bottom: clamp(20px, 5vh, 36px);
+  }
+
+  .title {
+    font-size: clamp(48px, 13.5vw, 76px);
+    line-height: .95;
+    letter-spacing: -.025em;
+  }
+
+  .line2Row {
+    line-height: 1;
+    margin-top: -.06em;
+    margin-left: .02em;
+  }
+
+  .como {
+    font-size: 1.26em;
+    margin: 0 -.03em;
+  }
+
+  /* Offset inicial menor, a juego con la escala tipográfica móvil (mismo
+     valor que revealOffset en useBrandPause.ts). */
+  .segment {
+    transform: translateY(60px);
+  }
+
+  /* Escritorio y móvil son dos marcados paralelos (no una compresión del
+     mismo) -- CSS decide cuál se pinta, y display:none ya excluye el que
+     no toca del árbol de accesibilidad, así que nunca hay doble locución. */
+  .desktopTitle {
+    display: none;
+  }
+
+  .mobileTitle {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    min-height: 0;
+    padding-top: clamp(64px, 12vw, 140px);
+    padding-bottom: clamp(64px, 12vw, 140px);
+  }
+
+  .eyebrow,
+  .segment {
+    opacity: 1;
+    transform: none;
+  }
+}

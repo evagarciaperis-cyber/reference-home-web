@@ -1,76 +1,61 @@
 "use client";
 
 import { useRef } from "react";
-import { SectionLabel } from "@/ui/primitives/SectionLabel";
 import { useHorizontalGallery } from "@/motion/hooks/useHorizontalGallery";
 import styles from "./ProjectsGallery.module.css";
 
-type Project = {
+type Step = {
   image: string;
   imageAlt: string;
-  category: string;
   number: string;
-  titleLine1: string;
-  titleLine2: string;
+  title: string;
+  description: string;
 };
 
-// Puerto literal de los 7 <article class="project-card"> de index.html.
-const PROJECTS: Project[] = [
+// Contenido de "nuestro método" en cinco pasos (2026-08-03) -- sustituye
+// al listado de proyectos ficticios. Mecanismo horizontal intacto (mismo
+// [data-horizontal-section]/[data-horizontal-track], useHorizontalGallery.ts
+// sin tocar): solo cambia el contenido de cada tarjeta. Rutas preparadas
+// para las fotografías reales en reference-home/public/images/pasos/ -- si
+// el archivo todavía no existe, la tarjeta simplemente no pinta imagen (el
+// fondo neutro de .media, ProjectsGallery.module.css, cubre el hueco); son
+// <img> normales, nunca bloquean el build ni el dev server.
+const STEPS: Step[] = [
   {
-    image: "/images/project-01.svg",
-    imageAlt: "Proyecto ficticio Atelier Norte",
-    category: "Dirección de arte",
+    image: "/images/pasos/paso1.jpg",
+    imageAlt: "Análisis y valoración de la vivienda",
     number: "01",
-    titleLine1: "Atelier",
-    titleLine2: "Norte",
+    title: "Análisis y valoración",
+    description: "Estudiamos tu vivienda y el mercado para definir el mejor precio de salida.",
   },
   {
-    image: "/images/project-02.svg",
-    imageAlt: "Proyecto ficticio Casa Serena",
-    category: "Web inmobiliaria",
+    image: "/images/pasos/paso2.jpg",
+    imageAlt: "Estrategia de venta a medida",
     number: "02",
-    titleLine1: "Casa",
-    titleLine2: "Serena",
+    title: "Estrategia a medida",
+    description: "Creamos un plan de marketing y comercial específico para tu vivienda.",
   },
   {
-    image: "/images/project-03.svg",
-    imageAlt: "Proyecto ficticio Forma Studio",
-    category: "Identidad digital",
+    image: "/images/pasos/paso3.jpg",
+    imageAlt: "Promoción inteligente de la vivienda",
     number: "03",
-    titleLine1: "Forma",
-    titleLine2: "Studio",
+    title: "Promoción inteligente",
+    description: "Difundimos tu vivienda en los canales que realmente atraen compradores.",
   },
   {
-    image: "/images/project-04.svg",
-    imageAlt: "Proyecto ficticio Línea Privada",
-    category: "Producto privado",
+    image: "/images/pasos/paso4.jpg",
+    imageAlt: "Gestión de visitas cualificadas",
     number: "04",
-    titleLine1: "Línea",
-    titleLine2: "Privada",
+    title: "Gestión de visitas",
+    description:
+      "Filtramos y gestionamos compradores interesados para que solo visites con quien realmente puede comprar.",
   },
   {
-    image: "/images/project-05.svg",
-    imageAlt: "Proyecto ficticio Nueve Casas",
-    category: "Campaña editorial",
+    image: "/images/pasos/paso5.jpg",
+    imageAlt: "Negociación y cierre de la operación",
     number: "05",
-    titleLine1: "Nueve",
-    titleLine2: "Casas",
-  },
-  {
-    image: "/images/project-06.svg",
-    imageAlt: "Proyecto ficticio Umbral",
-    category: "Experiencia web",
-    number: "06",
-    titleLine1: "Umbral",
-    titleLine2: "Living",
-  },
-  {
-    image: "/images/project-07.svg",
-    imageAlt: "Proyecto ficticio Reference Intelligence",
-    category: "Producto digital",
-    number: "07",
-    titleLine1: "Reference",
-    titleLine2: "Intelligence",
+    title: "Negociación y cierre",
+    description: "Negociamos las mejores condiciones y te acompañamos hasta la firma y la posventa.",
   },
 ];
 
@@ -91,37 +76,41 @@ export function ProjectsGallery() {
     <section ref={sectionRef} className={styles.projects} id="proyectos" data-horizontal-section>
       <div className={styles.sticky}>
         <div className={styles.intro}>
-          <SectionLabel number="03">Proyectos seleccionados</SectionLabel>
           <h2>
-            Explora
+            <span className={styles.headlineMain}>Cada paso</span>
             <br />
-            <em>el trabajo</em>
+            <span className={styles.headlineAccent}>importa.</span>
           </h2>
-          <p>Una colección de casos ficticios creados específicamente para esta reconstrucción técnica.</p>
+          <p>
+            Una venta bien hecha necesita análisis, estrategia, promoción, selección de compradores y una
+            negociación cuidada hasta el cierre.
+          </p>
           <div className={styles.progress}>
             <span data-project-current>01</span>
             <i>
               <b data-project-progress-bar />
             </i>
-            <span>07</span>
+            <span>{String(STEPS.length).padStart(2, "0")}</span>
           </div>
         </div>
         <div ref={viewportRef} className={styles.viewport} data-horizontal-viewport>
           <div ref={trackRef} className={styles.track} data-horizontal-track>
-            {PROJECTS.map((project) => (
-              <article key={project.number} className={styles.card} data-project-card data-cursor="Abrir">
+            {STEPS.map((step) => (
+              <article key={step.number} className={styles.card} data-project-card tabIndex={0}>
                 <div className={styles.media}>
-                  <img src={project.image} alt={project.imageAlt} />
+                  <img src={step.image} alt={step.imageAlt} />
                 </div>
-                <div className={styles.meta}>
-                  <span>{project.category}</span>
-                  <span>{project.number}</span>
+                <div className={styles.overlay} aria-hidden="true" />
+                <span className={styles.cardNumber} aria-hidden="true">
+                  {step.number}
+                </span>
+                <div className={styles.cardFoot}>
+                  <div className={styles.cardTitleWrap}>
+                    <span className={styles.cardLine} aria-hidden="true" />
+                    <h3 className={styles.cardTitle}>{step.title}</h3>
+                  </div>
                 </div>
-                <h3>
-                  {project.titleLine1}
-                  <br />
-                  {project.titleLine2}
-                </h3>
+                <p className={styles.cardDescription}>{step.description}</p>
               </article>
             ))}
           </div>

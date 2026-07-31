@@ -5,7 +5,7 @@
   position: relative;
   height: var(--projects-scroll-height, 650vh);
   min-height: 220vh;
-  background: var(--paper);
+  background: #fff;
 }
 
 .sticky {
@@ -23,6 +23,12 @@
 }
 
 .intro {
+  /* 2026-08-10: aire real bajo el header -- .sticky ya aporta 100px de
+     padding-top compartido con la columna de tarjetas (no se toca, para no
+     desplazar el track), así que este padding-top es EXCLUSIVO de la
+     columna de introducción y se suma a esos 100px. Total ≈248px desde
+     arriba del viewport, ~140px por debajo del header (108px). */
+  padding-top: 148px;
   padding-right: 3vw;
   display: flex;
   flex-direction: column;
@@ -31,22 +37,41 @@
 }
 
 .intro h2 {
-  font-size: clamp(58px, 7.2vw, 116px);
-  letter-spacing: -.07em;
-  line-height: .82;
-  margin: 13vh 0 30px;
+  font-size: clamp(56px, 6vw, 108px);
+  letter-spacing: -.03em;
+  line-height: .92;
+  max-width: 640px;
+  /* 2026-08-08: sin la microetiqueta encima, el titular pasa a ser el
+     primer elemento de .intro -- sin margen superior no queda ningún
+     hueco reservado donde antes estaba la etiqueta. */
+  margin: 0 0 20px;
+  color: var(--ink);
+}
+
+/* 2026-08-09 (coherencia tipográfica con SellingErrors): mismo lenguaje
+   que .titleMain/.titleSerifItalic en SellingErrors.module.css -- sans
+   principal en peso fuerte para la estructura, serif editorial itálica
+   reservada para un único fragmento con intención ("importa."). Ninguna
+   tipografía nueva: las dos ya están cargadas y en uso en el resto del
+   sistema (--font-manifesto-sans y --serif). */
+.headlineMain {
+  font-family: var(--font-manifesto-sans), var(--sans);
   font-weight: 600;
 }
 
-.intro h2 em {
+.headlineAccent {
   font-family: var(--serif);
+  font-style: italic;
   font-weight: 400;
 }
 
 .intro p {
-  font-family: var(--serif);
-  font-size: 18px;
-  max-width: 320px;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 400;
+  font-size: clamp(18px, 1.5vw, 26px);
+  line-height: 1.5;
+  color: rgba(17, 17, 15, .68);
+  max-width: 520px;
   margin: 0;
 }
 
@@ -83,31 +108,76 @@
 .track {
   height: 100%;
   display: flex;
-  gap: 22px;
+  /* 2026-08-11: gap a 0 -- cada tarjeta debe llegar exactamente hasta la
+     línea separadora del siguiente paso (.card + .card border-left, más
+     abajo), sin franja blanca intermedia. .card no tiene padding propio y
+     .media es inset:0, así que ese gap del track era la única fuente del
+     hueco entre el borde de la foto y la línea. La separación entre pasos
+     la da ahora solo la línea de 1px. */
+  gap: 0;
   align-items: center;
   width: max-content;
   will-change: transform;
   transform: translate3d(0, 0, 0);
+  padding-left: var(--pad);
+  /* 2026-08-14: antes 8vw -- ese tramo final SIN ninguna tarjeta se suma
+     de lleno a track.scrollWidth (useHorizontalGallery.ts), y como el
+     mapeo scroll->translateX es lineal en todo el recorrido, una cola
+     vacía grande se traduce directamente en tramo de scroll real sin
+     nada que mostrar justo después del paso 05 -- la "gran zona blanca
+     vacía" antes de BuyerExperience. Reducida al mismo valor que el borde
+     inicial: suficiente para que 05 no quede cortado en seco, sin
+     inflar el recorrido con cola vacía. */
   padding-right: var(--pad);
 }
 
 .card {
-  width: min(46vw, 690px);
+  width: clamp(420px, 36vw, 620px);
+  height: 75svh;
   flex: 0 0 auto;
   position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
   transform: scale(var(--card-scale, .93));
   transform-origin: center center;
   will-change: transform;
   transition: transform .18s linear;
 }
 
+/* Una sola línea separadora entre pasos (2026-08-09) -- border-left en
+   cada tarjeta EXCEPTO la primera (selector de hermano adyacente), nunca
+   border-right: así no hay línea doble entre columnas, ni borde exterior
+   al inicio ni al final del conjunto. Mismo color/grosor en las cuatro
+   separaciones. */
+.card + .card {
+  border-left: 1px solid var(--line);
+}
+
+/* Estado hover -- la fotografía a sangre, oculta en reposo (opacity 0 +
+   leve escala 1.04->1, ver .card:hover más abajo). pointer-events:none
+   (2026-08-05): esta capa cubre inset:0 todo el interior de la tarjeta --
+   sin esto, es ella quien recibe el puntero (aunque invisible en reposo,
+   opacity:0 sigue siendo interactuable) en vez de burbujear a .card, y
+   dependiendo del navegador eso podía dejar :hover sin aplicarse de forma
+   consistente sobre el resto de capas. Con esto, .card (el único elemento
+   con :hover real) es siempre el que recibe el puntero. */
 .media {
-  aspect-ratio: 4 / 5;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
-  background: #bbb;
+  background: #f4f4f4;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.04);
+  transition: opacity .6s var(--ease), transform .6s var(--ease);
 }
 
 .card img {
+  display: block;
+  width: 100%;
   height: 100%;
   object-fit: cover;
   transform: scale(var(--image-scale, 1.08));
@@ -115,25 +185,135 @@
   transition: transform .18s linear;
 }
 
-.card:hover img {
+.card:hover img,
+.card:focus-within img {
   transform: scale(calc(var(--image-scale, 1.08) + .025));
 }
 
-.meta {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 13px;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
+/* Overlay discreto -- degradado radial hacia ink/verde grisáceo, más
+   oscuro en el centro (donde ahora vive la descripción, ver
+   .cardDescription) y más claro hacia los bordes para no tapar demasiado
+   la fotografía; oculto en reposo. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    circle at center,
+    rgba(17, 17, 15, .5) 0%,
+    rgba(74, 93, 90, .34) 45%,
+    rgba(17, 17, 15, .16) 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .6s var(--ease);
 }
 
-.card h3 {
-  font-size: clamp(42px, 5.3vw, 82px);
-  line-height: .82;
-  letter-spacing: -.07em;
-  margin: 15px 0 0;
-  font-weight: 500;
+/* Estado normal -- número protagonista, caligráfico (Great Vibes, ya
+   cargada en el proyecto vía next/font/google como --font-manifesto-script,
+   ver layout.tsx/Manifesto.module.css), centrado en el espacio de la
+   tarjeta (flex en .card) -- ocupa ~65-75% de la altura útil. Título en
+   versales, mucho aire, sin foto ni descripción. pointer-events:none en
+   ambas capas (aquí y .cardFoot) -- solo .card recibe el hover/focus real,
+   así no hay ningún hijo que pueda interceptar el puntero por delante. */
+.cardNumber {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-manifesto-script), cursive;
+  font-weight: 400;
+  font-size: clamp(220px, 24vw, 390px);
+  line-height: .8;
+  color: #000;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: none;
+  transition: opacity .5s var(--ease), transform .5s var(--ease);
+}
+
+.cardFoot {
+  position: absolute;
+  z-index: 2;
+  left: clamp(20px, 2.5vw, 36px);
+  right: clamp(20px, 2.5vw, 36px);
+  bottom: clamp(20px, 2.5vw, 36px);
+  pointer-events: none;
+}
+
+.cardTitleWrap {
+  transition: opacity .5s var(--ease), transform .5s var(--ease);
+}
+
+.cardLine {
+  display: block;
+  width: 1px;
+  height: clamp(32px, 5vh, 56px);
+  margin: 0 0 18px;
+  background: var(--color-brand-primary);
+}
+
+.cardTitle {
+  margin: 0;
+  max-width: 20ch;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 600;
+  font-size: clamp(28px, 2.4vw, 48px);
+  line-height: 1.05;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: #000;
+}
+
+/* Descripción -- solo visible en hover, centrada sobre la foto (hijo
+   directo de .card, no de .cardFoot: así se centra en toda la tarjeta, no
+   en la caja del título anclada abajo), sin caja sólida detrás. */
+.cardDescription {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 70%;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-size: clamp(17px, 1.4vw, 22px);
+  line-height: 1.5;
+  color: #f8f5ef;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, .35), 0 1px 2px rgba(0, 0, 0, .25);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(-50% + 10px));
+  transition: opacity .5s var(--ease) .05s, transform .5s var(--ease) .05s;
+}
+
+.card:hover .media,
+.card:focus-within .media {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.card:hover .overlay,
+.card:focus-within .overlay {
+  opacity: 1;
+}
+
+.card:hover .cardNumber,
+.card:focus-within .cardNumber {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition-duration: .35s;
+}
+
+.card:hover .cardTitleWrap,
+.card:focus-within .cardTitleWrap {
+  opacity: 0;
+  transform: translateY(10px);
+  transition-duration: .35s;
+}
+
+.card:hover .cardDescription,
+.card:focus-within .cardDescription {
+  opacity: 1;
+  transform: translate(-50%, -50%);
 }
 
 @media (max-width: 900px) {
@@ -147,7 +327,11 @@
     height: auto;
     min-height: 0;
     display: block;
-    padding: 110px var(--pad);
+    /* 2026-08-10: aire bajo el header en móvil/tablet -- más contenido que
+       en desktop (~90px de arriba, dentro del rango 80-100px pedido); el
+       resto del bloque (intro + track) baja/sube en conjunto, sin alterar
+       el hueco de 80px entre intro y track que ya pone .track más abajo. */
+    padding: 90px var(--pad) 110px;
   }
 
   .intro {
@@ -155,7 +339,7 @@
   }
 
   .intro h2 {
-    margin: 9vh 0 25px;
+    margin: 0 0 25px;
   }
 
   .progress {
@@ -177,10 +361,59 @@
 
   .card {
     width: auto;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    /* La grid de 2 columnas ya no es una secuencia lineal -- el separador
+       de hermano adyacente (.card + .card, pensado para el track
+       horizontal) alinearía mal aquí (línea perdida al inicio de cada
+       fila). Cada tarjeta recupera su propio contorno lateral completo. */
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
   }
 
   .card:nth-child(even) {
     margin-top: 90px;
+  }
+
+  /* Sin hover en móvil/tablet (2026-08-04): la foto, el número, el título
+     y la descripción quedan siempre visibles -- nada depende de :hover. */
+  .media {
+    opacity: 1;
+    transform: none;
+  }
+
+  .overlay {
+    opacity: 1;
+  }
+
+  .cardTitleWrap {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* .cardFoot sube para dejar sitio a la descripción debajo (2026-08-11):
+     .cardDescription es hermana directa de .cardFoot dentro de .card
+     (necesario para poder centrarse sobre toda la tarjeta en el hover de
+     escritorio), y .card sigue siendo flex-row en este breakpoint (el
+     número Great Vibes, sin tocar, depende de ese centrado) -- así que
+     aquí NO puede pasar a position:static (quedaría lado a lado del
+     número). Se queda absoluta, apilada justo debajo del título. */
+  .cardFoot {
+    bottom: clamp(96px, 16vh, 150px);
+  }
+
+  .cardDescription {
+    position: absolute;
+    z-index: 2;
+    left: clamp(20px, 2.5vw, 36px);
+    right: clamp(20px, 2.5vw, 36px);
+    top: auto;
+    bottom: clamp(20px, 2.5vw, 36px);
+    width: auto;
+    opacity: 1;
+    text-align: left;
+    transform: none;
+    max-width: none;
   }
 }
 
@@ -198,8 +431,8 @@
     margin-top: 0;
   }
 
-  .card h3 {
-    font-size: 47px;
+  .cardNumber {
+    font-size: clamp(56px, 16vw, 84px);
   }
 }
 
@@ -240,11 +473,51 @@
 
   .card {
     width: auto;
+    height: auto;
+    aspect-ratio: 4 / 5;
     transform: none !important;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
   }
 
   .card:nth-child(even) {
     margin-top: 90px;
+  }
+
+  .media {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .overlay {
+    opacity: 1;
+    transition: none;
+  }
+
+  .cardTitleWrap {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .cardFoot {
+    bottom: clamp(96px, 16vh, 150px);
+  }
+
+  .cardDescription {
+    position: absolute;
+    z-index: 2;
+    left: clamp(20px, 2.5vw, 36px);
+    right: clamp(20px, 2.5vw, 36px);
+    top: auto;
+    bottom: clamp(20px, 2.5vw, 36px);
+    width: auto;
+    opacity: 1;
+    text-align: left;
+    transform: none;
+    transition: none;
+    max-width: none;
   }
 }
 

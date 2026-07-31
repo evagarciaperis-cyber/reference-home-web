@@ -155,13 +155,23 @@ export function useMarketingReel() {
 
     [video, panel1Video, panel3Video].forEach((v) => v.play().catch(() => {}));
 
+    const isMobileViewport = window.matchMedia("(max-width: 640px)").matches;
+
     if (prefersReducedMotion()) {
-      gsap.set(shell, {
-        width: window.innerWidth * PANEL2_WIDTH_FRAC,
-        height: window.innerHeight * PANEL2_HEIGHT_FRAC,
-        borderRadius: PANEL_RADIUS,
-      });
-      gsap.set(video, { objectPosition: OBJECT_POSITION_PANEL });
+      if (isMobileViewport) {
+        // Móvil: el tamaño de tarjeta ya lo da el CSS
+        // (MarketingReel.module.css, @media max-width:640px) -- nada de
+        // width/height por JS aquí, a diferencia de escritorio, que no
+        // tiene ningún tamaño de respaldo en CSS para .videoShell.
+        gsap.set(video, { objectPosition: OBJECT_POSITION_PANEL });
+      } else {
+        gsap.set(shell, {
+          width: window.innerWidth * PANEL2_WIDTH_FRAC,
+          height: window.innerHeight * PANEL2_HEIGHT_FRAC,
+          borderRadius: PANEL_RADIUS,
+        });
+        gsap.set(video, { objectPosition: OBJECT_POSITION_PANEL });
+      }
       gsap.set(copy, { opacity: 0 });
       gsap.set(panel2Copy, { opacity: 1, y: 0 });
       gsap.set([panel1Motion, panel3Motion], { opacity: 1, x: 0, y: 0, scale: 1 });
@@ -175,6 +185,65 @@ export function useMarketingReel() {
     if (!pluginRegistered) {
       gsap.registerPlugin(ScrollTrigger);
       pluginRegistered = true;
+    }
+
+    if (isMobileViewport) {
+      // ---- Móvil (2026-07-28, corrección dedicada): nada de pin, nada
+      // de fullscreen, nada de contracción -- "no intentes comprimir la
+      // composición de escritorio, móvil necesita una solución
+      // específica". Los tres vídeos ya están en su tamaño de tarjeta
+      // final (CSS) desde el montaje, apilados en orden visual Marketing
+      // -> Valoración -> Negociación (order en CSS, sin tocar el orden
+      // real del DOM/JSX). Cada tarjeta tiene un único ScrollTrigger NO
+      // pinned (sin spacer, sin RAF propio -- se sincroniza con el mismo
+      // frameTicker de siempre) que la revela al entrar y le da un ligero
+      // "lift" (translateY negativo real, no opacity ni visibility) justo
+      // al cruzar el borde superior del viewport -- la desaparición
+      // principal la produce el scroll nativo, no ninguna capa que la
+      // tape.
+      gsap.set(shell, { clearProps: "width,height,xPercent,yPercent,x,y,scale,rotateZ,borderRadius" });
+      gsap.set(video, { objectPosition: OBJECT_POSITION_PANEL });
+      gsap.set(copy, { opacity: 0 });
+      gsap.set(panel2Copy, { opacity: 1, y: 0 });
+      gsap.set([panel1Motion, panel3Motion], { clearProps: "xPercent,yPercent,x,y,scale,rotateZ" });
+      stage.setAttribute("data-panels-ready", "true");
+
+      function setupMobileCard(el: gsap.TweenTarget) {
+        gsap.set(el, { opacity: 0, y: 24 });
+        return ScrollTrigger.create({
+          trigger: el as gsap.DOMTarget,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 0.3,
+          onUpdate: (self) => {
+            const p = self.progress;
+            let y: number;
+            let o: number;
+            if (p < 0.12) {
+              const t = p / 0.12;
+              y = 24 * (1 - t);
+              o = t;
+            } else if (p > 0.85) {
+              const t = (p - 0.85) / 0.15;
+              y = -40 * t;
+              o = 1 - 0.15 * t;
+            } else {
+              y = 0;
+              o = 1;
+            }
+            gsap.set(el, { y, opacity: o });
+          },
+        });
+      }
+
+      const mobileTriggers = [panel1Motion, shell, panel3Motion].map(setupMobileCard);
+      const unsubscribeMobile = subscribeFrame(() => ScrollTrigger.update());
+
+      return () => {
+        unsubscribeMobile();
+        mobileTriggers.forEach((t) => t.kill());
+        stage.removeAttribute("data-panels-ready");
+      };
     }
 
     gsap.set(shell, {
@@ -254,13 +323,6 @@ export function useMarketingReel() {
     // entrada) y sus copys.
     const EXIT_SCALE_A = 1.012;
     const EXIT_OPACITY_A = 0.72;
-    // Móvil: salida vertical simple -- sin fase elástica, sin rotateZ, sin
-    // escala (ver AGENTS.md/CSS @media(max-width:640px) donde los paneles
-    // pasan a flujo normal). NOTA: el pin/scrub de esta escena no funciona
-    // correctamente bajo ese breakpoint hoy (bug preexistente, ajeno a esta
-    // ronda -- ver mensaje de validación); esta rama deja el código
-    // correcto en cuanto se corrija esa base.
-    const isMobile = window.matchMedia("(max-width: 640px)").matches;
 
     function addPanelExit(
       target: gsap.TweenTarget,
@@ -270,12 +332,7 @@ export function useMarketingReel() {
       finalY: number,
       finalScale: number,
       finalRotateZ: number,
-      mobileFinalY: number,
     ) {
-      if (isMobile) {
-        tl.to(target, { y: mobileFinalY, opacity: 0, duration: endB - startA, ease: "none" }, startA);
-        return;
-      }
       tl.to(target, { y: -92, scale: EXIT_SCALE_A, opacity: EXIT_OPACITY_A, duration: endA - startA, ease: "none" }, startA)
         .to(target, { y: finalY, scale: finalScale, opacity: 0, duration: endB - endA, ease: "none" }, endA)
         .to(target, { rotateZ: finalRotateZ, duration: endB - startA, ease: "none" }, startA);
@@ -288,16 +345,16 @@ export function useMarketingReel() {
     }
 
     // Panel 01 -- Valoración: 0.88 -> 0.94.
-    addPanelExit(panel1Motion, 0.88, 0.905, 0.94, -125, 0.982, -0.22, -60);
+    addPanelExit(panel1Motion, 0.88, 0.905, 0.94, -125, 0.982, -0.22);
     addCopyExit(panel1Copy, 0.88, 0.94);
 
     // Panel 02 -- Marketing: 0.905 -> 0.97 (mismo tratamiento que 01/03,
     // sin volver a pantalla completa ni protagonismo especial).
-    addPanelExit(shell, 0.905, 0.932, 0.97, -145, 0.97, 0.18, -70);
+    addPanelExit(shell, 0.905, 0.932, 0.97, -145, 0.97, 0.18);
     addCopyExit(panel2Copy, 0.905, 0.97);
 
     // Panel 03 -- Negociación: 0.93 -> 0.995.
-    addPanelExit(panel3Motion, 0.93, 0.9565, 0.995, -130, 0.978, 0.28, -80);
+    addPanelExit(panel3Motion, 0.93, 0.9565, 0.995, -130, 0.978, 0.28);
     addCopyExit(panel3Copy, 0.93, 0.995);
 
     const unsubscribe = subscribeFrame(() => ScrollTrigger.update());
