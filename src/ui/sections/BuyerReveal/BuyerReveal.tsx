@@ -4,7 +4,10 @@ import { TestSection } from "@/ui/sections/TestSection";
 import { useBuyerReveal } from "@/motion/hooks/useBuyerReveal";
 import styles from "./BuyerReveal.module.css";
 
-const VIDEO_SRC = "/videos/comprar-inmuebles.mp4";
+// 2026-08-19: Supabase Storage (bucket público web-videos) en vez del
+// archivo local -- el local no se ha borrado. (Componente actualmente
+// sin montar en page.tsx -- actualizado igualmente por consistencia.)
+const VIDEO_SRC = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/comprar-inmuebles.mp4";
 
 // Escena "apertura en dos cortinas" (2026-08-15) -- continúa el estado
 // final de BuyerExperience (sin tocar ese componente) y lo abre como dos

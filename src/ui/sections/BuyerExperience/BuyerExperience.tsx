@@ -4,7 +4,9 @@ import { TestSection } from "@/ui/sections/TestSection";
 import { useBuyerExperience } from "@/motion/hooks/useBuyerExperience";
 import styles from "./BuyerExperience.module.css";
 
-const VIDEO_SRC = "/videos/comprar-inmuebles.mp4";
+// 2026-08-19: Supabase Storage (bucket público web-videos) en vez del
+// archivo local -- el local no se ha borrado.
+const VIDEO_SRC = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/comprar-inmuebles.mp4";
 
 // Escena "comprar" -- transición de telón (2026-08-13) + continuidad
 // "apertura por el centro" (2026-08-18, reescrita: la versión anterior

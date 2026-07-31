@@ -21,7 +21,13 @@ import styles from "./MarketingReel.module.css";
 // versión anterior cacheada). `key={VIDEO_SRC_RIGHT}` fuerza a React a
 // tratar el <video> como un nodo nuevo si esta constante volviera a
 // cambiar en el futuro.
-const VIDEO_SRC_RIGHT = "/videos/manos-v2.mp4";
+//
+// 2026-08-19: los tres vídeos pasan de /videos/ local a Supabase Storage
+// (bucket público web-videos) -- la web deja de depender de los archivos
+// pesados en disco. Los locales no se han borrado.
+const VIDEO_SRC_VALORACION = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/valoracion.mp4";
+const VIDEO_SRC_MARKETING = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/video_marketing.mp4";
+const VIDEO_SRC_RIGHT = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/manos-v2.mp4";
 
 // <article> (no <a>): los paneles serán clicables cuando existan destinos
 // reales -- por ahora no se crea ningún enlace vacío. La composición
@@ -70,7 +76,7 @@ export function MarketingReel() {
         {/* Panel 01 -- Valoración estratégica */}
         <article className={styles.panelMotionWrapper} data-panel="left" ref={panel1MotionRef}>
           <div className={styles.panelFrame}>
-            <video className={styles.video} ref={panel1VideoRef} src="/videos/valoracion.mp4" autoPlay muted loop playsInline preload="auto" />
+            <video className={styles.video} ref={panel1VideoRef} src={VIDEO_SRC_VALORACION} autoPlay muted loop playsInline preload="auto" />
             <div className={styles.hoverOverlay} aria-hidden="true" />
             <div className={styles.panelCopy} ref={panel1CopyRef}>
               <div className={styles.panelCopyInner}>
@@ -86,7 +92,7 @@ export function MarketingReel() {
         {/* Panel 02 -- Marketing que vende (vídeo/transición existentes, sin recrear) */}
         <div className={styles.videoShell} ref={shellRef}>
           <div className={styles.panelFrame}>
-            <video className={styles.video} ref={videoRef} src="/videos/video_marketing.mp4" autoPlay muted loop playsInline preload="auto" />
+            <video className={styles.video} ref={videoRef} src={VIDEO_SRC_MARKETING} autoPlay muted loop playsInline preload="auto" />
             <div className={styles.hoverOverlay} aria-hidden="true" />
             <div className={styles.panelCopy} ref={panel2CopyRef}>
               <div className={styles.panelCopyInner}>
