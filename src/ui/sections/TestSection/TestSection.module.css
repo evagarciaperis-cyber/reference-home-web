@@ -175,6 +175,20 @@
 }
 
 @media (max-width: 900px) {
+  /* El titular vive centrado (flex de .textLayer) dentro de .section,
+     y el CTA se ancla de forma independiente al borde inferior
+     (.ctaLayer, bottom:clamp(...)) -- ninguno de los dos se toca aquí
+     (ver advertencia arriba: ya se intentó reestructurar y se rompió el
+     alineado entre las dos capas de texto). Con min-height:100svh
+     (regla base) el titular queda centrado a media pantalla y dista
+     mucho del CTA anclado abajo -- hueco vacío grande y botón aislado.
+     Reducir solo la altura del contenedor acerca el borde inferior (y
+     por tanto el CTA) al titular centrado, sin mover ni reescribir la
+     posición de ninguno de los dos. */
+  .section {
+    min-height: 72svh;
+  }
+
   .ctaLayer {
     bottom: clamp(32px, 8vh, 64px);
   }

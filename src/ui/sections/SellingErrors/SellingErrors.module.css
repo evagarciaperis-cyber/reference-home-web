@@ -383,6 +383,15 @@
     height: auto;
     padding: 16px var(--pad) 20px;
     gap: 14px;
+    /* Causa real del solape reportado en móvil: la regla base aplica
+       transform:translateY(-50%) para centrar .left sobre su propio
+       top:50% en position:absolute (escritorio). Este media query ya
+       anulaba position/top/left/height, pero nunca el transform -- un
+       translateY(-50%) sigue desplazando visualmente el elemento aunque
+       esté en position:static (el transform no depende del tipo de
+       posicionamiento), tirando de él hacia arriba la mitad de su propia
+       altura y solapándolo con el contenido que lo precede en el flujo. */
+    transform: none;
   }
 
   .title {
@@ -396,6 +405,16 @@
     width: 100%;
     padding: 4px var(--pad) 64px;
     display: block;
+    /* Mismo problema y misma causa que en .left: la regla base centra
+       .right con transform:translateY(-50%) sobre su propio top:50% en
+       escritorio -- aquí .right mide ~1000px (contiene la intro + los 4
+       capítulos), así que ese -50% lo desplazaba casi 500px hacia
+       arriba, solapándolo con .left y con el contenido anterior en el
+       flujo. Es la causa principal de "aparecen simultáneamente" -- las
+       posiciones que calculaba useSellingErrors.ts (rama isMobile) eran
+       correctas; lo que las desplazaba después era este transform
+       residual, nunca anulado en este breakpoint. */
+    transform: none;
   }
 
   .rightViewport {
@@ -423,8 +442,33 @@
     margin-bottom: 0;
   }
 
+  /* Causa real del "solape" reportado en móvil: .chapterNumber y
+     .chapterTitle nunca tuvieron una escala propia para este breakpoint
+     -- heredaban el clamp() de escritorio (52-88px / 48-78px), pensado
+     para alcanzar ese tamaño solo en viewports muy anchos; a 390-430px
+     el clamp queda anclado en su mínimo (52px / 48px), un titular
+     enorme para el ancho real disponible. Ese tamaño desproporcionado
+     es lo que hace que, al seguir haciendo scroll tras la revelación de
+     un capítulo, su título tarde mucho en despejar la franja del header
+     fijo (rgba + blur, nunca opaco al 100%) y se perciba "fantasma"/
+     superpuesto tras él durante buena parte del recorrido. Misma escala
+     que .title (arriba, ya correcta) para .chapterTitle, por coherencia
+     entre ambos titulares del bloque. */
+  .chapterNumber {
+    font-size: clamp(34px, 10vw, 40px);
+    margin-bottom: 4px;
+  }
+
+  .chapterTitle {
+    font-size: clamp(26px, 7.5vw, 32px);
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+
   .chapterBody {
     max-width: none;
+    font-size: clamp(15px, 4vw, 17px);
+    line-height: 1.4;
   }
 }
 

@@ -353,6 +353,13 @@
   .top {
     grid-template-columns: 1fr;
     gap: 48px;
+    /* Antes solo heredaba el padding-bottom:20px de escritorio, pensado
+       para una franja inferior que ya iba justo debajo de un formulario
+       en columna estrecha -- aquí, con el botón de envío como último
+       elemento real, esos 20px dejaban el logo pegado casi encima de él
+       (separados solo por la línea de .bottom). Más aire antes de esa
+       línea. */
+    padding-bottom: 44px;
   }
 
   .form {
@@ -360,6 +367,13 @@
   }
 
   .bottom {
+    /* padding-top propio (antes solo los 16px de escritorio, heredados):
+       el logo es el primer elemento de esta franja y en escritorio
+       convive con navegación/redes a su lado, nunca solo debajo de un
+       formulario -- en móvil, apilado y a ancho completo, necesita más
+       separación real de la línea divisoria para no leerse como una
+       continuación del formulario. */
+    padding-top: 32px;
     padding-bottom: 40px;
   }
 

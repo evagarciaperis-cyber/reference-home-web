@@ -396,6 +396,24 @@
 }
 
 @media (max-width: 900px) {
+  /* Corrección de equilibrio vertical (tablet, 641-900px -- CTA/enlaces
+     siguen en position:absolute aquí, sin tocar): la regla base usa
+     margin-top:auto para asentar .content justo encima de la reserva
+     del CTA, lo que deja casi todo el alto del Hero vacío (solo
+     fotografía) por encima del bloque de texto. Como el CTA sigue
+     anclado de forma independiente (bottom:28px, absoluto, no es hermano
+     de flex de .content en este rango), la única forma de repartir ese
+     vacío sin tocar su posición es centrar .content en el espacio
+     disponible (margin-top Y margin-bottom en auto) en vez de empujarlo
+     contra el fondo -- el título sube, pero no se pega al CTA. Por
+     debajo de 640px esto se anula (ver ese media query: ahí CTA/enlaces
+     SÍ son hermanos de flex y centrar aquí los empujaría contra el
+     colchón de safe-area). */
+  .content {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
   .title {
     font-size: clamp(30px, 6vw, 46px);
   }
@@ -451,6 +469,18 @@
 
   .title {
     font-size: clamp(28px, 8vw, 38px);
+  }
+
+  /* Aquí CTA/enlaces SÍ son hermanos de flex de .content (ver más abajo,
+     position:static) -- centrar con margin-bottom:auto (como en el rango
+     641-900px) los empujaría contra el colchón de safe-area del fondo,
+     reabriendo el mismo problema de recorte ya corregido en
+     FooterContact. Un margen superior fijo y proporcional sube el
+     titular sin tocar el reparto ya correcto de abajo (CTA/enlaces +
+     28px de suelo real). */
+  .content {
+    margin-top: clamp(28px, 8vh, 64px);
+    margin-bottom: 0;
   }
 
   /* Móvil -- la composición absoluta de escritorio/tablet no cabe: CTA y
