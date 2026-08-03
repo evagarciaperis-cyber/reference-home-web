@@ -1,13 +1,21 @@
 /* Bloque "valoración de vivienda" (2026-08-19) -- titular + mancha
-   orgánica de varios lóbulos (Canvas 2D, useTestSectionCanvasReveal.ts)
-   que revela una imagen arquitectónica. Sustituye la versión anterior
-   basada en `clip-path: ellipse()` + custom properties CSS (--mask-rx/
-   --mask-ry/--mask-rotate) -- por mucho que se deformara, seguía
-   leyéndose como una forma geométrica única, no como una mancha líquida.
-   El propio canvas pinta la fotografía siempre nítida (nunca blur) y la
-   recorta con una máscara auxiliar. Mismo lenguaje tipográfico que el
-   resto de la web: sans principal en peso fuerte + serif editorial
-   itálica en el fragmento con intención -- sin Great Vibes aquí. */
+   orgánica con estela y disipación (WebGL/Three.js,
+   useTestSectionFluidReveal.ts) que revela una imagen arquitectónica.
+   El canvas WebGL lo crea/gestiona useThreeScene.ts y se inserta dentro
+   de .canvasHost -- transparente de verdad (alpha real del shader, no
+   un blanco pintado), así que fuera de la mancha se ve el fondo blanco
+   real de .section y el texto negro/burgundy real del DOM, sin ningún
+   truco CSS. Mismo lenguaje tipográfico que el resto de la web: sans
+   principal en peso fuerte + serif editorial itálica en el fragmento
+   con intención -- sin Great Vibes aquí.
+
+   2026-08-20: .textLayer/.textLayerWhite son la estructura ORIGINAL,
+   restaurada literalmente -- dos intentos de reorganizarla para hacer
+   sitio al CTA (uno metiéndolo dentro de la capa negra, otro con un
+   wrapper .copyStack que participaba en el flex de .section) volvían a
+   mover el texto. Ninguna de las dos reglas de abajo sabe que el CTA
+   existe -- .ctaLayer vive fuera de ellas, position:absolute respecto a
+   .section, así que no puede alterarlas. */
 
 .section {
   position: relative;
@@ -19,16 +27,21 @@
   justify-content: center;
 }
 
-/* Único elemento que pinta la revelación -- tamaño real de la sección
-   (ajustado a devicePixelRatio, máx. 2, en el hook), sin participar en
-   el layout ni en el hit-testing. */
-.canvas {
+/* Contenedor del canvas WebGL (lo crea useThreeScene.ts) -- tamaño real
+   de la sección, sin participar en el layout ni en el hit-testing. */
+.canvasHost {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
 }
 
+/* Cada copia es, por sí sola, a sangre completa sobre TODA la sección
+   (inset:0) y se autocentra con su propio flex-column -- no depende del
+   flex de .section ni de ningún wrapper compartido con altura propia.
+   Como .textLayer y .textLayerWhite tienen el mismo contenido
+   (TestSectionCopy) y las mismas reglas aquí, ambas cajas son
+   idénticas por construcción. */
 .textLayer {
   position: absolute;
   inset: 0;
@@ -40,6 +53,34 @@
   text-align: center;
   padding: clamp(48px, 8vh, 96px) var(--pad);
   pointer-events: none;
+}
+
+/* Copia blanca -- MISMO .textLayer (posición, padding, flex, tipografía)
+   más este modificador: color, y una máscara CSS que el hook actualiza
+   por JS (mask-image inline, ver useTestSectionFluidReveal.ts) a partir
+   del mismo render target que ya revela la fotografía. z-index por
+   encima de la copia negra -- fuera de la mancha el mask-image la deja
+   con alpha 0 ahí, así que no tapa nada; dentro de la mancha es la que
+   se ve. Sin transform ni filtro propios (a propósito). */
+.textLayerWhite {
+  z-index: 3;
+  /* Por defecto, completamente oculta (luminancia 0 = fuera de la
+     máscara) hasta que el hook fija su propio mask-image inline -- así
+     nunca se ve la capa blanca completa antes de la primera actualización
+     ni cuando WebGL no está disponible/reduced-motion/táctil (el hook
+     nunca llega a tocar esta propiedad en esos casos). */
+  mask-image: linear-gradient(#000, #000);
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  mask-mode: luminance;
+  -webkit-mask-image: linear-gradient(#000, #000);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+}
+
+.textLayerWhite .micro,
+.textLayerWhite .headline {
+  color: #fdfbf7;
 }
 
 .micro {
@@ -71,4 +112,70 @@
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
+}
+
+/* CTA -- fuera del flujo por completo: position:absolute respecto a
+   .section (NO un hijo de su flex-column), así que activarlo/quitarlo
+   no puede mover ni redistribuir el espacio de .textLayer/.textLayerWhite
+   en absoluto. Anclado al borde inferior de la sección (no relativo al
+   alto del texto, que varía) -- se lee como "debajo del titular" porque
+   el texto está centrado verticalmente y normalmente no llega a ocupar
+   la franja inferior. z-index por encima de ambas capas de texto y del
+   canvas. */
+.ctaLayer {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(56px, 12vh, 120px);
+  transform: translateX(-50%);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* CTA "Valora tu vivienda" -- cápsula editorial, mismo href que el CTA
+   principal del Hero (#contacto). pointer-events:auto explícito -- el
+   wrapper .ctaLayer es pointer-events:none. */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 17px 32px;
+  border-radius: 999px;
+  background: var(--color-brand-primary);
+  color: #fdfbf7;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 500;
+  font-size: clamp(14px, 1.05vw, 16px);
+  letter-spacing: .02em;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: background-color .38s var(--ease), padding-right .38s var(--ease);
+}
+
+.cta:hover,
+.cta:focus-visible {
+  background: var(--color-brand-primary-dark);
+  padding-right: 38px;
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 3px;
+}
+
+.ctaArrow {
+  width: 18px;
+  height: 10px;
+  flex-shrink: 0;
+  transition: transform .38s var(--ease);
+}
+
+.cta:hover .ctaArrow,
+.cta:focus-visible .ctaArrow {
+  transform: translateX(4px);
+}
+
+@media (max-width: 900px) {
+  .ctaLayer {
+    bottom: clamp(32px, 8vh, 64px);
+  }
 }

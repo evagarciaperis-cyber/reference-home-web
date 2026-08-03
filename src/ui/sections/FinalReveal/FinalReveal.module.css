@@ -1,0 +1,29 @@
+/* Wrapper de revelado BrandStory -> FooterContact (ver useFinalReveal.ts
+   para la mecánica completa). FooterContact (.footerLayer) existe aquí
+   desde el principio, en su posición final, y no se anima nunca -- el
+   único movimiento de todo el relevo es BrandStory ascendiendo por
+   encima (useBrandStory.ts). height:100dvh + overflow:clip son
+   permanentes (no condicionados a ningún estado de scroll): FooterContact
+   ya cabe entero en 100dvh por diseño propio (FooterContact.module.css,
+   .footer{height:100dvh;overflow:hidden}), así que no hace falta
+   "liberar" el recorte tras el pin -- nunca hay contenido por debajo de
+   esa altura esperando a ser alcanzado con scroll normal. */
+
+.finalReveal {
+  position: relative;
+}
+
+@media (min-width: 901px) {
+  .finalReveal {
+    height: 100dvh;
+    overflow: clip;
+  }
+
+  .footerLayer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    z-index: 1;
+  }
+}

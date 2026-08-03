@@ -1,0 +1,367 @@
+/* Cierre único de la home -- fusiona Contact + Footer en un solo
+   <footer> semántico (FooterContact.tsx). Un único fondo plano para todo
+   el bloque, sin cajas/tarjetas/paneles internos: la separación entre la
+   zona de mensaje+formulario y la franja inferior es solo una línea fina
+   (.bottom border-top), nunca un cambio de superficie. */
+
+.footer {
+  position: relative;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+  color: var(--color-bg-primary);
+  padding: 32px var(--pad) 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 6vw;
+  row-gap: 20px;
+  padding-bottom: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #C14A70;
+  text-shadow: 0 1px 10px rgba(240, 223, 207, 0.08);
+}
+
+.title {
+  margin: 10px 0 6px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(30px, 3vw, 44px);
+  line-height: 1.08;
+  letter-spacing: -.01em;
+  color: var(--color-bg-primary);
+}
+
+.accent {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(17px, 1.4vw, 21px);
+  color: var(--color-accent-secondary);
+}
+
+.support {
+  margin: 0 0 20px;
+  max-width: 420px;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--color-bg-primary) 78%, transparent);
+}
+
+.details {
+  font-style: normal;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--color-bg-primary) 72%, transparent);
+}
+
+.details p {
+  margin: 0;
+}
+
+.details a {
+  color: var(--color-bg-primary);
+}
+
+.form {
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 20px;
+}
+
+.form label:not(.consent) {
+  display: block;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-bg-primary) 28%, transparent);
+  padding: 6px 0;
+  transition: border-color .3s var(--ease);
+}
+
+.form label:not(.consent):focus-within {
+  border-color: color-mix(in srgb, var(--color-bg-primary) 60%, transparent);
+}
+
+.form label > span {
+  display: block;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin-bottom: 4px;
+  color: color-mix(in srgb, var(--color-bg-primary) 62%, transparent);
+}
+
+.form input,
+.form textarea {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-bg-primary);
+  outline: 0;
+  font-family: var(--serif);
+  font-size: 18px;
+  resize: none;
+}
+
+.form textarea {
+  height: 60px;
+}
+
+.form input::placeholder,
+.form textarea::placeholder {
+  color: color-mix(in srgb, var(--color-bg-primary) 38%, transparent);
+}
+
+.consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 6px 0;
+}
+
+.consent input {
+  width: auto;
+  margin-top: 2px;
+  accent-color: var(--color-brand-primary);
+}
+
+.consent span {
+  font-family: var(--sans);
+  font-size: 12px !important;
+  line-height: 1.5;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  color: color-mix(in srgb, var(--color-bg-primary) 68%, transparent);
+}
+
+.consent a {
+  color: var(--color-bg-primary);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-bg-primary) 40%, transparent);
+  text-underline-offset: 2px;
+}
+
+.turnstileRow {
+  margin: 6px 0 0;
+  min-height: 65px;
+  display: flex;
+  align-items: center;
+  overflow: visible;
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: 4px;
+  border: 1px solid color-mix(in srgb, var(--color-bg-primary) 55%, transparent);
+  background: transparent;
+  color: var(--color-bg-primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 20px;
+  cursor: pointer;
+  font-family: var(--sans);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: 11px;
+  font-weight: 500;
+  transition: background .35s var(--ease), border-color .35s var(--ease);
+}
+
+.submitButton:hover,
+.submitButton:focus-visible {
+  background: var(--color-brand-primary);
+  border-color: var(--color-brand-primary);
+}
+
+.submitButton i {
+  font-style: normal;
+  font-size: 17px;
+}
+
+.formStatus {
+  min-height: 16px;
+  margin: 2px 0 0;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-bg-primary) 78%, transparent);
+}
+
+.hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+}
+
+/* Franja inferior -- separada del resto por una línea fina, nunca un
+   cambio de fondo/superficie. Logo + navegación + legal + copyright +
+   volver arriba, todo en el mismo plano. */
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 32px;
+  padding: 16px 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-bg-primary) 18%, transparent);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.brandLogo {
+  width: clamp(180px, 14vw, 240px);
+  height: auto;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-right: auto;
+}
+
+.social a {
+  display: inline-flex;
+  color: color-mix(in srgb, var(--color-bg-primary) 75%, transparent);
+  transition: color .25s var(--ease);
+}
+
+.social a:hover,
+.social a:focus-visible {
+  color: #C14A70;
+}
+
+.social svg {
+  width: 19px;
+  height: 19px;
+}
+
+.nav,
+.legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.nav a,
+.legal a {
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: .02em;
+  color: color-mix(in srgb, var(--color-bg-primary) 76%, transparent);
+  transition: color .25s var(--ease);
+}
+
+.nav a:hover,
+.legal a:hover {
+  color: var(--color-bg-primary);
+}
+
+.copyright {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: .02em;
+  color: color-mix(in srgb, var(--color-bg-primary) 55%, transparent);
+  white-space: nowrap;
+}
+
+.copyright span {
+  color: color-mix(in srgb, var(--color-bg-primary) 40%, transparent);
+}
+
+.backToTop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: color-mix(in srgb, var(--color-bg-primary) 76%, transparent);
+  transition: color .25s var(--ease);
+}
+
+.backToTop:hover,
+.backToTop:focus-visible {
+  color: var(--color-bg-primary);
+}
+
+.backToTop span {
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .top {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .form {
+    align-self: stretch;
+  }
+
+  .bottom {
+    padding-bottom: 40px;
+  }
+
+  .brand {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .backToTop {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer {
+    padding-top: 85px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+}

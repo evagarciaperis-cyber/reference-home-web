@@ -7,7 +7,10 @@
      reacciona al contenido que pasa por debajo; desde 2026-07-29 (BrandPause)
      también puede salir de pantalla temporalmente vía transform (.isHidden)
      cuando una sección lo pide explícitamente (data-header-hide="true",
-     useHeaderState.ts) -- sigue siendo la misma barra, nunca una segunda. */
+     useHeaderState.ts) -- sigue siendo la misma barra, nunca una segunda.
+     Desde 2026-08-25: en desktop empieza OCULTA por defecto y solo se
+     revela con hover en .hoverZone/el propio header o foco por teclado
+     (useHeaderState.ts) -- nunca por scroll. */
   position: fixed;
   top: 0;
   left: 0;
@@ -18,7 +21,7 @@
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
-  transition: background .4s, color .4s, border-color .4s, transform .5s var(--ease), opacity .4s var(--ease);
+  transition: background .4s, color .4s, border-color .4s, transform 320ms var(--ease), opacity 320ms var(--ease);
   border-bottom: 1px solid transparent;
   /* Negro carbón cálido -- nunca el --ink de paridad (frío) ni el burdeos
      corporativo, que se reserva para acentos puntuales (ver .active,
@@ -27,12 +30,40 @@
   color: #3a2f2b;
 }
 
+/* Franja invisible que detecta el cursor en desktop para revelar el
+   header (useHeaderState.ts, data-header-hover-zone) -- vive fuera de
+   .header (ver el comentario en Header.tsx: dentro se movería junto al
+   transform de .isHidden). z-index justo por debajo del header: si el
+   header está visible y cubre la misma franja, sus propios enlaces
+   reciben el puntero (900 > 899), esta franja nunca les roba clics;
+   solo intercepta el hover cuando el header está oculto y no hay nada
+   más ahí. Sin fondo, sin contenido, no participa del flujo. */
+.hoverZone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  z-index: 899;
+  pointer-events: auto;
+}
+
+@media (max-width: 900px) {
+  .hoverZone {
+    /* El revelado por hover no aplica en móvil/tablet (useHeaderState.ts
+       ignora hoverRevealedRef fuera de desktop) -- ocultarla evita que
+       capture toques/scroll cerca del borde superior sin ningún efecto
+       útil. */
+    display: none;
+  }
+}
+
 .isHidden {
   /* Triple garantía (2026-07-29, refuerzo): transform saca la barra del
      viewport, pero opacity:0 + pointer-events:none aseguran que no quede
      ni un resto visible (franja de fondo/blur) ni interacción, incluso si
      por cualquier motivo el transform no llegara a aplicarse a tiempo. */
-  transform: translateY(-160%);
+  transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
 }
@@ -54,6 +85,20 @@
 .onDark.isScrolled {
   background: rgba(17, 17, 15, .84);
   border-color: var(--line-light);
+}
+
+/* 2026-08-22 (Hero): el Hero se marca a sí mismo con
+   data-header-transparent="true" (useHeaderState.ts) para pedir que el
+   header siga flotando sin fondo mientras lo cubre -- su propio scrim ya
+   resuelve el contraste (logo/enlaces en blanco vía .onDark). Misma
+   especificidad que .onDark.isScrolled (dos clases): gana por ir después
+   en la hoja, sin !important. Nunca toca isHidden -- ambos comportamientos
+   son independientes y componen sin conflicto. */
+.header.isTransparent {
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  border-color: transparent;
 }
 
 .brand {

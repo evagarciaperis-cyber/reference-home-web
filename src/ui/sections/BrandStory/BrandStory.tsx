@@ -1,137 +1,188 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type CSSProperties } from "react";
+import Image from "next/image";
 import { useBrandStory } from "@/motion/hooks/useBrandStory";
 import styles from "./BrandStory.module.css";
 
+type RevealShape = "ellipse" | "ellipse-wide";
+
 type Step = {
   number: string;
-  icons: [string, string, string];
-  titlePrefix: string;
-  titleEm: string;
-  titleSuffix: string;
+  title: string;
+  description: string;
   image: string;
   imageAlt: string;
-  description: string;
+  lineArt: string;
+  lineArtAlt: string;
+  tag: string;
+  revealOriginX: number;
+  revealOriginY: number;
+  revealShape: RevealShape;
 };
 
-// Puerto literal de los 3 <article class="brand-step"> de index.html.
+// 2026-08-24: la línea vertical pasa a ser el controlador narrativo real
+// (mockup aprobado) -- cada paso ya no es solo texto+foto, también lleva
+// un recorte lineal (SVG, public/images/story/line/) que se transforma en
+// fotografía mediante un clip-path que nace de un punto concreto del
+// objeto (revealOriginX/Y, en % dentro de .rowVisual) -- nunca un wipe
+// rectangular genérico. revealShape "ellipse-wide" es solo para el plano
+// (02): una elipse achatada para sugerir que se despliega de lado, en vez
+// del iris circular que usan el resto.
 const STEPS: Step[] = [
   {
     number: "01",
-    icons: ["⌖", "◎", "↗"],
-    titlePrefix: "Descubrir",
-    titleEm: "&",
-    titleSuffix: "Definir",
-    image: "/images/journey-discover.svg",
-    imageAlt: "Composición abstracta de investigación y dirección",
+    title: "Escuchamos",
     description:
-      "Nos sumergimos en tus objetivos, tu audiencia y tu marca para descubrir información valiosa y definir una dirección.",
+      "Una conversación sincera para comprender tu situación, tus objetivos y lo que realmente necesitas.",
+    image: "/images/story/objects/story-key.webp",
+    imageAlt: "",
+    lineArt: "/images/story/line/story-key-line.svg",
+    lineArtAlt: "",
+    tag: "TODO EMPIEZA AQUÍ",
+    revealOriginX: 38,
+    revealOriginY: 62,
+    revealShape: "ellipse",
   },
   {
     number: "02",
-    icons: ["◇", "＋", "□"],
-    titlePrefix: "Diseño",
-    titleEm: "&",
-    titleSuffix: "Desarrollo",
-    image: "/images/journey-design.svg",
-    imageAlt: "Composición abstracta de diseño y desarrollo",
-    description:
-      "Con la estrategia definida, creamos una imagen de negocio impactante y soluciones digitales de alto rendimiento, diseñadas a medida, nunca de forma genérica.",
+    title: "Diseñamos la estrategia",
+    description: "Analizamos el mercado y trazamos el camino adecuado para defender el valor de tu propiedad.",
+    image: "/images/story/objects/story-blueprint.webp",
+    imageAlt: "",
+    lineArt: "/images/story/line/story-blueprint-line.svg",
+    lineArtAlt: "",
+    tag: "LA ESTRATEGIA IMPORTA",
+    revealOriginX: 12,
+    revealOriginY: 55,
+    revealShape: "ellipse-wide",
   },
   {
     number: "03",
-    icons: ["↑", "◌", "∞"],
-    titlePrefix: "Publicar",
-    titleEm: "y",
-    titleSuffix: "Crecer",
-    image: "/images/journey-grow.svg",
-    imageAlt: "Composición abstracta de publicación y crecimiento",
-    description:
-      "Damos vida a tu visión, optimizamos su rendimiento y apoyamos tu éxito continuo después del lanzamiento. Estaremos contigo siempre que nos necesites.",
+    title: "Preparamos cada detalle",
+    description: "Fotografía, vídeo, presentación y posicionamiento. Todo debe estar preparado antes de salir al mercado.",
+    image: "/images/story/objects/story-camera.webp",
+    imageAlt: "",
+    lineArt: "/images/story/line/story-camera-line.svg",
+    lineArtAlt: "",
+    tag: "CADA DETALLE CUENTA",
+    revealOriginX: 46,
+    revealOriginY: 48,
+    revealShape: "ellipse",
+  },
+  {
+    number: "04",
+    title: "Negociamos",
+    description: "Gestionamos las visitas, defendemos tus intereses y coordinamos cada decisión de la operación.",
+    image: "/images/story/objects/story-contract.webp",
+    imageAlt: "",
+    lineArt: "/images/story/line/story-contract-line.svg",
+    lineArtAlt: "",
+    tag: "TUS INTERESES, PRIMERO",
+    revealOriginX: 68,
+    revealOriginY: 78,
+    revealShape: "ellipse",
+  },
+  {
+    number: "05",
+    title: "Te acompañamos",
+    description: "Desde el primer contacto hasta la firma y mucho después de entregar las llaves.",
+    image: "/images/story/objects/story-handover.webp",
+    imageAlt: "",
+    lineArt: "/images/story/line/story-handover-line.svg",
+    lineArtAlt: "",
+    tag: "MUCHO DESPUÉS DE LAS LLAVES",
+    revealOriginX: 50,
+    revealOriginY: 45,
+    revealShape: "ellipse",
   },
 ];
 
-// Puerto literal de la sección [data-brand-story] de index.html: la
-// secuencia sticky con brújula "De la idea al lanzamiento". Sin sticky ni
-// parallax hasta este punto del roadmap (fase 8 confirmó que Process no
-// los tenía); esta es la sección a la que realmente pertenecen.
+type RowVars = CSSProperties & { "--reveal-x"?: string; "--reveal-y"?: string };
+
+// El recorrido -- capítulo final antes de Contact/Footer. Tres zonas:
+// foto+titular estables a la izquierda, línea+nodos+punto ascendente al
+// centro (dentro de .rows, ver CSS), lista de etapas a la derecha (una
+// expandida/activa, cuatro compactas). Motor en useBrandStory.ts: GSAP +
+// ScrollTrigger (un único pin/timeline para todo el módulo, igual que
+// useProcess.ts/useTeamFanEntrance.ts), no el motor scroll+rAF de la
+// ronda anterior.
 export function BrandStory() {
   const sectionRef = useRef<HTMLElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  useBrandStory({ sectionRef, stickyRef });
+  useBrandStory({ sectionRef });
 
   return (
-    <section className={styles.brandStory} data-brand-story aria-label="De la idea al lanzamiento" ref={sectionRef}>
-      <div className={styles.sticky} ref={stickyRef}>
-        <div className={styles.topline}>
-          <span>De la idea al lanzamiento</span>
-          <span data-story-count>01 / 03</span>
+    <section className={styles.brandStory} data-brand-story aria-label="El recorrido junto a ti" ref={sectionRef}>
+        <div className={styles.backgroundPhoto} aria-hidden="true">
+          <Image
+            src="/images/story/background/story-background.webp"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={75}
+            className={styles.backgroundPhotoImg}
+          />
+          <div className={styles.backgroundOverlay} />
         </div>
 
-        <div className={styles.words} aria-hidden="true">
-          <div className={`${styles.phrase} ${styles.phraseStart}`} data-story-start>
-            <span>Tus</span>
-            <span>ideas</span>
-            <span>historias</span>
+        <div className={styles.storyGrid}>
+          <div className={styles.titular}>
+            <p className={styles.eyebrow}>Servicios</p>
+            <h2 className={styles.titularHeading}>
+              <span className={styles.titularLine}>Desde el</span>
+              <span className={styles.titularAccent}>primer</span>
+              <span className={styles.titularLine}>contacto</span>
+            </h2>
+            <span className={styles.titularDivider} aria-hidden="true" />
+            <p className={styles.titularSupport}>Cada decisión inmobiliaria empieza de una manera distinta.</p>
           </div>
-          <div className={`${styles.phrase} ${styles.phraseEnd}`} data-story-end>
-            <span>se transforman</span>
-            <span>en historias</span>
-            <span>de Marca</span>
-          </div>
-        </div>
 
-        <div className={styles.route} aria-hidden="true" data-story-route>
-          <div className={styles.routeLine}>
-            <i data-story-line />
-          </div>
-          <div className={styles.compass} data-story-compass>
-            <svg viewBox="0 0 160 160" role="presentation">
-              <circle className={`${styles.compassRing} ${styles.compassRingOuter}`} cx="80" cy="80" r="72" />
-              <circle className={styles.compassRing} cx="80" cy="80" r="52" />
-              <path
-                className={styles.compassTicks}
-                d="M80 2v14M80 144v14M2 80h14M144 80h14M25 25l10 10M125 125l10 10M135 25l-10 10M35 125l-10 10"
-              />
-              <g className={styles.compassNeedle} data-story-needle>
-                <path d="M80 25 96 84 80 135 64 76Z" />
-                <path d="M80 25 96 84 80 80 64 76Z" className={styles.compassNeedleNorth} />
-              </g>
-              <circle className={styles.compassCentre} cx="80" cy="80" r="7" />
-            </svg>
-            <span>N</span>
-          </div>
-        </div>
+          <ol className={styles.rows} data-story-rows>
+            <div className={styles.routeLine} aria-hidden="true" />
+            <div className={styles.routeFill} data-story-line aria-hidden="true" />
+            <div className={styles.routePoint} data-story-point aria-hidden="true" />
 
-        <div className={styles.steps}>
-          {STEPS.map((step) => (
-            <article className={styles.step} data-story-step key={step.number}>
-              <div className={styles.stepHead}>
-                <span>{step.number}</span>
-                <div className={styles.stepIcons} aria-hidden="true">
-                  <i>{step.icons[0]}</i>
-                  <i>{step.icons[1]}</i>
-                  <i>{step.icons[2]}</i>
+            {STEPS.map((step, index) => (
+              <li
+                key={step.number}
+                className={styles.row}
+                data-story-row
+                data-story-row-index={index}
+                data-story-row-state={index === 0 ? "active" : "future"}
+              >
+                <span className={styles.rowNode} data-story-node aria-hidden="true">
+                  <span className={styles.rowNodeDot} data-story-node-dot />
+                  <span className={styles.rowNodeHalo} data-story-node-halo />
+                  <span className={styles.rowNodeArc} data-story-node-arc />
+                </span>
+                <span className={styles.rowNumber}>{step.number}</span>
+
+                <div className={styles.rowContent}>
+                  <h3 className={styles.rowTitle}>{step.title}</h3>
+                  <p className={styles.rowDesc}>{step.description}</p>
+                  <span className={styles.rowDivider} aria-hidden="true" />
+                  <span className={styles.rowTag}>{step.tag}</span>
                 </div>
-              </div>
-              <h2>
-                {step.titlePrefix} <em>{step.titleEm}</em> {step.titleSuffix}
-              </h2>
-              <div className={styles.stepVisual}>
-                <img src={step.image} alt={step.imageAlt} />
-              </div>
-              <p>{step.description}</p>
-            </article>
-          ))}
-        </div>
 
-        <div className={styles.caption} data-story-caption>
-          <span>Desplázate</span>
-          <i />
-          <span>La brújula marca el recorrido</span>
+                <div
+                  className={styles.rowVisual}
+                  data-story-visual
+                  data-reveal-shape={step.revealShape}
+                  style={{ "--reveal-x": `${step.revealOriginX}%`, "--reveal-y": `${step.revealOriginY}%` } as RowVars}
+                >
+                  <img className={styles.rowLineArt} src={step.lineArt} alt={step.lineArtAlt} aria-hidden="true" />
+                  <Image
+                    className={styles.rowPhoto}
+                    src={step.image}
+                    alt={step.imageAlt}
+                    fill
+                    sizes="(max-width: 900px) 60vw, 22vw"
+                  />
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
-      </div>
     </section>
   );
 }

@@ -214,23 +214,23 @@ test("responsive: Contact pasa de dos columnas a una en el breakpoint de 900px",
 });
 
 // ---------------------------------------------------------------------
-// Integración con Stats, Header, NoiseOverlay, CustomCursor
+// Integración con BrandStory, Header, NoiseOverlay, CustomCursor
 // ---------------------------------------------------------------------
 
-test("integración: Contact viene justo después de Stats y marca el header on-dark", async ({ page, baseURL }) => {
+test("integración: Contact viene justo después de BrandStory y marca el header on-dark", async ({ page, baseURL }) => {
   await gotoAndSettle(page, baseURL);
 
   const order = await page.evaluate(() => {
     const main = document.querySelector("main");
     return Array.from(main?.children ?? []).map((el) => {
-      if (el.hasAttribute("data-stats")) return "stats";
+      if (el.hasAttribute("data-brand-story")) return "brandstory";
       return el.id;
     });
   });
-  const statsIdx = order.indexOf("stats");
+  const brandstoryIdx = order.indexOf("brandstory");
   const contactoIdx = order.indexOf("contacto");
-  expect(statsIdx).toBeGreaterThanOrEqual(0);
-  expect(contactoIdx).toBe(statsIdx + 1);
+  expect(brandstoryIdx).toBeGreaterThanOrEqual(0);
+  expect(contactoIdx).toBe(brandstoryIdx + 1);
 
   await page.waitForSelector('[data-shell="preloader"]', { state: "hidden", timeout: 3000 }).catch(() => {});
   await scrollToContact(page);

@@ -26,9 +26,14 @@
   /* 2026-08-10: aire real bajo el header -- .sticky ya aporta 100px de
      padding-top compartido con la columna de tarjetas (no se toca, para no
      desplazar el track), así que este padding-top es EXCLUSIVO de la
-     columna de introducción y se suma a esos 100px. Total ≈248px desde
-     arriba del viewport, ~140px por debajo del header (108px). */
-  padding-top: 148px;
+     columna de introducción y se suma a esos 100px.
+     2026-08-25: bajado de 148px a 50px -- el título quedaba en y=248
+     mientras las tarjetas (columna derecha, centradas independientemente)
+     empiezan en y≈154; ese hueco extra era la sensación de "demasiado
+     bajo". Con 50px el título arranca en ≈150px, alineado con el inicio
+     real de las tarjetas, sin tocar el padding compartido de .sticky
+     (así el track/scroll horizontal no se mueve). */
+  padding-top: 50px;
   padding-right: 3vw;
   display: flex;
   flex-direction: column;

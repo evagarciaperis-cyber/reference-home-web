@@ -1,9 +1,9 @@
 /**
  * Genera el oráculo de Contact en su único estado (sección estática, sin
  * scroll-driven motion, sin data-split-reveal/data-reveal -- solo hover en
- * el botón magnético, que no se captura en reposo). Mismo patrón que
- * Manifesto/Solutions/Process/Principles/Stats: scroll instantáneo hasta
- * la sección tras neutralizar las animaciones en bucle del Hero.
+ * el botón magnético, que no se captura en reposo). Mismo patrón que el
+ * resto de secciones estáticas: scroll instantáneo hasta la sección tras
+ * neutralizar las animaciones en bucle del Hero.
  *
  * Uso: npm run parity:update-oracle-contact (manual).
  */

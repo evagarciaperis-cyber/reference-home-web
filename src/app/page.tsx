@@ -7,12 +7,10 @@ import { BrandPause } from "@/ui/sections/BrandPause";
 import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
 import { BuyerExperience } from "@/ui/sections/BuyerExperience";
 import { Process } from "@/ui/sections/Process";
+import { ProcessTeamPause } from "@/ui/sections/ProcessTeamPause";
 import { WorkZoom } from "@/ui/sections/WorkZoom";
 import { BrandStory } from "@/ui/sections/BrandStory";
-import { Principles } from "@/ui/sections/Principles";
-import { Stats } from "@/ui/sections/Stats";
-import { Contact } from "@/ui/sections/Contact";
-import { Footer } from "@/ui/layout/Footer";
+import { FinalReveal } from "@/ui/sections/FinalReveal";
 
 // Puerto literal de las <meta> de web-nueva/index.html (título,
 // description) -- fase 15, metadata técnica mínima, docs/MIGRACION.md.
@@ -44,12 +42,19 @@ export const metadata: Metadata = {
   },
 };
 
-// Con Contact se completa el contenido de la home de paridad estricta (ver
-// docs/MIGRACION.md). <main> envuelve el contenido tal como en el
-// index.html original; se trasladará a app/(marketing)/layout.tsx cuando
-// exista ese route group (igual que Header/MobileMenu, ver layout.tsx).
-// Footer es hermano de <main>, no un hijo -- </main> cierra justo después
-// de Contact en el original, y <footer> viene a continuación, fuera de él.
+// <main> envuelve el contenido tal como en el index.html original; se
+// trasladará a app/(marketing)/layout.tsx cuando exista ese route group
+// (igual que Header/MobileMenu, ver layout.tsx).
+// 2026-08-25: Contact (sección independiente) y Footer (layout, hermano
+// de <main>) se eliminan y se sustituyen por FinalReveal, que envuelve a
+// FooterContact -- mismo lugar en el árbol que ocupaba el Footer antiguo
+// (hermano de <main>, justo después de BrandStory, NO dentro de <main>):
+// esa adyacencia es la que permite que el ScrollTrigger del relevo
+// (useFinalReveal.ts) arranque exactamente donde termina el pin
+// narrativo de BrandStory, sin hueco. BrandStory se queda dentro de
+// <main>, sin cambios -- FinalReveal solo contiene FooterContact (ver
+// useFinalReveal.ts para por qué BrandStory no puede vivir anidado ahí
+// dentro sin romper su propio pin de 5 etapas).
 export default function Home() {
   return (
     <>
@@ -62,13 +67,11 @@ export default function Home() {
         <ProjectsGallery />
         <BuyerExperience />
         <Process />
+        <ProcessTeamPause />
         <WorkZoom />
         <BrandStory />
-        <Principles />
-        <Stats />
-        <Contact />
       </main>
-      <Footer />
+      <FinalReveal />
     </>
   );
 }

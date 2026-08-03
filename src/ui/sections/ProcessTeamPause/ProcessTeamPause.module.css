@@ -1,0 +1,23 @@
+/* Pausa editorial entre Process y el equipo -- sin imagen, sin texto,
+   sin pin, sin JS. Mismo crema que WorkZoom.module.css (.experience)
+   para que el respiro se lea como una única transición de color
+   continua (verde oscuro de Process -> crema), no dos saltos.
+
+   2026-08-21: reducida -- la versión anterior (32vh/24vh/15vh) se leía
+   como una tercera sección vacía. Ahora es solo un respiro breve. */
+.pause {
+  height: clamp(48px, 7vh, 90px);
+  background: #ece9e1;
+}
+
+@media (max-width: 900px) {
+  .pause {
+    height: clamp(36px, 5vh, 64px);
+  }
+}
+
+@media (max-width: 640px) {
+  .pause {
+    height: clamp(24px, 4vh, 40px);
+  }
+}

@@ -1,129 +1,487 @@
-/* Puerto literal de .process* en web-nueva/assets/css/styles.css. El
-   padding de .section se fusiona aquí, igual que en Manifesto (fase 5) y
-   Solutions (fase 6), por ser el mismo patrón ya repetido en dos
-   secciones migradas. */
+/* Bloque de servicios de Reference Home (2026-08-19/20) -- pausa
+   editorial cinematográfica: pin real de GSAP ScrollTrigger
+   (useProcess.ts) durante un tramo de scroll, cabecera asimétrica y
+   columnas interactivas con revelación de imagen al hover (CSS puro).
+   Reutiliza la estructura del antiguo bloque "La excelencia está en los
+   detalles" (cabecera + grid de 4 columnas con líneas finas, sin
+   tarjetas/sombras/iconos) -- solo se refina composición, proporción,
+   tipografía e interacción. */
 
 .process {
+  /* Altura real del header fijo global (Header.module.css, no se toca
+     aquí) + 28px de aire -- así el titular de Process nunca arranca
+     tapado por el menú. Reutilizable, mismo patrón que
+     SellingErrors.module.css (--header-height). */
+  --header-offset: 136px;
   position: relative;
-  background: var(--ink);
-  color: var(--paper);
+  height: 100svh;
+  max-height: 100svh;
   overflow: hidden;
-  padding: clamp(90px, 12vw, 180px) var(--pad);
+  background: #263330;
+  color: #f0dfcf;
 }
 
-.texture {
+/* Fondo global -- una única fotografía panorámica compartida por TODA
+   la sección (nunca una imagen por columna). scale animado por JS
+   (useProcess.ts, data-process-bg) 1.03 -> 1; en reposo/sin JS ya vale 1
+   (estado final, ver bloque prefers-reduced-motion/mobile más abajo no
+   necesita tocar esto porque el valor por defecto ya es el correcto). */
+.backgroundMedia {
   position: absolute;
   inset: 0;
-  opacity: .18;
-  background:
-    radial-gradient(circle at 20% 10%, #777, transparent 30%),
-    linear-gradient(135deg, transparent 0 44%, rgba(255, 255, 255, .05) 45%, transparent 46% 100%);
+  z-index: 0;
+  pointer-events: none;
 }
 
-.process > *:not(.texture) {
+.backgroundImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transform-origin: center;
+}
+
+/* Overlay general -- integra la foto con la paleta (base #263330): más
+   oscuro arriba (zona del titular) y en el borde inferior, más limpio
+   hacia el centro. Una sola capa continua, sin cortes por columna. */
+.backgroundOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* 2026-08-21: revertido -- una vuelta anterior lo redujo demasiado
+     (hasta .42/.14/.22) y la foto quedaba demasiado protagonista/plana.
+     De vuelta a los valores con más presencia/contraste. */
+  background: linear-gradient(
+    180deg,
+    rgba(38, 51, 48, .8) 0%,
+    rgba(38, 51, 48, .48) 30%,
+    rgba(38, 51, 48, .46) 55%,
+    rgba(38, 51, 48, .6) 100%
+  );
+}
+
+.content {
   position: relative;
-}
-
-.headline {
-  margin: 12vh 0 14vh;
-  text-align: center;
-}
-
-.headline p {
-  font-size: clamp(42px, 7vw, 110px);
-  letter-spacing: -.065em;
-  margin: 0;
-  line-height: .9;
-}
-
-.headline h2 {
-  font-size: clamp(72px, 11vw, 175px);
-  letter-spacing: -.08em;
-  line-height: .75;
-  margin: 0;
-  font-weight: 600;
-}
-
-.headline em {
-  font-family: var(--serif);
-  font-weight: 400;
-  color: var(--acid);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--line-light);
-}
-
-.grid article {
-  padding: 30px 25px 50px;
-  border-right: 1px solid var(--line-light);
-  min-height: 300px;
+  z-index: 2;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  padding: 0 var(--pad) clamp(28px, 6vh, 56px);
 }
 
-.grid article:last-child {
-  border: 0;
+/* ~32-36% del alto -- cabecera asimétrica: microtexto + titular a la
+   izquierda, apoyo desplazado a la derecha en una segunda columna. */
+.headline {
+  flex: 0 0 auto;
+  min-height: 30vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(24px, 5vw, 64px);
+  padding-top: var(--header-offset);
+  padding-bottom: clamp(16px, 2.4vh, 26px);
+  text-align: left;
 }
 
-.grid span {
-  font-size: 10px;
-  opacity: .5;
+.headlineText {
+  max-width: 60ch;
 }
 
-.grid h3 {
-  font-size: clamp(30px, 3vw, 48px);
-  letter-spacing: -.05em;
-  margin: auto 0 20px;
+.micro {
+  display: block;
+  margin-bottom: clamp(14px, 2vh, 20px);
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 500;
+  font-size: clamp(11px, .9vw, 13px);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #85b1b4;
 }
 
-.grid p {
+.title {
   margin: 0;
+  font-size: clamp(32px, 3.4vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -.02em;
+  font-weight: 600;
+  color: #fdfbf7;
+}
+
+.title em {
+  display: inline-block;
+  margin-top: .14em;
   font-family: var(--serif);
-  font-size: 16px;
-  opacity: .76;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.25;
+  color: #fdfbf7;
+  background: #a11f48;
+  padding: .02em .2em .06em;
+}
+
+.support {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  max-width: 30ch;
+  margin: 0;
+  font-size: clamp(13px, 1vw, 15px);
+  line-height: 1.55;
+  color: #fdfbf7;
+}
+
+/* ~56-60% del alto -- 4 columnas flex (no grid): el flex-grow es lo que
+   permite la redistribución de anchura al hover, en CSS puro. */
+.grid {
+  flex: 1 1 auto;
+  display: flex;
+  border-top: 1px solid rgba(240, 223, 207, .16);
+  border-bottom: 1px solid rgba(240, 223, 207, .12);
+  min-height: 0;
+}
+
+.article {
+  position: relative;
+  overflow: hidden;
+  flex: 1 1 0;
+  /* Estado final por defecto (sin depender de JS) -- useProcess.ts, si
+     llega a ejecutarse, la fija en transparente al montar y la anima de
+     vuelta a este mismo valor en la fase 2. */
+  border-right: 1px solid rgba(240, 223, 207, .16);
+  transition: flex-grow .62s cubic-bezier(.22, 1, .36, 1), opacity .5s ease;
+}
+
+.article:last-child {
+  border-right: 0;
+}
+
+/* Overlay INDIVIDUAL por columna -- nunca una imagen propia: la
+   fotografía es la única capa global (.backgroundMedia) de toda la
+   sección, esto solo aclara/oscurece la porción de esa misma foto que
+   cae bajo esta columna. En reposo, oscurecido uniforme; ver hover más
+   abajo para aclarar la activa/oscurecer las demás. */
+.columnOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* 2026-08-21: revertido a .4 -- la vuelta anterior lo subió a .52
+     ("panel transparente"), pero perdía presencia/solidez como panel
+     verde. De vuelta al valor con más cuerpo. */
+  background: rgba(38, 51, 48, .4);
+  /* backdrop-filter en reposo = saturate(1), sin efecto -- solo se mueve
+     en hover (ver abajo). Se declara aquí, no solo en :hover, para que la
+     transición tenga un valor de partida y no salte. */
+  backdrop-filter: saturate(1);
+  transition: background-color .55s ease, backdrop-filter .55s ease;
+}
+
+.articleContent {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 2.6vw, 32px) clamp(18px, 2vw, 28px) clamp(14px, 2vh, 24px);
+}
+
+/* Degradado local detrás del texto -- solo se activa en hover (columna
+   activa, ver media query más abajo), concentrado arriba (número/título)
+   y abajo (CTA), dejando el centro de la columna limpio para que la
+   fotografía se vea. No oscurece el panel entero, solo esas dos franjas. */
+.articleContent::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 20, 19, .34) 0%,
+    transparent 34%,
+    transparent 66%,
+    rgba(15, 20, 19, .3) 100%
+  );
+  transition: opacity .5s ease;
+}
+
+.number {
+  font-size: 12px;
+  letter-spacing: .06em;
+  opacity: .5;
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.articleContent h3 {
+  margin: clamp(44px, 8vh, 76px) 0 clamp(12px, 1.8vh, 18px);
+  font-size: clamp(23px, 2.1vw, 32px);
+  line-height: 1.08;
+  letter-spacing: -.01em;
+  font-weight: 600;
+  color: #fdfbf7;
+  transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+}
+
+.articleContent p {
+  margin: 0;
+  max-width: 26ch;
+  font-family: var(--serif);
+  font-size: clamp(13px, .95vw, 15px);
+  line-height: 1.5;
+  opacity: .74;
+  transition: opacity .4s ease;
+}
+
+/* CTA editorial de cada columna -- enlace de texto real, nunca un botón:
+   sin fondo, sin borde, sin radio, sin sombra. Área clicable ampliada por
+   el padding/margin negativo de abajo, sin cambiar la posición visual. */
+.ctaLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  margin-left: -4px;
+  padding: clamp(18px, 2.6vh, 28px) 4px 6px;
+  width: max-content;
+  max-width: 100%;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 500;
+  font-size: clamp(13px, .95vw, 15px);
+  letter-spacing: .01em;
+  color: #f0dfcf;
+  text-decoration: none;
+  opacity: .84;
+  transition: color .4s cubic-bezier(.22, 1, .36, 1), opacity .5s ease;
+}
+
+.ctaLink:focus-visible {
+  outline: 2px solid #f0dfcf;
+  outline-offset: 4px;
+}
+
+/* Línea inferior fina en reposo -- opacidad moderada, sin depender del
+   hover para ser reconocible como enlace. */
+.ctaLinkText {
+  position: relative;
+  padding-bottom: 3px;
+}
+
+.ctaLinkText::before,
+.ctaLinkText::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+}
+
+/* Línea "saliente" -- visible en reposo, se retrae hacia la derecha
+   (scaleX 1 -> 0 con origen a la derecha) al pasar el hover/foco. */
+.ctaLinkText::before {
+  background: rgba(240, 223, 207, .5);
+  transform-origin: left;
+  transition: transform .42s cubic-bezier(.22, 1, .36, 1), background-color .5s ease;
+}
+
+/* Línea "entrante" -- oculta en reposo (scaleX 0), crece desde la
+   izquierda al pasar el hover/foco, superponiéndose al hueco que deja la
+   línea saliente. */
+.ctaLinkText::after {
+  background: #fdfbf7;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .42s cubic-bezier(.22, 1, .36, 1);
+}
+
+.ctaLinkArrow {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  transition: transform .42s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Microinteracción de línea (inspirada en los link-effects de Webflow) --
+   funciona con hover Y con :focus-visible por igual, sin depender del
+   tipo de puntero, así que el teclado tiene el mismo feedback. Solo el
+   transform se desactiva en prefers-reduced-motion; el cambio de color
+   (crema -> blanco) y el outline de foco no dependen de la animación. */
+@media (prefers-reduced-motion: no-preference) {
+  .ctaLink:hover .ctaLinkText::before,
+  .ctaLink:focus-visible .ctaLinkText::before {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+
+  .ctaLink:hover .ctaLinkText::after,
+  .ctaLink:focus-visible .ctaLinkText::after {
+    transform: scaleX(1);
+  }
+
+  .ctaLink:hover .ctaLinkArrow,
+  .ctaLink:focus-visible .ctaLinkArrow {
+    transform: translate(6px, -6px);
+  }
+}
+
+.ctaLink:hover,
+.ctaLink:focus-visible {
+  color: #fdfbf7;
+  opacity: 1;
+}
+
+/* Hover de columnas -- solo con cursor real, nunca por :hover pegajoso
+   en táctil. La columna activa crece (flex-grow, arriba) mientras las
+   demás se reparten el resto proporcionalmente -- puro flexbox, sin JS. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .article:hover {
+    flex-grow: 1.5;
+  }
+
+  /* Aclara mucho la columna activa (deja ver la foto) y le da un
+     empujón muy sutil de contraste/saturación vía backdrop-filter --
+     actúa solo sobre lo que hay DETRÁS de esta ventana, en la MISMA
+     fotografía global, así que nunca duplica ni recorta la imagen.
+     2026-08-21: quitado el brightness() de la vuelta anterior (parte
+     del aclarado excesivo revertido) -- la bajada de opacidad ya basta
+     para que la activa "revele claramente la fotografía". */
+  .article:hover .columnOverlay {
+    background: rgba(38, 51, 48, .1);
+    backdrop-filter: saturate(1.08) contrast(1.03);
+  }
+
+  /* ...y las demás conservan un verde profundo bien diferenciado --
+     misma fotografía continua de fondo, nunca se corta ni salta: solo
+     cambia cuánto overlay lleva cada ventana sobre ella. */
+  .grid:has(.article:hover) .article:not(:hover) .columnOverlay {
+    background: rgba(38, 51, 48, .62);
+    backdrop-filter: saturate(.88);
+  }
+
+  /* Degradado local detrás del texto de la columna activa -- ver
+     .articleContent::before arriba. Solo entra en juego cuando el
+     overlay ya está muy claro, para que número/título/CTA sigan
+     legibles sin oscurecer el resto del panel. */
+  .article:hover .articleContent::before {
+    opacity: 1;
+  }
+
+  .article:hover .number {
+    transform: translateY(-8px);
+  }
+
+  .article:hover h3 {
+    transform: translateY(-12px);
+  }
+
+  .article:hover .articleContent p {
+    opacity: .94;
+  }
+
+  /* La columna activa queda mucho más clara (overlay .07) -- sombra
+     tipográfica muy sutil, nunca blur, para que número/título/texto
+     sigan legibles sobre la foto ya casi descubierta. Se aplica también
+     al CTA -- misma foto aclarada de fondo, mismo problema de contraste. */
+  .article:hover .number,
+  .article:hover h3,
+  .article:hover .articleContent p,
+  .article:hover .ctaLink {
+    text-shadow: 0 2px 10px rgba(15, 20, 19, .4);
+  }
+
+  /* Columna activa -- el CTA gana opacidad plena y su línea de reposo se
+     ve más marcada, aunque el cursor todavía no esté literalmente sobre
+     el enlace (solo sobre la columna); el avance de la flecha queda
+     reservado al hover/foco directo del propio enlace (.ctaLink:hover,
+     arriba), así que aquí no se toca su transform. */
+  .article:hover .ctaLink {
+    opacity: 1;
+  }
+
+  .article:hover .ctaLinkText::before {
+    background: rgba(240, 223, 207, .8);
+  }
+
+  /* Columnas inactivas -- el CTA sigue siendo un enlace real y clicable,
+     solo se atenúa junto al resto del contenido (mismo trato que el resto
+     de .articleContent, que tampoco se oscurece explícitamente aquí: la
+     atenuación visual ya la aporta el overlay más oscuro de la columna,
+     ver .grid:has(.article:hover) .article:not(:hover) .columnOverlay). */
 }
 
 @media (max-width: 900px) {
-  .grid {
-    grid-template-columns: 1fr 1fr;
+  .process {
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 
-  .grid article:nth-child(2) {
+  .content {
+    padding: clamp(64px, 12vh, 96px) var(--pad) clamp(48px, 10vh, 72px);
+  }
+
+  .headline {
+    min-height: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 0;
+    margin-bottom: clamp(32px, 7vh, 48px);
+  }
+
+  .support {
+    align-self: flex-start;
+    max-width: 52ch;
+    margin-top: clamp(16px, 3vh, 24px);
+  }
+
+  .grid {
+    flex-wrap: wrap;
+  }
+
+  .article {
+    flex: 1 1 50%;
+    min-height: 260px;
+  }
+
+  .article:nth-child(2) {
     border-right: 0;
   }
 
-  .grid article {
-    border-bottom: 1px solid var(--line-light);
+  .article:nth-child(1),
+  .article:nth-child(2) {
+    border-bottom: 1px solid rgba(240, 223, 207, .16);
+  }
+
+  /* Sin hover en tablet/móvil -- overlay algo más fuerte de base para
+     garantizar contraste suficiente siempre (nunca se aclara/oscurece
+     dinámicamente aquí, así que debe bastar por sí solo). */
+  .columnOverlay {
+    background: rgba(38, 51, 48, .5);
   }
 }
 
 @media (max-width: 640px) {
-  .process {
-    padding-top: 85px;
-    padding-bottom: 85px;
-  }
-
-  .headline {
-    margin: 9vh 0;
-  }
-
-  .headline p {
-    font-size: 42px;
-  }
-
-  .headline h2 {
-    font-size: 67px;
+  .title {
+    font-size: clamp(30px, 8vw, 40px);
   }
 
   .grid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
-  .grid article {
+  .article {
+    flex: 1 1 auto;
+    min-height: 220px;
     border-right: 0;
-    min-height: 240px;
+    border-bottom: 1px solid rgba(240, 223, 207, .16);
+  }
+
+  .article:last-child {
+    border-bottom: 0;
   }
 }

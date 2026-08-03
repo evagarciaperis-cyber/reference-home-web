@@ -1,408 +1,463 @@
-/* Puerto literal de .work-zoom* y .work-device* en
-   web-nueva/assets/css/styles.css. No usa la clase compartida .section
-   (el original tampoco se la aplica a .work-zoom: altura fija en vh, no
-   padding de sección estándar). */
+/* Bloque "Nuestro equipo" -- una única escena compacta y editorial
+   dentro de 100svh. Tres filas: cabecera (~22-24%), abanico central
+   (~48-52%), banda de información activa (~22-24%). Base CSS = estado
+   ESTÁTICO/apilado por defecto (flujo normal en columna) -- sirve
+   directamente de fallback para móvil; la disposición de escritorio/
+   tablet vive dentro de sus media queries respectivas, mismo gate que
+   usa useTeamFanEntrance.ts.
 
-.workZoom {
+   2026-08-22 (ajuste fiel al mockup aprobado): las seis tarjetas del
+   abanico son EXACTAMENTE del mismo tamaño y SIEMPRE opacity:1/sin
+   filtro -- la jerarquía visual (Eva/Jordi centro, Ángeles/Jorge
+   alrededor, Sem/Felipe extremos) se expresa solo con rotación, curva
+   vertical sutil y z-index (teamData.ts, FAN_LAYOUT), nunca con
+   transparencia ni tamaño. El abanico usa flex + solape controlado
+   (margin-left negativo, ~11% del ancho de tarjeta) en vez de
+   porcentajes absolutos -- posiciones predecibles a cualquier ancho de
+   contenedor, sin acumulación en el centro. */
+
+.experience {
   position: relative;
-  height: 360vh;
-  min-height: 2300px;
-  background: #d8d1c6;
+  background: #ece9e1;
   color: var(--ink);
-  --work-progress: 0;
 }
 
-.sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100svh;
-  min-height: 660px;
-  overflow: clip;
-  display: grid;
-  place-items: center;
-  isolation: isolate;
-  background: linear-gradient(155deg, #eeeae2 0%, #d8d1c6 57%, #c5b5a7 100%);
-  transition: background .45s ease;
+.scene {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3vh, 32px);
+  padding: clamp(108px, 14vh, 140px) var(--pad) clamp(48px, 7vh, 72px);
 }
 
-.workZoom[data-immersed] .sticky {
-  background: #160d11;
+.header {
+  text-align: left;
 }
 
-.ambient {
-  position: absolute;
-  inset: -20%;
-  z-index: -1;
-  background:
-    radial-gradient(circle at 52% 55%, rgba(231, 255, 72, .45), transparent 21%),
-    radial-gradient(circle at 75% 35%, rgba(143, 23, 63, .25), transparent 31%);
-  filter: blur(38px);
-  transform: scale(var(--work-ambient-scale, 1));
-  opacity: var(--work-ambient-opacity, 1);
-  will-change: transform, opacity;
+.headerText {
+  max-width: 720px;
 }
 
-.heading {
-  position: absolute;
-  z-index: 5;
-  left: var(--pad);
-  right: var(--pad);
-  top: clamp(105px, 14vh, 165px);
-  will-change: transform, opacity;
+.title {
+  margin: 0;
+  font-size: clamp(38px, 3.4vw, 54px);
+  line-height: .97;
+  letter-spacing: -.02em;
+  font-weight: 640;
 }
 
-.heading h2 {
-  font-size: clamp(72px, 11.2vw, 178px);
-  letter-spacing: -.085em;
-  line-height: .78;
-  margin: 8vh 0 0;
-  font-weight: 600;
-}
-
-.heading h2 em {
+.title em {
   display: block;
+  margin-top: .02em;
   font-family: var(--serif);
+  font-style: italic;
   font-weight: 400;
-  text-align: right;
-  padding-right: 5vw;
+  font-size: clamp(42px, 3.7vw, 60px);
+  line-height: .95;
+  color: #a11f48;
 }
 
-.heading > p {
-  margin: 22px 0 0 auto;
-  max-width: 270px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  text-align: right;
+.support {
+  margin: 0;
+  max-width: 280px;
+  font-size: clamp(14px, 1vw, 17px);
+  line-height: 1.4;
+  color: rgba(20, 20, 20, .72);
 }
 
-.stage {
+/* Abanico -- oculto por defecto (base = fallback móvil, ver más abajo);
+   se activa a partir de tablet. --card-width/--card-height: el ÚNICO
+   sitio que define el tamaño de las seis tarjetas -- todas lo heredan
+   igual, ninguna anula estos valores. */
+.fan {
+  display: none;
+  --card-width: clamp(150px, 11vw, 195px);
+  --card-height: clamp(235px, 27vh, 305px);
+}
+
+/* Envoltorio exterior de cada tarjeta -- item de flex normal (no
+   position:absolute): su posición horizontal la da el orden en
+   FAN_LAYOUT + el solape de .cardSlot de aquí abajo, nunca left/top
+   calculados a mano. GSAP anima SU opacity/x/y/rotation/scale para la
+   entrada del abanico (useTeamFanEntrance.ts) -- nunca la del <button>
+   interior, así React (hover) y GSAP (entrada) no compiten nunca por la
+   misma propiedad transform en el mismo nodo. */
+.cardSlot {
+  position: relative;
+  flex: 0 0 auto;
+  width: var(--card-width);
+  height: var(--card-height);
+  /* Solape ligero y controlado -- ~11% del ancho de tarjeta (dentro de
+     8-14%), nunca porcentajes extremos. La primera tarjeta no solapa
+     con nada a su izquierda. */
+  margin-left: calc(var(--card-width) * -0.11);
+}
+
+.cardSlot:first-child {
+  margin-left: 0;
+}
+
+.card {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  perspective: 1800px;
-}
-
-.device {
-  position: relative;
-  width: min(68vw, 1040px);
-  aspect-ratio: 1.56;
-  transform-origin: 50% 48%;
-  will-change: transform;
-  z-index: 3;
-}
-
-.monitor {
-  position: absolute;
-  inset: 0 0 8.5%;
-  padding: clamp(9px, 1.05vw, 17px);
-  border-radius: clamp(18px, 2.2vw, 34px);
-  background: linear-gradient(145deg, #292927, #090908 62%);
-  box-shadow: 0 44px 110px rgba(17, 12, 10, .46), inset 0 1px rgba(255, 255, 255, .2);
-}
-
-.camera {
-  position: absolute;
-  z-index: 3;
-  top: 7px;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #555;
-  transform: translateX(-50%);
-  box-shadow: 0 0 0 2px #151514;
-}
-
-.screen {
-  position: relative;
   width: 100%;
   height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: clamp(16px, 1.6vw, 26px);
   overflow: hidden;
-  border-radius: clamp(10px, 1.25vw, 20px);
-  background: #651735;
-  transform: translateZ(0);
+  background: #fbfaf7;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(38, 30, 26, .1);
+  transition:
+    transform .6s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .4s ease;
 }
 
-.screen img {
+.card:focus-visible {
+  outline: 2px solid #a11f48;
+  outline-offset: 3px;
+}
+
+.cardImage {
+  width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.035);
-  will-change: transform;
-  filter: saturate(.92) contrast(1.02);
-}
-
-.shade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(8, 7, 7, .68), transparent 42%);
-  opacity: 0;
-  will-change: opacity;
-}
-
-.neck {
-  position: absolute;
-  z-index: -1;
-  width: 17%;
-  height: 18%;
-  left: 41.5%;
-  bottom: -5%;
-  background: linear-gradient(90deg, #777, #d1d0ca 48%, #777);
-  clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
-  box-shadow: 0 18px 30px rgba(0, 0, 0, .2);
-}
-
-.base {
-  position: absolute;
-  z-index: -1;
-  width: 38%;
-  height: 4%;
-  left: 31%;
-  bottom: -7%;
-  border-radius: 50%;
-  background: linear-gradient(90deg, #70706e, #d2d2cd 50%, #727270);
-  box-shadow: 0 20px 28px rgba(0, 0, 0, .25);
-}
-
-.detail {
-  position: absolute;
-  z-index: 7;
-  left: var(--pad);
-  right: var(--pad);
-  bottom: clamp(28px, 4vw, 58px);
-  display: grid;
-  grid-template-columns: 1.2fr 1fr auto;
-  gap: 4vw;
-  align-items: end;
-  color: #f5eee5;
-  opacity: 0;
-  transform: translateY(38px);
+  display: block;
   pointer-events: none;
-  will-change: opacity, transform;
 }
 
-.detail span {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .16em;
-  opacity: .7;
+/* Línea divisoria muy sutil por encima de la banda de información. */
+.activeBand {
+  border-top: 1px solid rgba(20, 20, 20, .14);
 }
 
-.detail h3 {
-  font-size: clamp(50px, 7vw, 112px);
-  line-height: .8;
-  letter-spacing: -.075em;
-  margin: 15px 0 0;
+.infoNumber {
+  display: block;
+  margin-bottom: 6px;
+  font-size: clamp(12px, .85vw, 13px);
+  letter-spacing: .08em;
+  color: #a11f48;
 }
 
-.detail p {
-  font-family: var(--serif);
-  font-size: clamp(16px, 1.45vw, 22px);
-  max-width: 430px;
+.infoName {
   margin: 0;
+  font-size: clamp(24px, 1.7vw, 30px);
+  line-height: 1.05;
+  font-weight: 650;
 }
 
-.detail a {
-  min-width: 190px;
-  border-bottom: 1px solid currentColor;
-  padding: 0 0 10px;
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  font-size: 10px;
+.infoRole {
+  margin: 6px 0 0;
+  font-size: clamp(12px, .85vw, 13px);
   text-transform: uppercase;
-  letter-spacing: .14em;
-  pointer-events: auto;
+  letter-spacing: .12em;
+  color: #a11f48;
 }
 
-.detail b {
-  font-size: 17px;
-  font-weight: 400;
+/* Comilla gráfica burdeos -- marca la cita como cita, sin comillas
+   tipográficas dentro del propio texto. */
+.quoteMark {
+  display: block;
+  font-family: var(--serif);
+  font-size: clamp(44px, 4vw, 56px);
+  line-height: .8;
+  color: #a11f48;
 }
 
-.scrollHint {
-  position: absolute;
-  z-index: 6;
-  right: var(--pad);
-  bottom: 28px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: .15em;
-  will-change: opacity;
-}
-
-.scrollHint i {
-  position: relative;
-  width: 74px;
-  height: 1px;
-  background: rgba(17, 17, 15, .3);
+.infoQuote {
+  margin: 4px 0 0;
+  max-width: 680px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(20px, 1.55vw, 27px);
+  line-height: 1.16;
+  color: #151515;
+  /* Máximo 2-3 líneas -- se recorta con puntos suspensivos en vez de
+     desbordar la banda si la cita es más larga. */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.scrollHint i:after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--ink);
-  transform: translateX(-100%);
-  animation: workScroll 1.8s var(--ease) infinite;
+.closingPhrase {
+  margin: 0 0 10px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(16px, 1.15vw, 18px);
+  line-height: 1.3;
 }
 
-@keyframes workScroll {
-  50%, 100% {
-    transform: translateX(100%);
+/* CTA editorial -- enlace de texto real, subrayado fino burdeos, flecha
+   separada que avanza en hover/foco. */
+.closingCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 4px;
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 500;
+  font-size: clamp(15px, 1.05vw, 17px);
+  letter-spacing: .01em;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(161, 31, 72, .55);
+  transition: border-color .3s ease;
+}
+
+.closingCta:hover,
+.closingCta:focus-visible {
+  border-color: #a11f48;
+}
+
+.closingCta:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.closingCtaArrow {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #a11f48;
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .closingCta:hover .closingCtaArrow,
+  .closingCta:focus-visible .closingCtaArrow {
+    transform: translate(4px, -4px);
   }
 }
 
-@media (max-width: 900px) {
-  .workZoom {
-    height: auto;
-    min-height: 0;
-  }
+/* Fallback móvil -- imagen activa grande + fila de miniaturas (ocultas a
+   partir de tablet, ver media queries de abajo). */
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(16px, 3vh, 24px);
+}
 
-  .sticky {
-    position: relative;
-    height: auto;
-    min-height: 0;
-    display: block;
-    padding: 110px var(--pad) 90px;
-    overflow: hidden;
-  }
+.mobileActive {
+  width: min(280px, 68vw);
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  overflow: hidden;
+}
 
-  .heading {
-    position: relative;
-    inset: auto;
-    opacity: 1 !important;
-    transform: none !important;
-  }
+.mobileActiveImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
-  .heading h2 {
-    margin: 9vh 0 28px;
-    font-size: clamp(62px, 12vw, 105px);
-  }
+.mobileThumbs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  max-width: 100%;
+  padding: 4px 2px;
+}
 
-  .heading h2 em {
-    text-align: left;
-    padding: 0;
-  }
+.mobileThumb {
+  flex: 0 0 auto;
+  width: 48px;
+  aspect-ratio: 3 / 4;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: .6;
+  transition: opacity .3s ease, border-color .3s ease;
+}
 
-  .heading > p {
-    margin: 0;
-    text-align: left;
-  }
+.mobileThumb[data-active] {
+  opacity: 1;
+  border-color: #a11f48;
+}
 
-  .stage {
-    position: relative;
-    inset: auto;
-    margin: 70px 0 90px;
-    min-height: 58vw;
-  }
+.mobileThumbImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
 
-  .device {
-    width: 88vw;
-    max-width: 900px;
-    transform: none !important;
-    margin: auto;
-  }
+/* Banda de información activa -- apilada por defecto (móvil/tablet
+   estrecho); se convierte en grid a partir de tablet, ver abajo. */
+.activeBand {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2vh, 18px);
+  padding: 18px 8px 12px;
+  text-align: center;
+}
 
-  .detail {
-    position: relative;
-    inset: auto;
-    grid-template-columns: 1fr;
-    gap: 28px;
-    color: var(--ink);
-    opacity: 1 !important;
-    transform: none !important;
-  }
+.activeIdentity,
+.activeQuote,
+.activeClosing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .detail a {
-    max-width: 260px;
-  }
-
-  .scrollHint {
+/* ============================================================
+   Tablet (641-900px) -- abanico compacto (no el fallback de móvil),
+   banda de información en dos columnas, CTA debajo del cierre.
+   ============================================================ */
+@media (min-width: 641px) and (max-width: 900px) and (prefers-reduced-motion: no-preference) {
+  .mobileActive,
+  .mobileThumbs {
     display: none;
   }
-}
 
-@media (max-width: 640px) {
-  .sticky {
-    padding-top: 85px;
+  .fan {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    --card-width: clamp(110px, 13vw, 140px);
+    --card-height: clamp(160px, 24vh, 200px);
   }
 
-  .heading h2 {
-    font-size: 58px;
-    line-height: .82;
+  .activeBand {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    text-align: left;
+    gap: clamp(20px, 3vw, 36px);
   }
 
-  .stage {
-    min-height: 72vw;
-    margin: 55px 0 75px;
+  .activeIdentity,
+  .activeQuote {
+    align-items: flex-start;
   }
 
-  .device {
-    width: 98vw;
-  }
-
-  .detail h3 {
-    font-size: 48px;
-  }
-
-  .detail p {
-    font-size: 17px;
+  .activeClosing {
+    grid-column: 2;
+    align-items: flex-start;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .workZoom {
-    height: auto;
-    min-height: 0;
+/* ============================================================
+   Escritorio -- las tres franjas en una sola pantalla, filas
+   explícitas (evita huecos de "space-between"). Mismo gate que
+   useTeamFanEntrance.ts (901px + prefers-reduced-motion:no-preference).
+   ============================================================ */
+@media (min-width: 901px) and (prefers-reduced-motion: no-preference) {
+  .experience {
+    /* 2026-08-25: dvh en vez de svh -- altura real disponible, sin
+       necesidad de restar el header: desde el nuevo sistema de
+       revelado por hover (useHeaderState.ts) el header está plegado
+       por defecto en desktop y no reserva espacio en el layout
+       (transform, no display/height), así que WorkZoom ya no necesita
+       compensar sus 108px. */
+    height: 100dvh;
+    min-height: 100dvh;
   }
 
-  .sticky {
-    position: relative;
-    height: auto;
-    min-height: 0;
-    padding: 110px var(--pad);
+  .scene {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: 100%;
+    gap: clamp(10px, 1.6vh, 14px);
+    /* 2026-08-25: el padding-top ya no compensa un header fijo (ver
+       .experience arriba) -- solo aire editorial mínimo bajo el borde
+       superior real del viewport. */
+    padding-top: clamp(20px, 3vh, 32px);
+    padding-bottom: clamp(20px, 2.6vh, 28px);
   }
 
-  .heading {
-    position: relative;
-    inset: auto;
-    opacity: 1 !important;
-    transform: none !important;
+  .header {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, .7fr);
+    align-items: end;
+    column-gap: 48px;
   }
 
   .stage {
-    position: relative;
-    inset: auto;
-    min-height: 55vw;
-    margin: 60px 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .device {
-    transform: none !important;
-  }
-
-  .detail {
-    position: relative;
-    inset: auto;
-    opacity: 1 !important;
-    transform: none !important;
-    color: var(--ink);
-  }
-
-  .scrollHint {
+  .mobileActive,
+  .mobileThumbs {
     display: none;
   }
+
+  .fan {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .activeBand {
+    display: grid;
+    grid-template-columns: minmax(230px, .8fr) minmax(420px, 1.45fr) minmax(280px, .9fr);
+    align-items: center;
+    gap: clamp(24px, 3vw, 48px);
+    text-align: left;
+  }
+
+  .activeIdentity,
+  .activeQuote,
+  .activeClosing {
+    align-items: flex-start;
+  }
+
+  .infoQuote {
+    -webkit-line-clamp: 2;
+  }
 }
 
-@supports not (overflow: clip) {
-  .sticky {
-    overflow: hidden;
+/* Viewport de escritorio entre 700-820px de alto -- todavía cabe fijo en
+   una sola pantalla, pero necesita otra vuelta de compactado (encima del
+   ya aplicado arriba) para no cortar la banda inferior. */
+@media (min-width: 901px) and (max-height: 820px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+  .title {
+    font-size: clamp(32px, 3vw, 44px);
+  }
+
+  .title em {
+    font-size: clamp(36px, 3.3vw, 48px);
+  }
+
+  .fan {
+    --card-width: clamp(130px, 10vw, 165px);
+    --card-height: clamp(195px, 24vh, 250px);
+  }
+
+  .scene {
+    /* 2026-08-25: gap bajado a 6-8px (2 huecos -> hasta 16px liberados)
+       -- .stage (fila central) tiene su alto fijado por --card-height
+       del abanico, no se comprime con el 1fr del grid, así que el
+       contenido total podía seguir desbordando el alto de .scene y
+       .activeBand (última fila auto) salirse por debajo de su
+       padding-bottom. padding-top ya no se redeclara aquí -- hereda el
+       de la regla base de 901px (sin compensación de header, ver
+       arriba), esta franja de alto solo necesita el gap más ajustado. */
+    gap: clamp(6px, 1vh, 8px);
+  }
+
+  .activeBand {
+    /* 6px arriba (era 14px) + 14px abajo (era 10px) -- mismo total
+       aproximado, pero redistribuido para dejar un margen inferior
+       real y visible en vez de comerlo con aire innecesario encima
+       del propio texto. */
+    padding: 6px 8px 14px;
+  }
+}
+
+/* Por debajo de 700px de alto -- ya no cabe fijo sin recortar: se libera
+   la altura por un min-height real y flujo normal. */
+@media (min-width: 901px) and (max-height: 699px) and (prefers-reduced-motion: no-preference) {
+  .experience {
+    height: auto;
+    min-height: 700px;
   }
 }

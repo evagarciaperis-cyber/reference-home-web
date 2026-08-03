@@ -32,6 +32,8 @@ export function Hero() {
       className={cx(styles.hero, ready && styles.isReady)}
       id="inicio"
       data-header-tone="dark"
+      data-header-transparent="true"
+      data-header-force-visible="true"
       ref={sectionRef}
     >
       <div className={styles.sticky}>
@@ -98,32 +100,38 @@ export function Hero() {
           <p className={styles.lead}>
             Diseñamos la estrategia, la imagen y el proceso de venta para que cada propiedad alcance todo su valor.
           </p>
-          <div className={styles.actions}>
-            <a ref={valuationRef} className={styles.primaryCta} href="#contacto">
-              <span>Valora tu vivienda</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 17 17 7M8 7h9v9" />
-              </svg>
-            </a>
-            <a className={styles.secondaryCta} href="#proceso">
-              Descubre cómo trabajamos <b aria-hidden="true">↗</b>
-            </a>
-          </div>
         </div>
 
-        <div className={styles.services} aria-label="Reference Home, en una vista rápida">
-          <div>
-            <span>(01)</span> Valoración
-          </div>
-          <div>
-            <span>(02)</span> Venta
-          </div>
-          <div>
-            <span>(03)</span> Marketing premium
-          </div>
-          <div>
-            <span>(04)</span> Acompañamiento
-          </div>
+        {/* 2026-08-22 (ronda 3): el CTA circular y los enlaces editoriales
+            salen por completo del flujo de .content -- ya no comparten
+            columna vertical con el título/lead ni dependen de
+            margin-top:auto, así que su posición nunca cambia según cuánto
+            ocupe el copy. Ambos son hijos directos de .sticky (el propio
+            contenedor sticky, contexto de posicionamiento real) y se
+            colocan con left/bottom absolutos, nunca con transform. */}
+        <div className={styles.heroValuationCta}>
+          {/* El wrapper exterior (arriba) fija la posición (left/bottom) y
+              el tamaño del círculo; useMagnetic aplica su transform SOLO
+              sobre este nodo interior, nunca sobre el wrapper posicionado
+              -- así el efecto magnético no puede interferir con left/bottom. */}
+          <a ref={valuationRef} className={styles.magneticInner} href="#contacto">
+            <span>Valora tu vivienda</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 17 17 7M8 7h9v9" />
+            </svg>
+          </a>
+        </div>
+
+        <div className={styles.heroBottomLinks}>
+          {/* /inmuebles -- misma ruta real que ya usan BuyerReveal,
+              BuyerExperience y el CTA "Comprar" de Process, no una ruta
+              inventada. */}
+          <a className={styles.secondaryCta} href="/inmuebles">
+            Ver últimas viviendas <b aria-hidden="true">↗</b>
+          </a>
+          <a className={styles.secondaryCta} href="#proceso">
+            Descubre cómo trabajamos <b aria-hidden="true">↗</b>
+          </a>
         </div>
       </div>
     </section>

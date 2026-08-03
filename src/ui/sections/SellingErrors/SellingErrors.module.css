@@ -84,7 +84,11 @@
 .earlyReveal {
   position: fixed;
   z-index: 6;
-  top: calc(50% + var(--header-height) / 2);
+  /* 2026-08-25: -75px extra (dentro de 60-90px pedido) sobre el eje ya
+     centrado -- las 3 reglas que comparten esta fórmula (.earlyReveal,
+     .left, .right) se actualizan idénticas a la vez para no romper su
+     sincronía pixel a pixel en el relevo. */
+  top: calc(50% + var(--header-height) / 2 - 75px);
   left: 8%;
   width: 40%;
   height: auto;
@@ -112,7 +116,11 @@
 .left {
   position: absolute;
   z-index: 1;
-  top: calc(50% + var(--header-height) / 2);
+  /* 2026-08-25: -75px extra (dentro de 60-90px pedido) sobre el eje ya
+     centrado -- las 3 reglas que comparten esta fórmula (.earlyReveal,
+     .left, .right) se actualizan idénticas a la vez para no romper su
+     sincronía pixel a pixel en el relevo. */
+  top: calc(50% + var(--header-height) / 2 - 75px);
   left: 8%;
   width: 40%;
   height: auto;
@@ -206,7 +214,11 @@
 .right {
   position: absolute;
   z-index: 1;
-  top: calc(50% + var(--header-height) / 2);
+  /* 2026-08-25: -75px extra (dentro de 60-90px pedido) sobre el eje ya
+     centrado -- las 3 reglas que comparten esta fórmula (.earlyReveal,
+     .left, .right) se actualizan idénticas a la vez para no romper su
+     sincronía pixel a pixel en el relevo. */
+  top: calc(50% + var(--header-height) / 2 - 75px);
   left: 55%;
   width: 40%;
   height: auto;

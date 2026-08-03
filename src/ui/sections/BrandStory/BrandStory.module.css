@@ -1,624 +1,727 @@
-/* Puerto literal de .brand-story*, .brand-step*, .compass-* en
-   web-nueva/assets/css/styles.css. No usa la clase compartida .section
-   (el original tampoco se la aplica: altura fija en vh). El estado
-   "activo" de cada paso ([data-step-active]) y del índice general
-   (brandStory[data-active]) se leen tal cual del atributo que escribe
-   useBrandStory -- ver comentario del hook. */
+/* 2026-08-24: reconstrucción sobre el mockup aprobado -- la línea vertical
+   pasa a ser el controlador narrativo real (un punto burdeos que asciende
+   ligado al progreso de scroll vía GSAP ScrollTrigger, useBrandStory.ts).
+   Ya no hay .sticky propio: igual que Process.module.css, el elemento que
+   GSAP pinea es la propia .brandStory (position:fixed lo aplica GSAP,
+   no CSS position:sticky), así que su altura es 100svh, no un múltiplo de
+   vh -- la distancia de scroll adicional la crea el propio ScrollTrigger
+   (pin:true, end:"+=450%") con su spacer, igual que .process. */
 
 .brandStory {
   position: relative;
-  height: 500vh;
-  min-height: 3200px;
-  background: #d4cbbb;
-  color: var(--ink);
-  --story-progress: 0;
-}
-
-.sticky {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  /* 2026-08-25 (relevo hacia FinalReveal/FooterContact): z-index
+     permanente, no solo durante el handoff -- gracias al
+     margin-bottom:-100svh de abajo, el final de esta sección y el
+     arranque (aún sin pinnear) de .finalReveal ya se solapan en
+     coordenadas de documento DURANTE la propia etapa 05 (antes de que
+     useFinalReveal.ts haga nada), y sin z-index aquí ganaba el orden
+     del DOM (.finalReveal, al ir después, se pintaba encima) --
+     footer se colaba visualmente por debajo del punto/etiqueta de la
+     etapa 05. z-index:2 iguala el que useFinalReveal.ts aplica de
+     forma dinámica durante el propio handoff (cover()), así el
+     apilado es idéntico y estable en todo momento, no solo durante el
+     pin del relevo. */
+  z-index: 2;
   height: 100svh;
-  min-height: 660px;
+  max-height: 100svh;
   overflow: clip;
-  isolation: isolate;
-  background: linear-gradient(145deg, #e4ded4 0%, #d3c8b8 58%, #c4b3a3 100%);
-  transition: background .55s ease;
+  background: var(--color-bg-primary);
+  color: var(--ink);
 }
 
-.sticky:before {
-  content: "";
-  position: absolute;
-  inset: -25%;
-  z-index: -2;
-  background:
-    radial-gradient(circle at 20% 55%, rgba(231, 255, 72, .28), transparent 24%),
-    radial-gradient(circle at 84% 25%, rgba(143, 23, 63, .17), transparent 30%);
-  filter: blur(42px);
-  transform: scale(calc(1 + var(--story-progress) * .18));
-  will-change: transform;
-}
-
-.sticky:after {
-  content: "";
+.backgroundPhoto {
   position: absolute;
   inset: 0;
-  z-index: -1;
-  opacity: .18;
-  background-image:
-    linear-gradient(rgba(17, 17, 15, .045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(17, 17, 15, .045) 1px, transparent 1px);
-  background-size: 8vw 8vw;
-  mask-image: linear-gradient(to right, black, transparent 62%);
-}
-
-.brandStory[data-active="1"] .sticky {
-  background: linear-gradient(145deg, #ded9d0 0%, #c9bdb2 58%, #b5a5a0 100%);
-}
-
-.brandStory[data-active="2"] .sticky {
-  background: linear-gradient(145deg, #d9d1c6 0%, #c8b7ac 48%, #b69b9f 100%);
-}
-
-.topline {
-  position: absolute;
-  z-index: 8;
-  top: 28px;
-  left: var(--pad);
-  right: var(--pad);
-  display: flex;
-  justify-content: space-between;
-  border-top: 1px solid rgba(17, 17, 15, .34);
-  padding-top: 10px;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: .15em;
-}
-
-.words {
-  position: absolute;
-  z-index: 2;
-  left: var(--pad);
-  top: 12vh;
-  width: 38vw;
-  height: 76vh;
+  z-index: -4;
   pointer-events: none;
 }
 
-.phrase {
+.backgroundPhotoImg {
+  object-fit: cover;
+  filter: saturate(.86) contrast(.95) brightness(1.02);
+}
+
+/* Velo editorial en gradiente -- menos intenso a la izquierda (donde la
+   arquitectura de la foto debe seguir leyéndose), progresivamente más
+   opaco hacia la derecha (donde vive la lista de etapas, necesita fondo
+   uniforme para el texto). rgba() literal sobre el RGB real de
+   --color-bg-primary (240,223,207) -- nunca se anima. */
+.backgroundOverlay {
   position: absolute;
   inset: 0;
+  z-index: -3;
+  background: linear-gradient(
+    to right,
+    rgba(240, 223, 207, .22) 0%,
+    rgba(240, 223, 207, .82) 60%,
+    rgba(240, 223, 207, 1) 100%
+  );
+}
+
+/* --- Composición: foto protagonista (~42%) + recorrido (~58%) ---------
+   .titular y .rows se posicionan de forma INDEPENDIENTE (absolute, no
+   columnas de un mismo grid): un grid de 2 columnas obligaría a que el
+   ancho de columna 1 fuera A LA VEZ "donde vive el prólogo" (24-36% del
+   ancho) Y "lo que empuja la línea hacia la derecha" (~51%, ligeramente
+   a la derecha del centro geométrico, como en el mockup) -- dos
+   necesidades que no comparten el mismo número. Con posicionamiento
+   independiente cada bloque va exactamente donde pide el mockup sin ese
+   compromiso. La lógica de ScrollTrigger/el punto/la animación no
+   cambia -- esto es solo colocación. */
+
+.storyGrid {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  max-width: 1680px;
+  margin-inline: auto;
+  padding-inline: clamp(24px, 3vw, 64px);
+}
+
+/* Prólogo editorial -- arriba del todo, anclado por la DERECHA justo
+   al lado izquierdo de la línea central, sobre la zona clara de
+   cielo/fondo, nunca sobre la fachada. Única fuente de verdad para su
+   posición en desktop: "right" (no "left") ancla el borde derecho del
+   bloque a un hueco fijo de la línea (51% + padding-left de .rows);
+   left:auto/transform:none para que no quede ningún resto de la
+   colocación anterior. Todo el contenido se alinea a la derecha
+   (text-align + align-items) para que ese borde derecho sea el borde
+   visual real del bloque. */
+.titular {
+  position: absolute;
+  z-index: 2;
+  left: auto;
+  right: calc(49% + 30px);
+  top: 8%;
+  transform: none;
+  width: min(300px, 30vw);
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  will-change: opacity, transform;
+  align-items: flex-end;
+  gap: 7px;
+  text-align: right;
 }
 
-.phrase span {
-  display: block;
-  font-size: clamp(72px, 9.2vw, 148px);
-  line-height: .75;
-  letter-spacing: -.085em;
+/* Protección de contraste LOCAL -- solo detrás del prólogo, nunca un
+   panel/tarjeta: gradiente radial crema que se funde con la fotografía,
+   sin borde ni forma reconocible. */
+.titular::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -8px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(240, 223, 207, .62) 0%,
+    rgba(240, 223, 207, .34) 55%,
+    transparent 78%
+  );
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--color-brand-primary);
 }
 
-.phrase span:nth-child(2) {
+.titularHeading {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  /* Compacto pero sin solapar ascendentes/descendentes -- "primer" es
+     más grande que las otras dos líneas, 1 justo las tocaría. */
+  line-height: 1.1;
+}
+
+/* "Desde el" / "contacto" -- misma serif editorial que el resto de la
+   web (var(--serif)), caja natural (nunca mayúsculas), peso ligero
+   -- nunca sans, nunca bold/semibold. */
+.titularLine {
+  font-family: var(--serif);
+  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(25px, 2.1vw, 31px);
+  letter-spacing: -.003em;
+  color: var(--ink);
+}
+
+/* "primer" -- misma serif en cursiva, burdeos, protagonista del bloque
+   (ligeramente mayor que las otras dos líneas). */
+.titularAccent {
   font-family: var(--serif);
   font-style: italic;
   font-weight: 400;
-  padding-left: 5vw;
+  font-size: clamp(28px, 2.35vw, 34px);
+  color: var(--color-brand-primary);
 }
 
-.phrase span:nth-child(3) {
-  padding-left: 1vw;
+.titularDivider {
+  width: 30px;
+  height: 1.5px;
+  background: var(--color-brand-primary);
+  margin: 4px 0;
 }
 
-.phraseEnd {
-  opacity: 0;
-  transform: translate3d(0, 12vh, 0);
+.titularSupport {
+  margin: 0;
+  max-width: 26ch;
+  font-size: 13px;
+  line-height: 1.48;
+  font-weight: 500;
+  /* Contraste algo más marcado que el sage puro (era var(--color-bg-secondary)
+     directo) -- se lee mejor sobre la fotografía sin dejar de ser
+     secundario respecto al titular. */
+  color: color-mix(in srgb, var(--color-bg-secondary) 78%, var(--ink) 22%);
 }
 
-.phraseEnd span {
-  font-size: clamp(58px, 7.8vw, 126px);
-}
-
-.phraseEnd span:nth-child(1) {
-  padding-left: 0;
-}
-
-.phraseEnd span:nth-child(2) {
-  padding-left: 8vw;
-}
-
-.phraseEnd span:nth-child(3) {
-  padding-left: 2vw;
-  color: var(--wine);
-}
-
-.route {
+/* --- Eje central + lista de etapas -------------------------------------
+   La línea/relleno/punto viven dentro de .rows (no en una columna aparte)
+   para que su posición vertical se derive del propio flujo de las filas
+   -- ver useBrandStory.ts (centerY()), que las posiciona vía
+   --route-fill-h/--point-y sin leer el DOM cada frame. left:51% coloca
+   el eje ligeramente a la derecha del centro geométrico, como el mockup. */
+.rows {
   position: absolute;
-  z-index: 5;
-  left: 43.3vw;
-  top: 12vh;
-  bottom: 10vh;
-  width: 160px;
-  transform: translateX(-50%);
-  pointer-events: none;
+  left: 51%;
+  right: clamp(24px, 4vw, 64px);
+  top: clamp(64px, 10vh, 100px);
+  bottom: clamp(28px, 4vh, 48px);
+  /* visible (antes hidden): el halo/aro del nodo activo son más
+     grandes que el propio punto y su lado izquierdo quedaba recortado
+     contra este borde -- el alto de fila ya no depende de este clip
+     como red de seguridad (useBrandStory.ts mide clientHeight, que no
+     cambia con overflow), y el contenido de texto/imagen ya no
+     desborda (verificado). */
+  overflow: visible;
+  margin: 0;
+  padding-left: 44px;
+  display: flex;
+  flex-direction: column;
+  /* Separación vertical con más aire (era 10px) -- las etapas futuras ya
+     no deben sentirse apelotonadas; el hueco se compensa reduciendo el
+     padding vertical general de la sección, no la tipografía. */
+  gap: 16px;
+  list-style: none;
+}
+
+.routeLine,
+.routeFill,
+.routePoint {
+  position: absolute;
+  left: 20px;
+  z-index: 1;
 }
 
 .routeLine {
-  position: absolute;
-  left: 50%;
-  top: 5%;
-  bottom: 5%;
-  width: 1px;
-  background: rgba(17, 17, 15, .26);
-  overflow: hidden;
-}
-
-.routeLine:before,
-.routeLine:after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: 1px solid var(--ink);
-  transform: translateX(-50%);
-  background: #d4cbbb;
-}
-
-.routeLine:before {
   top: 0;
-}
-
-.routeLine:after {
   bottom: 0;
+  width: 1px;
+  background: var(--color-accent-secondary);
+  opacity: .4;
 }
 
-.routeLine i {
-  position: absolute;
-  left: 0;
+.routeFill {
   top: 0;
-  width: 100%;
-  height: 0;
-  background: var(--wine);
-  will-change: height;
+  width: 1px;
+  height: var(--route-fill-h, 0px);
+  background: var(--color-brand-primary);
 }
 
-.compass {
-  position: absolute;
-  left: 0;
+.routePoint {
   top: 0;
-  width: 160px;
-  height: 160px;
-  display: grid;
-  place-items: center;
-  transform: translate3d(0, 62vh, 0) scale(.72);
-  transform-origin: center;
-  will-change: transform, opacity;
-  filter: drop-shadow(0 18px 22px rgba(17, 17, 15, .16));
-}
-
-.compass svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.compass > span {
-  position: absolute;
-  top: -18px;
-  font-size: 9px;
-  letter-spacing: .2em;
-}
-
-.compassRing {
-  fill: #ece9e1;
-  stroke: #11110f;
-  stroke-width: 1.25;
-}
-
-.compassRingOuter {
-  fill: rgba(236, 233, 225, .76);
-  stroke-width: 2;
-}
-
-.compassTicks {
-  fill: none;
-  stroke: #11110f;
-  stroke-width: 1.4;
-}
-
-.compassNeedle {
-  fill: #11110f;
-  transform-origin: 80px 80px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-brand-primary);
+  transform: translate(-50%, calc(var(--point-y, 0px) - 50%));
   will-change: transform;
 }
 
-.compassNeedleNorth {
-  fill: #8f173f;
-}
-
-.compassCentre {
-  fill: #e7ff48;
-  stroke: #11110f;
-  stroke-width: 2;
-}
-
-.steps {
-  position: absolute;
-  z-index: 4;
-  left: 49vw;
-  right: var(--pad);
-  top: 10vh;
-  bottom: 7vh;
-}
-
-.step {
-  position: absolute;
-  inset: 0;
+.row {
+  position: relative;
+  box-sizing: border-box;
+  /* Altura real derivada de --row-compact-h/--row-active-delta (los
+     escribe useBrandStory.ts en .rows tras medir el espacio disponible
+     y repartirlo: activa ~36%, las 4 compactas el resto a partes
+     iguales, ver measure() ahí) -- la altura calculada aquí y la que
+     useBrandStory.ts asume para posicionar el punto/línea nunca pueden
+     desincronizarse, o las filas desbordarían .rows{overflow:hidden} y
+     se recortarían. */
+  height: calc(var(--row-compact-h, 84px) + var(--row-expand) * var(--row-active-delta, 140px));
+  /* visible (antes hidden): el halo/aro del nodo activo (.rowNodeHalo/
+     .rowNodeArc) son más grandes que el propio nodo y quedaban
+     recortados por este overflow -- título/párrafo/imagen ya no lo
+     necesitan como red de seguridad (verificado: scrollHeight ==
+     clientHeight en las 5 etapas, nada desborda realmente la fila). */
+  overflow: visible;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, .82fr);
-  grid-template-rows: auto auto 1fr;
-  gap: 18px 3vw;
-  align-content: center;
-  opacity: 0;
-  transform: translate3d(0, 9vh, 0) scale(.975);
-  pointer-events: none;
-  will-change: opacity, transform;
-}
-
-.stepHead {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
+  /* El número (01-05) ya no es columna de grid -- ver .rowNumber, ahora
+     posicionado en absoluto respecto a esta fila para que no desplace
+     el contenido al crecer su fuente entre estado inactivo/activo.
+     padding-left fija el punto de partida del contenido exactamente
+     donde ya estaba en el estado activo (antes variaba 37-44px según
+     el ancho del número), así el título/párrafo no se mueve nunca. */
+  grid-template-columns: 1fr auto;
+  padding-left: 44px;
   align-items: center;
-  border-bottom: 1px solid rgba(17, 17, 15, .32);
-  padding-bottom: 11px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .15em;
+  column-gap: 24px;
+  padding-block: 13px;
+  /* Separador muy fino y claro -- solo para ordenar, no para dibujar una
+     tabla (era rgba(17,17,15,.1), demasiado presente). */
+  border-top: 1px solid rgba(74, 93, 90, .08);
+  /* Única variable que useBrandStory.ts anima por fila (0 inactiva -> 1
+     activa) -- todo lo demás (nodo, número, título, divisor, tag,
+     tamaño del recorte visual) se deriva vía calc(), así GSAP solo
+     escribe UN número por fila y frame, no cinco propiedades sueltas. */
+  --row-expand: 0;
 }
 
-.stepIcons {
-  display: flex;
-  gap: 8px;
+.row:first-child {
+  border-top: none;
+  --row-expand: 1;
 }
 
-.stepIcons i {
-  font-style: normal;
-  width: 34px;
-  height: 34px;
-  border: 1px solid rgba(17, 17, 15, .38);
+/* Contenedor de posición pura -- mismo top/width/height/transform de
+   base (escalado 1->1.85 ligado a --row-expand) que antes, sin tocar.
+   left corregido de -30px a -24px: -30 era 6px a la izquierda del
+   centro real de la línea (.routeLine vive en .rows con left:20px,
+   .rows tiene padding-left:44px, así que la línea cae en 20-44=-24px
+   respecto a .row) -- con el halo/aro ahora grandes y visibles ese
+   desfase de 6px se notaba como "la línea pasa por el lateral del
+   nodo". Ya no pinta nada por sí mismo: el punto sólido vive en
+   .rowNodeDot, así useBrandStory.ts puede animar las 3 capas con GSAP
+   sin pelearse con este transform CSS-driven. */
+.rowNode {
+  position: absolute;
+  overflow: visible;
+  left: -24px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  z-index: 2;
+  transform: translate(-50%, -50%) scale(calc(1 + var(--row-expand) * .85));
+}
+
+/* Las 3 capas comparten EXACTAMENTE la misma referencia de centrado:
+   top:50%/left:50% (el punto medio del propio .rowNode) + un tamaño
+   explícito. El desplazamiento al centro (translate -50%/-50%) no se
+   escribe aquí como CSS transform -- lo hace GSAP vía xPercent/
+   yPercent (ver useBrandStory.ts, gsap.set una sola vez al montar,
+   para las 5 filas) porque este mismo elemento recibe además scale/
+   rotation por GSAP mientras está activo, y un transform estático en
+   CSS quedaría machacado por el que GSAP escribe inline en cada
+   frame. Así las 3 capas nunca pueden desalinearse entre sí ni con el
+   punto real de la línea. */
+
+/* Capa 1 -- punto central sólido, mismo color/box-shadow/tamaño que
+   antes. GSAP le añade una respiración mínima (scale 1->1.1) vía
+   transform, independiente del scale de fila de arriba porque vive en
+   su propio elemento. Por encima de halo y aro (z-index más alto). */
+.rowNodeDot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  z-index: 4;
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 15px;
-  transform: rotate(-12deg);
-  transition: transform .6s var(--ease), background .6s, color .6s;
+  background: color-mix(in srgb, var(--color-brand-primary) calc(var(--row-expand) * 100%), var(--color-accent-secondary));
+  box-shadow: 0 0 0 calc(var(--row-expand) * 5px) rgba(161, 31, 72, calc(var(--row-expand) * .22));
+  transition: box-shadow .3s var(--ease);
+  transform-origin: 50% 50%;
 }
 
-.step[data-step-active] .stepIcons i {
-  transform: none;
+/* Capa 2 -- halo que pulsa (GSAP: scale .85->1.6, opacity .5->0).
+   17px de diámetro local que, multiplicado por el scale ~1.85 que ya
+   trae .rowNode en la fila activa, cae en pantalla sobre los 28-34px
+   pedidos. Reposo en opacity:0 -- si GSAP no llega a arrancar (fila
+   inactiva, prefers-reduced-motion, mobile) el halo simplemente no se
+   ve. .row/.rows ya no recortan esto (overflow:visible). */
+.rowNodeHalo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 17px;
+  height: 17px;
+  z-index: 2;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-brand-primary);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
 }
 
-.step[data-step-active] .stepIcons i:nth-child(2) {
-  background: var(--ink);
-  color: var(--paper);
+/* Capa 3 -- aro parcial (~100deg, bordes suaves via conic-gradient)
+   que GSAP rota 360deg de forma continua y lenta. 21px de diámetro
+   local -> ~34-39px en pantalla ya escalado, más grande que el halo,
+   como se pide. El conic-gradient pinta solo un arco corto
+   (20deg-80deg) con transición suave en los bordes; el resto es
+   transparente, así que al rotar el elemento entero da la sensación
+   de un trazo incompleto girando, no un aro completo. mask con
+   radial-gradient recorta el círculo relleno a un anillo fino
+   (~1.6px local) sin dibujar un disco sólido. Por encima del halo,
+   por debajo del punto. */
+.rowNodeArc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 21px;
+  height: 21px;
+  z-index: 3;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--color-brand-primary) 20deg,
+    var(--color-brand-primary) 80deg,
+    transparent 100deg,
+    transparent 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.6px), #000 calc(100% - 1.6px) 100%);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 1.6px), #000 calc(100% - 1.6px) 100%);
+  opacity: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
 }
 
-.step[data-step-active] .stepIcons i:nth-child(3) {
-  background: var(--acid);
+/* Posición absoluta y fija respecto a la fila (no grid, no depende del
+   ancho del propio texto) -- misma posición en estado activo e
+   inactivo, sin salto al cambiar de etapa. left:0 = el borde de la
+   propia fila (.row tiene overflow:hidden -- un left negativo aquí
+   recorta el primer carácter, a diferencia de .rowNode que sí puede
+   vivir fuera del borde); la línea está a -24px de la fila, así que
+   left:0 deja exactamente 24px de separación línea->número (dentro
+   del rango 18-24 pedido) sin ningún recorte. Termina en 0+24=24px,
+   con 20px de aire hasta el inicio del contenido (padding-left:44px
+   de .row) -- nunca invade el título. */
+.rowNumber {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: 24px;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  font-size: calc(12px + var(--row-expand) * 6px);
+  color: var(--ink);
+  opacity: calc(.45 + var(--row-expand) * .55);
 }
 
-.step h2 {
-  grid-column: 1 / -1;
-  font-size: clamp(48px, 5.2vw, 86px);
-  letter-spacing: -.07em;
-  line-height: .82;
-  margin: 10px 0 12px;
-  font-weight: 600;
+.rowContent {
+  min-width: 0;
 }
 
-.step h2 em {
+/* Tamaño activo responsive: ~32px a 1366px de ancho (dentro de 32-36px
+   pedido), nunca escala de hero. Base inactiva (16px), line-height,
+   family/weight/color sin cambios -- solo se toca el clamp() del
+   tamaño activo. calc(clamp(...)) es CSS válido: el clamp() se evalúa
+   primero, luego entra en la resta/suma exterior. */
+.rowTitle {
+  margin: 0;
   font-family: var(--serif);
   font-weight: 400;
+  font-size: calc(16px + var(--row-expand) * (clamp(30px, 2.3vw, 36px) - 16px));
+  line-height: 1.16;
+  color: var(--ink);
 }
 
-.stepVisual {
-  min-height: 0;
-  overflow: hidden;
-  border-radius: 2px;
-  align-self: stretch;
-  background: #bbb;
-  box-shadow: 0 22px 55px rgba(17, 17, 15, .14);
+/* Sin recorte artificial: nunca line-clamp/ellipsis/overflow:hidden --
+   el texto completo siempre visible, envuelve en tantas líneas como
+   necesite. El alto de la fila (arriba) ya reserva sitio real para eso,
+   así que no hace falta clip de ningún tipo aquí. */
+.rowDesc {
+  margin: 8px 0 0;
+  max-width: 40ch;
+  font-size: calc(12.5px + var(--row-expand) * 1px);
+  line-height: 1.42;
+  color: var(--color-bg-secondary);
 }
 
-.stepVisual img {
-  height: 100%;
-  min-height: 320px;
-  object-fit: cover;
-  transform: scale(1.08);
-  will-change: transform;
-  transition: transform 1.2s var(--ease);
-}
-
-.step[data-step-active] .stepVisual img {
-  transform: scale(1);
-}
-
-.step p {
-  font-family: var(--serif);
-  font-size: clamp(17px, 1.42vw, 23px);
-  line-height: 1.32;
-  margin: 0;
-  align-self: end;
-  max-width: 430px;
-}
-
-.caption {
-  position: absolute;
-  z-index: 8;
-  left: var(--pad);
-  right: var(--pad);
-  bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 8px;
-  text-transform: uppercase;
-  letter-spacing: .16em;
-  will-change: opacity;
-}
-
-.caption i {
-  width: 64px;
+.rowDivider {
+  display: block;
+  width: calc(var(--row-expand) * 32px);
   height: 1px;
-  background: rgba(17, 17, 15, .4);
-  position: relative;
+  margin-top: 12px;
+  background: var(--color-brand-primary);
   overflow: hidden;
 }
 
-.caption i:after {
-  content: "";
+.rowTag {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-brand-primary);
+  opacity: var(--row-expand);
+}
+
+/* "Fantasmas editoriales", no iconos: bastante más grandes que un icono
+   incluso en reposo. El ancho crece más que el alto a propósito -- la
+   fila no gana mucha más altura al activarse (para que quepan las 5 en
+   el viewport), así que el protagonismo del recorte viene sobre todo de
+   su anchura, no de estirar la fila. Ancho activo reducido ~18% (era
+   310px, demasiado grande, se recortaba contra el borde derecho) y alto
+   compacto bajado a 46px -- con padding-block:13px (26px total) el
+   interior de una fila en reposo mide 78-26=52px, así que 46px deja
+   margen real y nunca roza el separador superior/inferior. Un pequeño
+   margin-left extra solo cuando la fila está activa separa más el texto
+   de la fotografía sin tocar el gap de las filas compactas. */
+/* Ancho activo reducido de 255px a 205px (compacto sin cambios, 150px)
+   -- con la línea al 51% (sin tocar) la columna de texto solo tiene
+   ~200-280px reales; a 255px la imagen la dejaba tan estrecha que el
+   título envolvía en 3 líneas y desbordaba la fila. No es un aumento
+   respecto a la ronda anterior, es una reducción adicional para que el
+   texto quepa completo sin recortes.
+   Alto activo reducido de 224px (46+178) a 196px (46+150): con
+   padding-block:13px (26px) el interior de la fila activa mide
+   ~225px reales (34-38% de la lista) y el propio .rowVisual, no el
+   texto, era quien desbordaba -- el bloque título+párrafo+tag solo
+   necesita ~148px, sobra sitio; la imagen es la pieza más alta del
+   grid (align-items:center) y debía caber ella sola en esos ~225px
+   menos el padding. */
+/* Alto compacto subido de 46px a 62px: el SVG real es 1536x1024 (1.5:1),
+   así que con object-fit:contain es la ALTURA del contenedor, no su
+   ancho, quien limita el tamaño visible en reposo (con 46px de alto
+   solo se veían ~69px de ancho reales pese al contenedor de 150px --
+   de ahí la sensación de icono). 62px es el máximo que cabe sin tocar
+   la altura de fila compacta (92.375px - 26px de padding-block =
+   66.375px de interior disponible; 62px deja ~4px de aire real hasta
+   el separador). Delta reescrito (134 en vez de 150) para que el alto
+   ACTIVO siga terminando en el mismo 196px de siempre (62+134=196) --
+   ese valor ya estaba ajustado al límite del alto de fila activa, no
+   se toca para no reabrir el desbordamiento de texto ya corregido. */
+.rowVisual {
+  position: relative;
+  flex-shrink: 0;
+  width: calc(150px + var(--row-expand) * 55px);
+  height: calc(62px + var(--row-expand) * 134px);
+  margin-left: calc(var(--row-expand) * 20px);
+  /* Sube el recorte 14px respecto a su centrado vertical por defecto
+     (align-items:center en .row) -- misma regla fija para las 5
+     etapas y ambos estados (no depende de --row-expand), así que la
+     versión lineal y la fotografía comparten exactamente la misma
+     posición elevada durante la transición, sin salto. */
+  transform: translateY(-14px);
+}
+
+.rowLineArt {
   position: absolute;
   inset: 0;
-  background: var(--wine);
-  transform: translateX(-100%);
-  animation: storyScroll 2s var(--ease) infinite;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Base subida de .4 a .44 (dentro de 0.32-0.45 pedido) -- mismo
+     mecanismo de fundido hacia la foto, sin tocar su timing. */
+  opacity: calc(.44 - var(--row-expand) * .44);
+  /* Justo antes de transformarse en fotografía: escala +7% y el trazo
+     oscurece (de --color-accent-secondary, más claro, hacia
+     --color-bg-secondary, más oscuro) -- así el ojo sabe dónde mirar
+     incluso antes de que aparezca la foto. */
+  transform: scale(calc(1 + var(--row-expand) * .07));
+  color: color-mix(in srgb, var(--color-bg-secondary) calc(35% + var(--row-expand) * 65%), var(--color-accent-secondary));
+  transition: opacity .25s var(--ease);
 }
 
-@keyframes storyScroll {
-  50%, 100% {
-    transform: translateX(100%);
+.rowPhoto {
+  object-fit: contain;
+  object-position: center;
+  clip-path: ellipse(var(--reveal-rx, 0%) var(--reveal-ry, 0%) at var(--reveal-x) var(--reveal-y));
+  will-change: clip-path;
+}
+
+/* 2026-08-25 (relevo hacia FinalReveal/FooterContact, useFinalReveal.ts):
+   GSAP reserva, por defecto, la altura natural del elemento pinneado
+   (100svh) COMO EXTRA tras liberar el pin, además de la distancia de
+   scroll de "end" -- mismo problema ya documentado y resuelto en
+   MarketingReel.module.css .stickyStage y SellingErrors.module.css
+   .stage (ambos con el mismo margin-bottom negativo). Sin esto,
+   .finalReveal (siguiente hermano de esta sección, ver page.tsx)
+   quedaría 100svh por debajo de donde termina este pin narrativo, y el
+   ScrollTrigger de useFinalReveal.ts ("start: top top" sobre
+   .finalReveal) arrancaría 100svh tarde -- dejando una franja vacía
+   (fondo de .brandStory) entre el final de las 5 etapas y el arranque
+   del relevo. Solo en el breakpoint donde el pin real está activo
+   (>=901px, mismo gate que DESKTOP_QUERY en useBrandStory.ts y
+   useFinalReveal.ts) -- por debajo de eso no hay pin-spacer que
+   compensar, y .brandStory ya pasa a height:auto en flujo normal (ver
+   @media max-width:900px más abajo). */
+@media (min-width: 901px) {
+  .brandStory {
+    margin-bottom: -100svh;
   }
 }
 
+/* --- Responsive ---------------------------------------------------------
+   Igual convención de 3 niveles que el resto del proyecto: >900px pin
+   real (JS), <=900px fallback estático, <=640px más compacto,
+   prefers-reduced-motion comparte el fallback de 900px. */
 @media (max-width: 900px) {
   .brandStory {
     height: auto;
-    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    padding-block: 72px;
   }
 
-  .sticky {
-    position: relative;
+  .storyGrid {
     height: auto;
-    min-height: 0;
-    overflow: hidden;
-    padding: 105px var(--pad) 100px;
+    padding-inline: clamp(20px, 6vw, 64px);
   }
 
-  .topline {
-    position: relative;
-    inset: auto;
-  }
-
-  .words {
-    position: relative;
-    inset: auto;
+  /* Vuelven al flujo normal (ya no position:absolute) -- se apilan una
+     encima de otra, cada una con su propio ancho completo. */
+  .titular {
+    position: static;
     width: auto;
+    max-width: 480px;
+    margin-bottom: 40px;
+    padding: 0;
+  }
+
+  .titular::before {
+    display: none;
+  }
+
+  .rows {
+    position: static;
     height: auto;
-    margin: 10vh 0 8vh;
+    overflow: visible;
   }
 
-  .phrase {
-    position: relative;
-    inset: auto;
-  }
-
-  .phraseStart {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .phraseEnd {
+  .routeFill,
+  .routePoint {
     display: none;
   }
 
-  .phrase span {
-    font-size: clamp(72px, 14vw, 126px);
+  .rowPhoto {
+    clip-path: none !important;
   }
 
-  .route {
-    position: absolute;
-    left: auto;
-    right: var(--pad);
-    top: 125px;
-    bottom: auto;
-    width: 100px;
-    height: 100px;
-    transform: none;
+  .row {
+    height: auto;
+    overflow: visible;
+    --row-expand: 0;
   }
 
-  .routeLine {
-    display: none;
+  .row:first-child {
+    --row-expand: 1;
   }
 
-  .compass {
-    width: 100px;
-    height: 100px;
-    transform: none !important;
-    opacity: 1 !important;
-  }
-
-  .steps {
-    position: relative;
-    inset: auto;
-    display: grid;
-    gap: 90px;
-  }
-
-  .step {
-    position: relative;
-    inset: auto;
-    opacity: 1 !important;
-    transform: none !important;
-    pointer-events: auto;
-    grid-template-columns: 1.15fr .85fr;
-    min-height: 610px;
-  }
-
-  .stepVisual img {
-    min-height: 360px;
-  }
-
-  .caption {
+  .row:not(:first-child) .rowPhoto {
     display: none;
   }
 }
 
 @media (max-width: 640px) {
-  .sticky {
-    padding-top: 85px;
+  .rows {
+    padding-left: 36px;
   }
 
-  .route {
-    top: 94px;
-    width: 72px;
-    height: 72px;
+  .routeLine {
+    left: 18px;
   }
 
-  .compass {
-    width: 72px;
-    height: 72px;
+  .rowNode {
+    left: -30px;
   }
 
-  .compass > span {
-    display: none;
+  .row {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
   }
 
-  .words {
-    margin: 11vh 0 9vh;
+  .rowVisual {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
   }
 
-  .phrase span {
-    font-size: 58px;
-    line-height: .8;
-  }
-
-  .phrase span:nth-child(2) {
-    padding-left: 10vw;
-  }
-
-  .steps {
-    gap: 78px;
-  }
-
-  .step {
-    display: block;
-    min-height: 0;
-  }
-
-  .stepHead {
-    margin-bottom: 26px;
-  }
-
-  .step h2 {
-    font-size: 48px;
-    margin-bottom: 30px;
-  }
-
-  .stepVisual {
-    height: 74vw;
-    max-height: 480px;
-    margin-bottom: 30px;
-  }
-
-  .stepVisual img {
-    min-height: 0;
-  }
-
-  .step p {
-    font-size: 18px;
-  }
-
-  .stepIcons i {
-    width: 30px;
-    height: 30px;
+  .row:not(:first-child) .rowVisual {
+    width: 44px;
+    height: 44px;
+    aspect-ratio: auto;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .brandStory {
     height: auto;
-    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    padding-block: 72px;
   }
 
-  .sticky {
-    position: relative;
+  .storyGrid {
     height: auto;
-    min-height: 0;
-    padding: 110px var(--pad);
-    overflow: hidden;
+    padding-inline: clamp(20px, 6vw, 64px);
   }
 
-  .topline,
-  .words,
-  .steps {
-    position: relative;
-    inset: auto;
-  }
-
-  .words {
+  /* Vuelven al flujo normal (ya no position:absolute) -- se apilan una
+     encima de otra, cada una con su propio ancho completo. */
+  .titular {
+    position: static;
     width: auto;
-    height: auto;
-    margin: 10vh 0;
+    max-width: 480px;
+    margin-bottom: 40px;
+    padding: 0;
   }
 
-  .phrase {
-    position: relative;
-    inset: auto;
-  }
-
-  .phraseStart {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .phraseEnd,
-  .route,
-  .caption {
+  .titular::before {
     display: none;
   }
 
-  .steps {
-    display: grid;
-    gap: 90px;
+  .rows {
+    position: static;
+    height: auto;
+    overflow: visible;
   }
 
-  .step {
-    position: relative;
-    inset: auto;
-    opacity: 1 !important;
-    transform: none !important;
-    pointer-events: auto;
+  .routeFill,
+  .routePoint {
+    display: none;
   }
-}
 
-@supports not (overflow: clip) {
-  .sticky {
-    overflow: hidden;
+  .rowPhoto {
+    clip-path: none !important;
+  }
+
+  .row {
+    height: auto;
+    overflow: visible;
+    --row-expand: 0;
+  }
+
+  .row:first-child {
+    --row-expand: 1;
+  }
+
+  .row:not(:first-child) .rowPhoto {
+    display: none;
+  }
+
+  .rowNode,
+  .rowDivider,
+  .rowPhoto {
+    transition: none;
+  }
+
+  /* useBrandStory.ts ya no arranca en absoluto bajo reduced-motion
+     (early return), así que GSAP nunca anima estas capas -- esta
+     regla es solo un cinturón de seguridad para que, si algo las
+     tocara, el punto activo se quede sólido y estático. */
+  .rowNodeDot {
+    transition: none;
+  }
+
+  .rowNodeHalo,
+  .rowNodeArc {
+    display: none;
   }
 }

@@ -20,12 +20,19 @@
   /* 2026-07-28: el vacío superior era estructural (el padding-top de la
      propia sección), no algo que debiera corregirse desplazando
      .statement con un margen negativo -- esa vía se revirtió (ver
-     .statement más abajo). -105px en escritorio/portátil (primera
-     prueba pedida, dentro del rango -90/-120); el padding-bottom no se
-     toca, así que el hueco liberado queda "por debajo" en términos
-     relativos. Bajo 640px sigue mandando el padding-top:85px fijo de su
-     propio @media, sin tocar. */
-  padding-top: calc(clamp(90px, 12vw, 180px) - 105px);
+     .statement más abajo). El padding-bottom no se toca (163.92px a
+     1366px), así que el margen real bajo la última línea es siempre
+     ese valor, independiente de cuánto se reduzca aquí -- nunca baja
+     de los 70-100px pedidos.
+     2026-08-25: -105px subido a -175px (70px más, dentro de 60-80px
+     pedido) para que el bloque completo suba como unidad y el
+     conjunto quede más centrado en el viewport -- a 1366px el
+     resultado de clamp(90,12vw,180)-175 es negativo, así que el motor
+     lo satura a 0 (padding nunca es negativo); a partir de ~1552px de
+     ancho (12vw=186.24) empieza a haber padding-top real de nuevo.
+     Bajo 640px sigue mandando el padding-top:85px fijo de su propio
+     @media, sin tocar. */
+  padding-top: calc(clamp(90px, 12vw, 180px) - 175px);
 }
 
 /* Envoltorio de la microcabecera + manifiesto (solo esa parte, no
@@ -69,6 +76,12 @@
      depender de que space-between con un único hijo se comporte como
      flex-start. */
   justify-content: flex-start;
+  /* 2026-08-25: +25px solo para este elemento -- position:relative no
+     afecta al flujo del documento, así que .statement (justo debajo)
+     no se mueve ni un píxel; un margin-top habría empujado también al
+     bloque principal. */
+  position: relative;
+  top: 25px;
   gap: 24px;
   font-family: var(--font-manifesto-micro), var(--sans);
   font-weight: 500;

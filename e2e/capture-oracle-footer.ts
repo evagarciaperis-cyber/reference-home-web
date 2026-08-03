@@ -3,8 +3,9 @@
  * motion). Scroll instantáneo hasta el final de la página -- footer es el
  * último contenido tanto en el oráculo como en el proyecto migrado a
  * partir de esta fase, así que no aplica aquí el problema de recorte
- * (clamping) por altura de página distinta que sí afectó a Principles/
- * Stats (fases 11/12): ambos lados terminan en el mismo punto real.
+ * (clamping) por altura de página distinta que sí afectó a otras
+ * secciones en fases anteriores: ambos lados terminan en el mismo punto
+ * real.
  *
  * Uso: npm run parity:update-oracle-footer (manual).
  */

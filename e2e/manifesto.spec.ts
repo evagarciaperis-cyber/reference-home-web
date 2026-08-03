@@ -16,11 +16,11 @@ async function scrollToManifesto(page: import("@playwright/test").Page) {
 
 // Regresión encontrada en la fase 12: [data-word] es un atributo
 // compartido por todo [data-split-reveal], no exclusivo de Manifesto --
-// Stats (fase 12) también lo usa. Sin acotar a "#estudio", page.locator(
-// "[data-word]").last() empezó a resolver a la última palabra de Stats
-// (más abajo en la página) en vez de la de Manifesto, en cuanto Stats se
-// añadió al DOM. Acotado aquí para que este test siga siendo válido
-// independientemente de cuántas secciones más usen data-word en el futuro.
+// otra sección con [data-split-reveal] más abajo en la página hizo que
+// page.locator("[data-word]").last() dejara de resolver a la última
+// palabra de Manifesto en cuanto esa sección se añadió al DOM. Acotado
+// aquí para que este test siga siendo válido independientemente de
+// cuántas secciones más usen data-word en el futuro.
 
 // ---------------------------------------------------------------------
 // Paridad visual
