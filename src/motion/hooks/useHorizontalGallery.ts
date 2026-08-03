@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
-import { prefersReducedMotion } from "../core/media";
+import { prefersReducedMotion, DESKTOP_QUERY } from "../core/media";
 
-const DESKTOP_QUERY = "(min-width: 901px)";
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
 
 type Refs = {

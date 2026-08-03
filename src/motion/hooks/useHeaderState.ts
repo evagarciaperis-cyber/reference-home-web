@@ -2,14 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { HEADER_TONE_REFRESH_EVENT } from "../core/events";
+import { DESKTOP_QUERY } from "../core/media";
 
 const SCROLLED_AFTER_Y = 20;
 const SAMPLE_Y = 44;
-
-// Mismo breakpoint que useBrandStory.ts/useProcess.ts/etc -- redeclarado
-// aquí en vez de importado, siguiendo la convención ya establecida en el
-// resto de hooks de motion/.
-const DESKTOP_QUERY = "(min-width: 901px)";
 
 // 2026-08-25: en desktop el header empieza oculto por defecto y solo se
 // revela con hover/foco -- al salir, espera este margen antes de

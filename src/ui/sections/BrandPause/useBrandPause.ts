@@ -3,12 +3,11 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "@/motion/core/media";
+import { prefersReducedMotion, MOBILE_QUERY, WIDE_DESKTOP_QUERY } from "@/motion/core/media";
 import { subscribeFrame } from "@/motion/core/frameTicker";
 
 let pluginRegistered = false;
 
-const MOBILE_QUERY = "(max-width: 640px)";
 // 2026-07-30: mismo umbral que useHorizontalHandoff.ts -- a partir de aquí
 // BrandPause vive dentro de la escena horizontal (HorizontalHandoff), no
 // en flujo vertical normal. Su propio ScrollTrigger "top bottom"->"top
@@ -17,7 +16,6 @@ const MOBILE_QUERY = "(max-width: 640px)";
 // y BrandPause solo se desplaza en horizontal, así que ese trigger dejaría
 // de tener sentido geométrico. El desplazamiento horizontal pasa a ser el
 // mecanismo de entrada -- el texto se asienta directamente.
-const WIDE_DESKTOP_QUERY = "(min-width: 1024px)";
 
 /**
  * Pausa de marca (2026-07-30, composición centrada) entre SellingErrors y

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "../core/media";
+import { prefersReducedMotion, MOBILE_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
 import { requestHeaderToneRefresh } from "../core/events";
 
@@ -155,7 +155,7 @@ export function useMarketingReel() {
 
     [video, panel1Video, panel3Video].forEach((v) => v.play().catch(() => {}));
 
-    const isMobileViewport = window.matchMedia("(max-width: 640px)").matches;
+    const isMobileViewport = window.matchMedia(MOBILE_QUERY).matches;
 
     if (prefersReducedMotion()) {
       if (isMobileViewport) {

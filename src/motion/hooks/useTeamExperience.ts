@@ -3,14 +3,13 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion, canHover } from "../core/media";
+import { prefersReducedMotion, canHover, DESKTOP_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
 import { requestHeaderToneRefresh } from "../core/events";
 import { useTeamPortraitScene } from "../webgl/useTeamPortraitScene";
 
 let pluginRegistered = false;
 
-const DESKTOP_QUERY = "(min-width: 901px)";
 const PERSON_COUNT = 6;
 
 // Reparto del progreso (self.progress, 0-1) sobre un pin de 750% de

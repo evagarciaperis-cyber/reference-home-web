@@ -3,13 +3,11 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "../core/media";
+import { prefersReducedMotion, DESKTOP_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
 import { FAN_LAYOUT } from "@/ui/sections/WorkZoom/teamData";
 
 let pluginRegistered = false;
-
-const DESKTOP_QUERY = "(min-width: 901px)";
 
 type Refs = {
   sectionRef: React.RefObject<HTMLElement | null>;

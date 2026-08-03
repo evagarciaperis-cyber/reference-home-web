@@ -3,12 +3,11 @@
 import { useEffect, type RefObject } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "../core/media";
+import { prefersReducedMotion, DESKTOP_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
 
 let pluginRegistered = false;
 
-const DESKTOP_QUERY = "(min-width: 901px)";
 const HANDOFF_PERCENT = 100;
 
 type Refs = {

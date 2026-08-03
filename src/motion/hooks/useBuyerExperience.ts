@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "../core/media";
+import { prefersReducedMotion, MOBILE_TABLET_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
 
 let pluginRegistered = false;
@@ -123,7 +123,7 @@ export function useBuyerExperience(): Refs {
     // altura de .buyer en BuyerExperience.module.css). totalDuration se
     // calcula aquí (no con tl.duration() dentro de onUpdate) para no
     // depender de `tl` antes de que termine de asignarse.
-    const holdDuration = window.matchMedia("(max-width: 900px)").matches ? 0.19 : 0.32;
+    const holdDuration = window.matchMedia(MOBILE_TABLET_QUERY).matches ? 0.19 : 0.32;
     const splitEndTime = 1.4;
     const totalDuration = splitEndTime + holdDuration;
 

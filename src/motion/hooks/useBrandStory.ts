@@ -4,13 +4,11 @@ import { useEffect, type RefObject } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { easeInOutCubic } from "../core/easing";
-import { prefersReducedMotion } from "../core/media";
+import { prefersReducedMotion, DESKTOP_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
 import { requestHeaderToneRefresh } from "../core/events";
 
 let pluginRegistered = false;
-
-const DESKTOP_QUERY = "(min-width: 901px)";
 
 const ROW_COUNT = 5;
 const ROW_GAP_PX = 16; // debe coincidir con .rows{gap} en BrandStory.module.css

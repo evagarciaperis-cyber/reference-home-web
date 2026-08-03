@@ -3,16 +3,14 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion } from "../core/media";
+import { prefersReducedMotion, MOBILE_QUERY, WIDE_DESKTOP_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
 
 let pluginRegistered = false;
 
-const MOBILE_QUERY = "(max-width: 640px)";
 // 2026-07-30 (transición horizontal a BrandPause): mismo umbral que
 // useBrandPause.ts -- por debajo de este ancho, BrandPause sigue en flujo
 // vertical normal después de SellingErrors, sin desplazamiento horizontal.
-const WIDE_DESKTOP_QUERY = "(min-width: 1024px)";
 
 // Base histórica calibrada a mano en rondas anteriores (480% para
 // entrada+permanencia+salida de etiqueta/título/intro/4 capítulos, sin
