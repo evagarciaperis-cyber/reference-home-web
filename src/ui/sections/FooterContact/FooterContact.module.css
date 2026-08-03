@@ -333,6 +333,23 @@
 }
 
 @media (max-width: 900px) {
+  /* La restricción de 100dvh + overflow:hidden en la regla base solo
+     existe para el relevo BrandStory -> FooterContact (useFinalReveal.ts),
+     que solo se activa en desktop (useFinalReveal.ts comprueba
+     DESKTOP_QUERY, >=901px, antes de registrar su ScrollTrigger) -- por
+     debajo de 901px ese pin nunca se crea, así que FooterContact no
+     necesita encajar en un viewport fijo. Sin esta anulación, el
+     formulario completo (mensaje, checkbox, Turnstile, botón de envío) y
+     la franja inferior (logo, navegación, legal, copyright, "volver
+     arriba") quedaban recortados/superpuestos e inaccesibles en
+     dispositivos con poca altura real -- confirmado visualmente a 390px y
+     430px de ancho antes de este cambio. Crece a su altura natural; nada
+     más de la sección cambia. */
+  .footer {
+    height: auto;
+    overflow: visible;
+  }
+
   .top {
     grid-template-columns: 1fr;
     gap: 48px;
@@ -359,6 +376,11 @@
 @media (max-width: 640px) {
   .footer {
     padding-top: 85px;
+    /* Suelo real bajo "Volver arriba"/copyright (home indicator de iOS,
+       barra gestual de Android) -- suma el safe-area al colchón fijo de
+       20px que ya define la regla base, nunca lo sustituye. Mismo patrón
+       que Hero.module.css (.sticky, @media max-width:640px). */
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   }
 
   .title {
