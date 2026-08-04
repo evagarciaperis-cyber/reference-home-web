@@ -58,7 +58,7 @@ function TestSectionCopy() {
 // segundo sistema de seguimiento de puntero sobre esta sección, que ya
 // tiene el suyo propio para la mancha.
 export function TestSection() {
-  const { sectionRef, canvasHostRef, whiteLayerRef, onPointerEnter, onPointerMove, onPointerLeave } =
+  const { sectionRef, canvasHostRef, whiteLayerRef, mobileRevealRef, onPointerEnter, onPointerMove, onPointerLeave } =
     useTestSectionFluidReveal();
 
   return (
@@ -70,6 +70,14 @@ export function TestSection() {
       onPointerLeave={onPointerLeave}
     >
       <div ref={canvasHostRef} className={styles.canvasHost} aria-hidden="true" />
+
+      {/* ≤900px únicamente (ver TestSection.module.css y
+          useTestSectionFluidReveal.ts, rama móvil): la interacción de
+          cursor no tiene equivalente táctil, así que aquí se sustituye
+          por un revelado propio -- capa burdeos recortada con clip-path,
+          controlada por el progreso de scroll natural, sin cursor, sin
+          pin. Invisible en escritorio (display:none en la regla base). */}
+      <div className={styles.mobileReveal} ref={mobileRevealRef} aria-hidden="true" />
 
       <div className={styles.textLayer}>
         <TestSectionCopy />

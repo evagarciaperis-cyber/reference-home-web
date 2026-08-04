@@ -36,6 +36,15 @@
   pointer-events: none;
 }
 
+/* Capa burdeos del revelado móvil (useTestSectionFluidReveal.ts, rama
+   ≤900px) -- invisible en escritorio, donde sigue mandando la mancha
+   WebGL de siempre. Definida aquí (mismo z-index que .canvasHost, nunca
+   compiten: uno u otro según el ancho) y activada dentro del media
+   query de más abajo. */
+.mobileReveal {
+  display: none;
+}
+
 /* Cada copia es, por sí sola, a sangre completa sobre TODA la sección
    (inset:0) y se autocentra con su propio flex-column -- no depende del
    flex de .section ni de ningún wrapper compartido con altura propia.
@@ -191,5 +200,41 @@
 
   .ctaLayer {
     bottom: clamp(32px, 8vh, 64px);
+  }
+
+  /* El titular sube y deja de estar centrado a media altura -- reserva
+     un carril inferior real y sin solape para la capa burdeos
+     (.mobileReveal, justo debajo), que crece desde el suelo de la
+     sección según el scroll. Aplica por igual a .textLayer Y
+     .textLayerWhite (la copia blanca la hereda por composición de
+     clases, nunca se declara aparte -- ver advertencia de cabecera del
+     archivo: las dos copias no pueden divergir entre sí). La copia
+     blanca sigue sin usarse en móvil (el hook nunca le asigna mask-image
+     ahí), así que esto no cambia nada visible en ella, solo mantiene la
+     sincronía por si acaso. */
+  .textLayer {
+    justify-content: flex-start;
+    padding-top: clamp(48px, 11vh, 84px);
+    padding-bottom: 0;
+  }
+
+  /* Revelado físico por scroll (useTestSectionFluidReveal.ts, rama
+     móvil): en reposo, clip-path la oculta por completo (recorte del
+     100% desde arriba); al hacer scroll, ese recorte se reduce hasta 0,
+     así que el borde revelado asciende desde el suelo de la sección,
+     nunca alcanza la franja del titular (reservada arriba). El CTA
+     queda dentro de este carril, por lo que al completarse el
+     revelado aparece integrado sobre el burdeos, no flotando aparte. */
+  .mobileReveal {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 48%;
+    background: var(--color-brand-primary);
+    z-index: 1;
+    clip-path: inset(100% 0 0 0);
+    pointer-events: none;
   }
 }
