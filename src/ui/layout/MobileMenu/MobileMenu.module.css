@@ -1,14 +1,24 @@
-/* Puerto literal de .mobile-menu* en web-nueva/assets/css/styles.css */
+/* Puerto literal de .mobile-menu* en web-nueva/assets/css/styles.css --
+   2026-08-05: paleta reemplazada por la corporativa (docs/PALETA_CORPORATIVA.md).
+   El --acid heredado de paridad (amarillo ácido/verde neón) no pertenece a
+   la dirección de arte de Reference Home -- se sustituye por los mismos
+   tokens ya usados en el resto del sitio (FooterContact, chapterTitle,
+   etc.), nunca valores nuevos: fondo = --color-bg-secondary, texto =
+   --color-text-primary-inverse, acento/numeración = --color-brand-primary. */
 
 .mobileMenu {
   position: fixed;
   inset: 0;
-  background: var(--acid);
+  background: var(--color-bg-secondary);
   z-index: 850;
   transform: translateY(-105%);
   transition: transform .8s var(--ease);
-  padding: 110px var(--pad) 42px;
+  /* Safe-area real (notch/isla dinámica arriba, home indicator/barra
+     gestual abajo) sumada al colchón fijo existente, nunca en su lugar --
+     mismo patrón que Hero.module.css/FooterContact.module.css. */
+  padding: calc(110px + env(safe-area-inset-top, 0px)) var(--pad) calc(42px + env(safe-area-inset-bottom, 0px));
   visibility: hidden;
+  color: var(--color-text-primary-inverse);
 }
 
 .isOpen {
@@ -25,19 +35,48 @@
 .inner a {
   font-size: clamp(42px, 12vw, 84px);
   letter-spacing: -.06em;
-  border-bottom: 1px solid rgba(17, 17, 15, .25);
+  border-bottom: 1px solid rgba(240, 223, 207, .28);
   display: flex;
   justify-content: space-between;
   line-height: 1.15;
+  color: inherit;
+  transition: color .25s var(--ease);
+}
+
+/* Activo/pressed -- burdeos, nunca amarillo/neón (mismo tono que la
+   numeración y que el resto de acentos del sitio). Cubre teclado
+   (:focus-visible) y puntero/táctil (:hover/:active) por igual. */
+.inner a:hover,
+.inner a:focus-visible,
+.inner a:active {
+  color: var(--color-brand-primary);
+}
+
+.inner a:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 4px;
 }
 
 .inner a span {
   font-size: 11px;
   letter-spacing: 0;
   padding-top: 12px;
+  /* El burdeos corporativo puro (--color-brand-primary, #A11F48) mide
+     1.07:1 sobre este fondo (#4A5D5A) -- ambos son tonos de luminosidad
+     casi idéntica, solo distinguibles por matiz, no por contraste real.
+     Aclarado hacia blanco (nunca hacia un tono nuevo/ajeno a la paleta)
+     lo suficiente para separar su luminosidad de la del fondo sin
+     perder su identidad de burdeos -- more allá de ~45% ya empieza a
+     leerse como rosa, no como burdeos, así que este es el límite
+     práctico: 2.43:1 (frente a 1.07:1 original), la mejora más clara
+     posible manteniendo el mismo matiz. Cambio confinado a este único
+     elemento -- el resto del burdeos del menú (estado activo/pressed de
+     los enlaces, arriba) no se toca. */
+  color: color-mix(in srgb, var(--color-brand-primary), white 45%);
 }
 
 .inner p {
   margin-top: auto;
   font-size: 12px;
+  color: var(--color-text-primary-inverse);
 }
