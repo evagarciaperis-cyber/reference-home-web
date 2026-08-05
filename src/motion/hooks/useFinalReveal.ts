@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, type RefObject } from "react";
+import type { RefObject } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion, DESKTOP_QUERY } from "../core/media";
 import { subscribeFrame } from "../core/frameTicker";
+import { useIsomorphicLayoutEffect } from "../core/useIsomorphicLayoutEffect";
 
 let pluginRegistered = false;
 
@@ -51,9 +52,44 @@ type Refs = {
  * viewport: el hueco de fondo crema reportado. Por eso, aquí abajo, la
  * rama progress<=0 NUNCA toca `position/inset/zIndex` -- solo yPercent,
  * que es la única propiedad que useBrandStory.ts no gestiona nunca.
+ *
+ * 2026-08-05 (fix NotFoundError "removeChild" al navegar Home ->
+ * /inmobiliaria-valencia, reproducido con Playwright + instrumentación
+ * real de Node.prototype.removeChild/appendChild): este hook usaba
+ * `useEffect` normal para crear/destruir el ScrollTrigger. `.finalReveal`
+ * (el wrapper que este hook pinea) vive como HIJO DIRECTO de <body> --
+ * hermano de <main>, ver page.tsx -- y GSAP, al pinearlo, lo reparenta
+ * dentro de un <div class="pin-spacer"> que él mismo inserta. React, en
+ * su propio árbol de fibers, sigue creyendo que <body> es el padre
+ * directo de .finalReveal.
+ *
+ * Verificado leyendo el bundle real de react-dom que sirve el proyecto:
+ * al desmontar un subárbol eliminado, `commitDeletionEffectsOnFiber` solo
+ * ejecuta de forma síncrona, ANTES del removeChild real de un nodo, los
+ * efectos `Insertion` y `Layout` -- los efectos `Passive` (los de
+ * `useEffect`) de un componente eliminado se procesan en un paso APARTE,
+ * después de que la fase de mutación (donde ocurre el removeChild) ya
+ * terminó. Con `useEffect`, `trigger.kill()` -- que revierte el pin y
+ * quita el pin-spacer -- llegaba sistemáticamente TARDE: React ya había
+ * intentado `body.removeChild(.finalReveal)` mientras su padre real
+ * seguía siendo el pin-spacer, produciendo el NotFoundError en el 100%
+ * de las navegaciones fuera de Home (confirmado con 10 ciclos
+ * Home<->/inmobiliaria-valencia). El resto de secciones pineadas del
+ * proyecto (MarketingReel, SellingErrors, Process, WorkZoom, BrandStory,
+ * TeamFanEntrance...) no sufren esto porque viven ANIDADAS dentro de
+ * <main>: React solo necesita un removeChild sobre <main> en sí (que
+ * nunca fue reparentado), y todo lo que GSAP reestructuró por dentro
+ * desaparece con él sin necesitar removeChild propios.
+ *
+ * `useIsomorphicLayoutEffect` (useLayoutEffect en cliente) hace que
+ * `trigger.kill()` corra síncronamente en la MISMA fase de mutación,
+ * antes de que React intente eliminar .finalReveal -- exactamente la
+ * garantía de orden que faltaba. No es un check defensivo sobre el
+ * síntoma: corrige la propiedad real del nodo (vuelve a ser hijo directo
+ * de <body>) antes de que React dependa de ello.
  */
 export function useFinalReveal({ wrapperRef }: Refs): void {
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
     if (prefersReducedMotion()) return;
