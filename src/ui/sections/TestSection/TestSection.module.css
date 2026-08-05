@@ -36,13 +36,26 @@
   pointer-events: none;
 }
 
-/* Capa burdeos del revelado móvil (useTestSectionFluidReveal.ts, rama
-   ≤900px) -- invisible en escritorio, donde sigue mandando la mancha
-   WebGL de siempre. Definida aquí (mismo z-index que .canvasHost, nunca
-   compiten: uno u otro según el ancho) y activada dentro del media
-   query de más abajo. */
-.mobileReveal {
+/* Fondo fotográfico móvil (≤900px) -- invisible en escritorio, donde
+   sigue mandando la mancha WebGL de siempre sobre .canvasHost. Mismo
+   z-index que .canvasHost (nunca compiten: uno u otro según el ancho,
+   ver el media query de más abajo). */
+.mobilePhotoLayer {
   display: none;
+}
+
+.mobilePhoto {
+  object-fit: cover;
+}
+
+/* Lavado plano y sutil -- nunca un degradado agresivo ni blur, solo el
+   mínimo necesario para que el titular (negro, sin cambiar de color)
+   siga siendo legible sobre la fotografía real. */
+.mobileScrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(240, 223, 207, .22);
+  pointer-events: none;
 }
 
 /* Cada copia es, por sí sola, a sangre completa sobre TODA la sección
@@ -184,57 +197,68 @@
 }
 
 @media (max-width: 900px) {
-  /* El titular vive centrado (flex de .textLayer) dentro de .section,
-     y el CTA se ancla de forma independiente al borde inferior
-     (.ctaLayer, bottom:clamp(...)) -- ninguno de los dos se toca aquí
-     (ver advertencia arriba: ya se intentó reestructurar y se rompió el
-     alineado entre las dos capas de texto). Con min-height:100svh
-     (regla base) el titular queda centrado a media pantalla y dista
-     mucho del CTA anclado abajo -- hueco vacío grande y botón aislado.
-     Reducir solo la altura del contenedor acerca el borde inferior (y
-     por tanto el CTA) al titular centrado, sin mover ni reescribir la
-     posición de ninguno de los dos. */
-  .section {
-    min-height: 72svh;
-  }
-
+  /* min-height:100svh de la regla base ya NO se anula aquí (a diferencia
+     de una ronda anterior, cuando el fondo era blanco liso y un
+     min-height reducido acercaba el CTA al titular para evitar un hueco
+     vacío). Ahora .section contiene una fotografía real a sangre
+     completa (.mobilePhotoLayer, position:absolute;inset:0) -- con
+     min-height reducido, la fotografía solo llenaba esa fracción de la
+     caja y el resto del viewport (100svh real de .testLayer en
+     BuyerExperience.module.css, sin tocar) quedaba en blanco liso
+     debajo: el hueco muerto que se pidió eliminar. A pantalla completa,
+     la fotografía cubre todo el viewport y no hay nada debajo que
+     mostrar. */
   .ctaLayer {
     bottom: clamp(32px, 8vh, 64px);
   }
 
-  /* El titular sube y deja de estar centrado a media altura -- reserva
-     un carril inferior real y sin solape para la capa burdeos
-     (.mobileReveal, justo debajo), que crece desde el suelo de la
-     sección según el scroll. Aplica por igual a .textLayer Y
-     .textLayerWhite (la copia blanca la hereda por composición de
-     clases, nunca se declara aparte -- ver advertencia de cabecera del
-     archivo: las dos copias no pueden divergir entre sí). La copia
-     blanca sigue sin usarse en móvil (el hook nunca le asigna mask-image
-     ahí), así que esto no cambia nada visible en ella, solo mantiene la
-     sincronía por si acaso. */
+  /* El titular sube y deja de estar centrado a media altura -- dentro de
+     una fotografía real a sangre completa, la mitad superior del
+     encuadre (techo/pared, siempre más despejada que la zona del sofá o
+     la mesa) es la zona con menos detalle compitiendo con el texto. El
+     CTA sigue anclado abajo (.ctaLayer) de forma independiente. Aplica
+     por igual a .textLayer Y .textLayerWhite (la copia blanca la hereda
+     por composición de clases, nunca se declara aparte -- ver
+     advertencia de cabecera del archivo: las dos copias no pueden
+     divergir entre sí). La copia blanca sigue sin usarse en móvil (el
+     hook nunca le asigna mask-image ahí), así que esto no cambia nada
+     visible en ella, solo mantiene la sincronía por si acaso. */
   .textLayer {
     justify-content: flex-start;
     padding-top: clamp(48px, 11vh, 84px);
     padding-bottom: 0;
   }
 
-  /* Revelado físico por scroll (useTestSectionFluidReveal.ts, rama
-     móvil): en reposo, clip-path la oculta por completo (recorte del
-     100% desde arriba); al hacer scroll, ese recorte se reduce hasta 0,
-     así que el borde revelado asciende desde el suelo de la sección,
-     nunca alcanza la franja del titular (reservada arriba). El CTA
-     queda dentro de este carril, por lo que al completarse el
-     revelado aparece integrado sobre el burdeos, no flotando aparte. */
-  .mobileReveal {
+  /* Fondo fotográfico -- toda la sección, object-fit:cover. El
+     object-position (solo el eje X importa aquí: a esta altura de
+     sección la imagen se ajusta por alto y sobra ancho, nunca al revés)
+     se fija en esta variable y se afina por breakpoint -- ver también
+     @media (max-width:640px) más abajo para 390/430px. 768px conserva
+     más columna visible que un teléfono (menos recorte relativo), así
+     que este valor -- el de la banda 641-900px -- centra algo más hacia
+     la mesa/salón sin perder la ventana izquierda. */
+  .mobilePhotoLayer {
     display: block;
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 48%;
-    background: var(--color-brand-primary);
+    inset: 0;
     z-index: 1;
-    clip-path: inset(100% 0 0 0);
-    pointer-events: none;
+    overflow: hidden;
+    --mobile-photo-position: 38% center;
+  }
+
+  .mobilePhoto {
+    object-position: var(--mobile-photo-position);
+  }
+}
+
+@media (max-width: 640px) {
+  /* Recorte más agresivo que a 768px (columna visible más estrecha) --
+     prioriza la ventana/vista al mar y el sofá en primer plano sobre la
+     mesa de comedor, que queda fuera de encuadre. Verificado visualmente
+     a 390 y 430px (ambos comparten esta banda; el contenido interesante
+     de la fotografía no cambia lo bastante entre los dos anchos como
+     para necesitar valores distintos). */
+  .mobilePhotoLayer {
+    --mobile-photo-position: 28% center;
   }
 }

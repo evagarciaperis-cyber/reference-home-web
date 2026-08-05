@@ -1,7 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { useTestSectionFluidReveal } from "@/motion/webgl/useTestSectionFluidReveal";
 import styles from "./TestSection.module.css";
+
+// Misma fotografía que ya revela la mancha WebGL en escritorio -- en
+// móvil (≤900px, sin hover/puntero continuo) es directamente el fondo a
+// sangre completa de la sección, sin ningún mecanismo de revelado.
+const MOBILE_BACKGROUND_SRC = "/images/valoracion/reveal-valoracion.png";
 
 // Contenido tipográfico compartido -- EXCLUSIVAMENTE microtexto, titular
 // y línea cursiva. Se renderiza DOS veces (capa negra + capa blanca
@@ -58,7 +64,7 @@ function TestSectionCopy() {
 // segundo sistema de seguimiento de puntero sobre esta sección, que ya
 // tiene el suyo propio para la mancha.
 export function TestSection() {
-  const { sectionRef, canvasHostRef, whiteLayerRef, mobileRevealRef, onPointerEnter, onPointerMove, onPointerLeave } =
+  const { sectionRef, canvasHostRef, whiteLayerRef, onPointerEnter, onPointerMove, onPointerLeave } =
     useTestSectionFluidReveal();
 
   return (
@@ -71,13 +77,28 @@ export function TestSection() {
     >
       <div ref={canvasHostRef} className={styles.canvasHost} aria-hidden="true" />
 
-      {/* ≤900px únicamente (ver TestSection.module.css y
-          useTestSectionFluidReveal.ts, rama móvil): la interacción de
-          cursor no tiene equivalente táctil, así que aquí se sustituye
-          por un revelado propio -- capa burdeos recortada con clip-path,
-          controlada por el progreso de scroll natural, sin cursor, sin
-          pin. Invisible en escritorio (display:none en la regla base). */}
-      <div className={styles.mobileReveal} ref={mobileRevealRef} aria-hidden="true" />
+      {/* ≤900px únicamente (TestSection.module.css) -- sin hover ni
+          puntero continuo, la mancha de cursor no tiene equivalente
+          táctil. En vez de simular una interacción, la fotografía que la
+          mancha revela en escritorio pasa a ser directamente el fondo a
+          sangre completa: composición fotográfica fija, sin ningún
+          mecanismo de revelado. Invisible en escritorio (display:none en
+          la regla base, donde sigue mandando .canvasHost/la mancha). */}
+      <div className={styles.mobilePhotoLayer} aria-hidden="true">
+        <Image
+          src={MOBILE_BACKGROUND_SRC}
+          alt=""
+          fill
+          sizes="100vw"
+          quality={75}
+          className={styles.mobilePhoto}
+        />
+        {/* Capa de contraste sutil -- un lavado plano, nunca un degradado
+            agresivo ni blur, solo lo necesario para que el titular negro
+            (sin cambiar de color respecto al actual) siga siendo legible
+            sobre una fotografía real. */}
+        <div className={styles.mobileScrim} />
+      </div>
 
       <div className={styles.textLayer}>
         <TestSectionCopy />

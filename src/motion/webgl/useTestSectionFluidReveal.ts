@@ -4,8 +4,6 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useThreeScene } from "./useThreeScene";
 import { quadVertexShader, trailFragmentShader, compositeFragmentShader } from "./testSectionFluidShaders";
-import { DESKTOP_QUERY } from "../core/media";
-import { subscribeFrame } from "../core/frameTicker";
 
 const IMAGE_SRC = "/images/valoracion/reveal-valoracion.png";
 
@@ -63,7 +61,6 @@ type Refs = {
   sectionRef: React.RefObject<HTMLElement | null>;
   canvasHostRef: React.RefObject<HTMLDivElement | null>;
   whiteLayerRef: React.RefObject<HTMLDivElement | null>;
-  mobileRevealRef: React.RefObject<HTMLDivElement | null>;
   supported: boolean;
   onPointerEnter: (event: React.PointerEvent<HTMLElement>) => void;
   onPointerMove: (event: React.PointerEvent<HTMLElement>) => void;
@@ -140,13 +137,15 @@ type Resources = {
  *
  * Fallback: si `!supported` (WebGL no disponible/falló/contexto
  * perdido), `reducedMotion`, o el dispositivo no tiene cursor real
- * (`hover:none`/touch), no se construye nada -- la sección se queda en
- * blanco + texto (negro) estático, sin que este hook intervenga.
+ * (`hover:none`/touch), no se construye nada -- este hook no interviene
+ * en absoluto. En ≤900px (sin cursor continuo por diseño) la sección
+ * resuelve su propio fondo por CSS puro (TestSection.module.css,
+ * .mobilePhotoLayer): la misma fotografía a sangre completa, sin ningún
+ * mecanismo de revelado que sustituya a la mancha.
  */
 export function useTestSectionFluidReveal(): Refs {
   const sectionRef = useRef<HTMLElement>(null);
   const whiteLayerRef = useRef<HTMLDivElement>(null);
-  const mobileRevealRef = useRef<HTMLDivElement>(null);
 
   const targetRef = useRef({ x: 0, y: 0 });
   const easedRef = useRef({ x: 0, y: 0, lastX: 0, lastY: 0 });
@@ -425,90 +424,6 @@ export function useTestSectionFluidReveal(): Refs {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supported, reducedMotion]);
 
-  /**
-   * Revelado móvil (≤900px, DESKTOP_QUERY de motion/core/media.ts -- el
-   * breakpoint maestro del proyecto). Completamente independiente del
-   * efecto de arriba: nunca se ejecutan los dos a la vez (uno u otro
-   * según el ancho), y este no toca WebGL/Three.js en absoluto -- es la
-   * razón técnica de que la interacción de cursor no tenga sentido aquí
-   * (no hay hover ni puntero continuo), así que en vez de intentar
-   * simularla se sustituye por un mecanismo de naturaleza distinta: una
-   * capa burdeos plana (.mobileReveal, TestSection.module.css) recortada
-   * con clip-path, cuyo avance depende del scroll natural -- sin pin
-   * propio, sin scroll-jacking, sin simular ningún cursor.
-   *
-   * REFERENCIA DE SCROLL (el punto no evidente de esta implementación):
-   * en la Home actual, TestSection vive anidado dentro de la escena de
-   * BuyerExperience (telón + vídeo que se abre por el centro vía
-   * clip-path, useBuyerExperience.ts) -- su .sticky mantiene a
-   * TestSection fija ocupando el viewport (position:absolute dentro de
-   * ese sticky) durante TODA esa escena, en cualquier ancho (ese hook no
-   * tiene rama de escritorio/móvil, solo ajusta una duración). Medir el
-   * progreso sobre section.getBoundingClientRect() aquí se queda
-   * CONGELADO (top:0 constante) en cuanto ese sticky engancha, mucho
-   * antes de que el vídeo termine de abrirse -- el revelado terminaría
-   * invisible, oculto detrás del vídeo todavía cerrado. La sección
-   * exterior (`.buyer`, NUNCA sticky ella misma, solo su hijo) sí tiene
-   * una posición que avanza sin congelarse durante todo el scroll, así
-   * que se referencia A ELLA en vez de a la propia sección -- solo
-   * LECTURA de su geometría, sin importar ni tocar useBuyerExperience.ts/
-   * BuyerExperience.tsx/module.css. Con fallback a la propia sección si
-   * algún día se usa TestSection sin ese ancestro.
-   *
-   * REVEAL_START/END (0.90-0.99) son una ventana dentro de ese mismo
-   * progreso 0-1 exterior ("top bottom" a "bottom bottom", igual
-   * definición que usa el propio ScrollTrigger de useBuyerExperience.ts
-   * por construcción geométrica) -- caen DESPUÉS de que el vídeo termina
-   * de abrirse (~0.88 con la duración actual de esa escena) y ANTES de
-   * que termine su pausa de lectura (1.0), verificado visualmente. Si la
-   * duración de esa escena cambia en el futuro, este es el primer sitio
-   * a revisar -- es la única dependencia real entre ambas escenas, y es
-   * de lectura, nunca de escritura.
-   *
-   * Sin rAF propio: se suscribe a subscribeFrame (motion/core/frameTicker.ts),
-   * el mismo ticker que ya conduce Lenis y el resto de hooks de motion del
-   * proyecto -- lee la posición vía getBoundingClientRect en cada frame
-   * (sin listener de "scroll" propio) y escribe un único clip-path
-   * inline, igual de barato que leer/escribir un estilo por frame en
-   * cualquier otro hook de scroll del proyecto.
-   */
-  useEffect(() => {
-    const section = sectionRef.current;
-    const reveal = mobileRevealRef.current;
-    if (!section || !reveal) return;
-    if (reducedMotion) return;
-    if (window.matchMedia(DESKTOP_QUERY).matches) return;
-
-    const outerScrollHost = section.parentElement?.closest("section") ?? section;
-    const REVEAL_START = 0.9;
-    const REVEAL_END = 0.97;
-
-    const render = () => {
-      const rect = outerScrollHost.getBoundingClientRect();
-      const vh = window.innerHeight;
-      // (vh - rect.top) / rect.height -- NO "+ vh" en el denominador: debe
-      // reproducir exactamente "top bottom" -> "bottom bottom" (self.progress
-      // de useBuyerExperience.ts), no "top bottom" -> "bottom top". Con un
-      // contenedor más alto que el viewport (aquí siempre lo es, 352vh),
-      // "bottom bottom" cae en rect.top = vh - rect.height, no en
-      // rect.top = -rect.height -- de ahí que el divisor correcto sea solo
-      // rect.height. Verificado numéricamente contra el propio release del
-      // sticky exterior antes de fijar este valor.
-      const outerProgress = clamp((vh - rect.top) / rect.height, 0, 1);
-      const progress = clamp((outerProgress - REVEAL_START) / (REVEAL_END - REVEAL_START), 0, 1);
-      const topInset = ((1 - progress) * 100).toFixed(2);
-      reveal.style.clipPath = `inset(${topInset}% 0 0 0)`;
-    };
-
-    render();
-    const unsubscribe = subscribeFrame(render);
-    return () => {
-      unsubscribe();
-      reveal.style.clipPath = "";
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reducedMotion]);
-
   const updateTarget = (event: React.PointerEvent<HTMLElement>) => {
     const section = sectionRef.current;
     if (!section) return;
@@ -553,7 +468,6 @@ export function useTestSectionFluidReveal(): Refs {
     sectionRef,
     canvasHostRef: containerRef,
     whiteLayerRef,
-    mobileRevealRef,
     supported: supported && !reducedMotion && eligible(),
     onPointerEnter,
     onPointerMove,
