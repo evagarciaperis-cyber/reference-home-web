@@ -1,0 +1,230 @@
+/* Escena 01 "La fachada" -- apertura de /inmobiliaria-valencia
+   (docs/INMOBILIARIA_VALENCIA_STORYBOARD.md). Contenedor alto + escenario
+   `position: sticky` (CSS puro, sin pin real de GSAP -- mismo patrón ya
+   estable de BuyerExperience/BuyerReveal): 170svh de altura total, 100svh
+   visibles en todo momento, 70svh de recorrido real para el ScrollTrigger
+   de useValenciaOpening.ts ("bottom bottom" cae justo al liberarse el
+   sticky, sin spacer).
+
+   Base CSS = estado "antes de animar" (titular ligeramente por asentar,
+   cubierta fuera de encuadre) -- useValenciaOpening.ts fija estos mismos
+   valores con gsap.set() antes del primer pintado (useIsomorphicLayoutEffect),
+   así que nunca hay un salto visible entre la base y lo que escribe JS.
+   El único sitio que cambia este estado de reposo es el media query de
+   prefers-reduced-motion, al final del archivo -- mismo criterio que
+   BrandPause/BrandStory. */
+
+.opening {
+  position: relative;
+  height: 170svh;
+  /* Mismo color que la cubierta y que el territorio oscuro de la escena
+     siguiente -- si la fotografía tarda en cargar, el hueco ya es del
+     color correcto, nunca blanco. */
+  background: var(--color-bg-secondary);
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transform: translateY(0);
+  will-change: transform;
+}
+
+.photoImg {
+  object-fit: cover;
+  /* Ligero margen de seguridad -- la deriva en Y (useValenciaOpening.ts,
+     hasta -24px en desktop) nunca debe descubrir un borde vacío. */
+  transform: scale(1.04);
+}
+
+/* Velo inferior sutil -- solo legibilidad del titular, nunca un tratamiento
+   decorativo propio (misma disciplina que Hero.module.css: scrim real,
+   no un filtro sobre toda la imagen). */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    0deg,
+    rgba(17, 17, 15, .74) 0%,
+    rgba(17, 17, 15, .28) 42%,
+    rgba(17, 17, 15, 0) 70%
+  );
+  pointer-events: none;
+}
+
+.topline {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  padding: clamp(20px, 3vw, 32px) var(--pad);
+  font-family: var(--font-manifesto-micro), var(--sans);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(240, 223, 207, .82);
+}
+
+.content {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(28px, 5vh, 44px);
+  padding: 0 var(--pad) clamp(56px, 9vh, 96px);
+  max-width: 780px;
+}
+
+.titleGroup {
+  /* Estado de reposo (antes de la primera pizca de scroll) -- calcado del
+     valor inicial que useValenciaOpening.ts fija con gsap.set(). */
+  transform: translateY(18px);
+  opacity: .9;
+  will-change: transform, opacity;
+}
+
+.headline {
+  margin: 0;
+  font-size: clamp(32px, 4.6vw, 60px);
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  color: var(--color-text-primary-inverse);
+}
+
+.headlineMain {
+  font-family: var(--font-manifesto-sans), var(--sans);
+  font-weight: 700;
+}
+
+.headlineAccent {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.sub {
+  margin: 18px 0 0;
+  max-width: 46ch;
+  font-size: clamp(14px, 1.1vw, 17px);
+  line-height: 1.55;
+  color: rgba(240, 223, 207, .84);
+}
+
+/* Cue de scroll -- invitación a seguir leyendo, nunca un CTA de
+   conversión (regla explícita del storyboard: aquí no cabe "pide tu
+   valoración"). No es un enlace: es una afirmación visual, estática,
+   sin animación propia. */
+.cue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(240, 223, 207, .78);
+}
+
+.cueRing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 223, 207, .5);
+  font-size: 12px;
+}
+
+/* Cubierta física -- plano sólido, nunca una capa de opacity. Mismo color
+   que .opening/el fondo de la escena siguiente. yPercent 100 = totalmente
+   fuera de encuadre por abajo (estado de reposo); useValenciaOpening.ts
+   la sube (yPercent -> 0) en el último tramo del scroll de la escena.
+
+   SIN `transform` aquí a propósito (bug real encontrado y corregido,
+   2026-08-05): declarar `translateY(100%)` en CSS y luego fijar
+   `yPercent: 100` con GSAP sobre el MISMO elemento hace que GSAP sume
+   ambos en vez de reconciliarlos -- al montar, GSAP lee el transform ya
+   calculado por el navegador (100% -> resuelto a un valor en píxeles) y
+   lo interpreta como su propio `y` base en píxeles; su `yPercent`
+   segurió siendo una propiedad interna aparte, así que el `yPercent:100`
+   de useValenciaOpening.ts se sumaba ENCIMA de esos píxeles heredados --
+   el desplazamiento real medido era el doble del previsto y la cubierta
+   nunca llegaba a cubrir el encuadre. useIsomorphicLayoutEffect ya fija
+   `yPercent: 100` de forma síncrona antes del primer pintado, así que no
+   hace falta (ni es seguro) declarar también un transform de reposo
+   aquí -- GSAP es el único dueño de esta propiedad desde el primer
+   frame. La única red de seguridad para cuando JS no llega a tocar este
+   elemento es el `display: none` de prefers-reduced-motion, más abajo. */
+.cover {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: var(--color-bg-secondary);
+  will-change: transform;
+}
+
+@media (max-width: 900px) {
+  .content {
+    max-width: none;
+    gap: 28px;
+  }
+
+  .sub {
+    max-width: 38ch;
+  }
+}
+
+@media (max-width: 640px) {
+  .topline {
+    padding: 18px var(--pad);
+  }
+
+  .topline span:last-child {
+    display: none;
+  }
+
+  .content {
+    padding-bottom: clamp(48px, 10vh, 72px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening {
+    height: 100svh;
+  }
+
+  .stage {
+    position: static;
+    height: 100svh;
+  }
+
+  .titleGroup {
+    transform: none;
+    opacity: 1;
+  }
+
+  .photo {
+    transform: none;
+  }
+
+  /* Sin cubierta: no hay recorrido de scroll que animar, así que no hay
+     nada que "entregar" -- la escena termina como una fotografía fija y
+     cede el paso al siguiente bloque por el propio flujo del documento. */
+  .cover {
+    display: none;
+  }
+}
