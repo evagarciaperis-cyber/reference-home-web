@@ -1,0 +1,88 @@
+/* Placeholder temporal de /inmobiliaria-valencia (2026-08-05) -- la
+   navegación (Header/MobileMenu) ya queda integrada de verdad; el
+   contenido real, escena a escena, se construye a continuación siguiendo
+   docs/INMOBILIARIA_VALENCIA_MASTERPLAN.md y
+   docs/INMOBILIARIA_VALENCIA_STORYBOARD.md. Territorio oscuro de la
+   paleta corporativa (--color-bg-secondary, el mismo verde grisáceo que
+   ya usa BrandPause) -- no negro, no un color nuevo -- con
+   data-header-tone="dark" en la sección (InmobiliariaValencia.tsx) para
+   que el header muestre el logo claro, igual que sobre cualquier otra
+   sección oscura del sitio. */
+
+.placeholder {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary-inverse);
+  overflow: hidden;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: clamp(24px, 4vh, 44px);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(240, 223, 207, .82);
+}
+
+.eyebrowRule {
+  width: 38px;
+  height: 1px;
+  background: var(--color-accent-exceptional);
+}
+
+.title {
+  font-size: clamp(34px, 5vw, 62px);
+  line-height: 1.12;
+  letter-spacing: -.01em;
+}
+
+.titleAccent {
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.support {
+  margin-top: 22px;
+  max-width: 46ch;
+  font-size: clamp(14px, 1.1vw, 17px);
+  line-height: 1.6;
+  color: rgba(240, 223, 207, .78);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 44px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(240, 223, 207, .4);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-text-primary-inverse);
+  transition: border-color .3s ease, opacity .3s ease;
+}
+
+.back:hover {
+  border-color: var(--color-accent-exceptional);
+  opacity: .85;
+}
