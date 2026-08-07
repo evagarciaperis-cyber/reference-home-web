@@ -5,17 +5,23 @@ import Image from "next/image";
 import { useValenciaOpening } from "@/motion/hooks/useValenciaOpening";
 import styles from "./ValenciaOpening.module.css";
 
-// PLACEHOLDER FOTOGRÁFICO (2026-08-05) -- docs/INMOBILIARIA_VALENCIA_MASTERPLAN.md
-// marca la fotografía real de esta escena como pendiente de producción
-// (candidato: una de las viviendas del clímax, Cap. 06, cuando exista).
-// Mientras tanto se reutiliza "/images/story/background/story-background.webp"
-// -- YA existe en el proyecto y ya está aprobada para uso editorial a
-// pantalla completa (es el fondo real de BrandStory en la Home): misma
-// disciplina fotográfica pedida aquí (arquitectura mediterránea, luz
-// natural, sin gente, sin gran angular de portal). Sustituir por la
-// fotografía definitiva de esta página no requiere tocar nada más que
-// esta constante.
-const PLACEHOLDER_PHOTO_SRC = "/images/story/background/story-background.webp";
+// PLACEHOLDER FOTOGRÁFICO -- IA, NO FOTOGRAFÍA REAL (2026-08-06).
+// docs/INMOBILIARIA_VALENCIA_MASTERPLAN.md marca la fotografía real de
+// esta escena como pendiente de producción (candidato: una de las
+// viviendas del clímax, Cap. 06, cuando exista). Esta imagen concreta
+// (skyline de Valencia -- cúpula, avenida, torre -- al atardecer) es una
+// generación de IA (ChatGPT) aportada por el cliente; confirmado
+// explícitamente con él que NO es fotografía real y que se usa aquí
+// únicamente como placeholder mejorado (sustituye a la anterior,
+// story-background.webp) mientras se produce la fotografía real
+// definitiva -- ver docs/INMOBILIARIA_VALENCIA_MASTERPLAN.md, regla de
+// "cero fotografía de stock/fabricada" para el resto del proyecto, que
+// esta imagen todavía no cumple. Sustituirla no requiere tocar nada más
+// que esta constante (el object-position por breakpoint de
+// ValenciaOpening.module.css está calibrado a ESTA composición concreta
+// -- cúpula en el tercio izquierdo, torre a la derecha -- y habrá que
+// recalibrarlo si la fotografía definitiva tiene un encuadre distinto).
+const PLACEHOLDER_PHOTO_SRC = "/images/valencia-opening/valencia-skyline-atardecer.png";
 
 // Escena 01 "La fachada" (docs/INMOBILIARIA_VALENCIA_STORYBOARD.md) --
 // apertura de /inmobiliaria-valencia. Sin pin real de GSAP: contenedor
@@ -37,13 +43,20 @@ export function ValenciaOpening() {
   const photoRef = useRef<HTMLDivElement>(null);
   const titleGroupRef = useRef<HTMLDivElement>(null);
   const coverRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  useValenciaOpening({ sectionRef, photoRef, titleGroupRef, coverRef });
+  useValenciaOpening({ sectionRef, photoRef, titleGroupRef, coverRef, videoRef });
 
   return (
     <section className={styles.opening} data-header-tone="dark" data-header-transparent="true" ref={sectionRef}>
       <div className={styles.stage}>
         <div className={styles.photo} ref={photoRef} aria-hidden="true">
+          {/* Fotografía real -- fondo único en mobile/tablet (<=900px) y
+              bajo prefers-reduced-motion (ver .video en
+              ValenciaOpening.module.css), y estado de carga en desktop
+              mientras el vídeo todavía no está listo (useValenciaOpening.ts
+              solo marca data-video-ready cuando el vídeo dispara
+              `canplay`) -- nunca un frame negro. */}
           <Image
             src={PLACEHOLDER_PHOTO_SRC}
             alt=""
@@ -52,6 +65,26 @@ export function ValenciaOpening() {
             quality={75}
             priority
             className={styles.photoImg}
+          />
+          {/* Vídeo con scrubbing real -- solo desktop (>=901px), nunca en
+              mobile/tablet ni bajo prefers-reduced-motion (ver
+              useValenciaOpening.ts: el `src` solo se asigna por JS cuando
+              se confirma desktop, así que en mobile ni siquiera se
+              descarga). `currentTime` lo gobierna exclusivamente el mismo
+              ScrollTrigger de la escena -- nunca reproducción por tiempo,
+              nunca un segundo trigger. Sin object-position propio: hereda
+              el mismo encuadre de escritorio que la fotografía a través de
+              .videoEl (ValenciaOpening.module.css) y NO recibe ningún
+              transform (ni translateY de deriva, ni scale) -- el
+              movimiento de cámara es responsabilidad exclusiva del propio
+              metraje, pedido explícito. */}
+          <video
+            ref={videoRef}
+            className={styles.videoEl}
+            muted
+            playsInline
+            preload="auto"
+            aria-hidden="true"
           />
         </div>
 
