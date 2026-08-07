@@ -1,10 +1,18 @@
 /* Escena 01 "La fachada" -- apertura de /inmobiliaria-valencia
    (docs/INMOBILIARIA_VALENCIA_STORYBOARD.md). Contenedor alto + escenario
    `position: sticky` (CSS puro, sin pin real de GSAP -- mismo patrón ya
-   estable de BuyerExperience/BuyerReveal): 170svh de altura total, 100svh
-   visibles en todo momento, 70svh de recorrido real para el ScrollTrigger
-   de useValenciaOpening.ts ("bottom bottom" cae justo al liberarse el
-   sticky, sin spacer).
+   estable de BuyerExperience/BuyerReveal).
+
+   2026-08-07: altura subida de 170svh a 230svh (100svh visibles + 130svh
+   de recorrido real para el ScrollTrigger de useValenciaOpening.ts,
+   "bottom bottom" cae justo al liberarse el sticky, sin spacer) -- el
+   reparto obligatorio vídeo->pausa->cubierta (VIDEO_END=0.7,
+   COVER_RISE_START=0.82, ver ese hook) necesitaba más recorrido físico
+   para que la pausa de lectura del último fotograma y el ascenso de la
+   cubierta tuvieran peso real, en vez de sentirse instantáneos. .stage
+   sigue pineado (position:sticky) durante TODO ese recorrido -- la
+   Escena 02 no puede aparecer antes de que termine, es una garantía
+   estructural del propio sticky, no algo que dependa del reparto interno.
 
    Base CSS = estado "antes de animar" (titular ligeramente por asentar,
    cubierta fuera de encuadre) -- useValenciaOpening.ts fija estos mismos
@@ -16,7 +24,7 @@
 
 .opening {
   position: relative;
-  height: 170svh;
+  height: 230svh;
   /* Mismo color que la cubierta y que el territorio oscuro de la escena
      siguiente -- si la fotografía tarda en cargar, el hueco ya es del
      color correcto, nunca blanco. */
@@ -40,9 +48,54 @@
 
 .photoImg {
   object-fit: cover;
+  /* object-position calibrado a la fotografía real de esta escena
+     (cúpula en torno al 30% del ancho, torre en torno al 81% -- ver
+     comentario de PLACEHOLDER_PHOTO_SRC en ValenciaOpening.tsx). Con
+     `cover`, en las 4 anchuras validadas (390/430/768/1440) el recorte es
+     SIEMPRE horizontal (la imagen es más ancha por alto que cualquiera de
+     esos contenedores), así que solo el eje X importa -- el valor de Y
+     queda en 50% de forma inerte, sin efecto real, por claridad. 46% en
+     desktop dentro de @media(min-width:901px) más abajo. */
+  object-position: 46% 50%;
   /* Ligero margen de seguridad -- la deriva en Y (useValenciaOpening.ts,
-     hasta -24px en desktop) nunca debe descubrir un borde vacío. */
+     hasta -12px en mobile/tablet; 0 en desktop, donde esta imagen es solo
+     el fallback/estado de carga y el vídeo lleva el movimiento real)
+     nunca debe descubrir un borde vacío. */
   transform: scale(1.04);
+}
+
+/* Vídeo con scrubbing real -- oculto por defecto (mobile/tablet, y
+   desktop mientras no esté listo). Mismo object-position de desktop que
+   .photoImg (46%, calibrado a este metraje) pero SIN transform: ni
+   translateY de deriva ni scale -- el movimiento de cámara es
+   responsabilidad exclusiva del propio vídeo (pedido explícito), a
+   diferencia de .photoImg, que sí lleva el scale(1.04) de margen de
+   seguridad para su propia deriva en mobile. */
+.videoEl {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 46% 50%;
+  display: none;
+}
+
+/* Solo en desktop, y solo una vez useValenciaOpening.ts confirma que el
+   vídeo puede reproducirse (data-video-ready, fijado tras `canplay`) --
+   hasta entonces sigue mandando la fotografía real (.photoImg), nunca un
+   frame negro. Ambas reglas viven dentro del mismo breakpoint maestro a
+   propósito: si la ventana se redimensiona de escritorio a móvil, el
+   vídeo debe volver a ocultarse aunque data-video-ready siga en "true". */
+@media (min-width: 901px) {
+  .opening[data-video-ready="true"] .videoEl {
+    display: block;
+  }
+
+  .opening[data-video-ready="true"] .photoImg {
+    display: none;
+  }
 }
 
 /* Velo inferior sutil -- solo legibilidad del titular, nunca un tratamiento
@@ -86,6 +139,20 @@
   gap: clamp(28px, 5vh, 44px);
   padding: 0 var(--pad) clamp(56px, 9vh, 96px);
   max-width: 780px;
+}
+
+/* Desktop: la cúpula (tercio izquierdo) y la torre (derecha) deben seguir
+   protagonizando el encuadre -- el bloque de texto se desplaza a la zona
+   limpia entre ambas (la avenida/el cielo) en vez de arrancar en el borde
+   izquierdo, donde solapaba la fachada de la cúpula. Sin tocar .content
+   en el resto de anchuras (mobile ya usa el ancho completo, ver más abajo
+   -- ahí la cúpula ocupa casi todo el encuadre visible y no hay "zona
+   limpia" que buscar). */
+@media (min-width: 901px) {
+  .content {
+    left: 40%;
+    max-width: 660px;
+  }
 }
 
 .titleGroup {
@@ -186,6 +253,15 @@
   .sub {
     max-width: 38ch;
   }
+
+  /* Encuadre propio de móvil (no la panorámica de desktop): con `cover`
+     en un contenedor tan estrecho y alto, solo se ve una franja vertical
+     angosta de la fotografía -- 30% centra esa franja sobre la cúpula
+     completa (incluida la cruz) y la luz del atardecer detrás, sin
+     recortarla a medias contra ningún borde. */
+  .photoImg {
+    object-position: 30% 50%;
+  }
 }
 
 @media (max-width: 640px) {
@@ -225,6 +301,14 @@
      nada que "entregar" -- la escena termina como una fotografía fija y
      cede el paso al siguiente bloque por el propio flujo del documento. */
   .cover {
+    display: none;
+  }
+
+  /* Red de seguridad explícita -- useValenciaOpening.ts ya nunca llega a
+     crear/cargar el vídeo bajo reduced-motion (early return), así que
+     data-video-ready jamás se fija en este caso, pero esta regla lo deja
+     también garantizado a nivel de CSS. */
+  .videoEl {
     display: none;
   }
 }
