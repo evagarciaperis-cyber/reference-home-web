@@ -16,7 +16,7 @@ const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boo
 
 // Rutas por página estática original (docs/ARQUITECTURA.md, sección 7):
 // index.html -> /, nosotros.html -> /nosotros, proyectos.html -> /proyectos,
-// contacto.html -> /contacto. Esas páginas aún no existen (fases futuras),
+// contacto.html -> /contacto. Esas tres aún no existen (fases futuras),
 // igual que en el oráculo, donde los .html correspondientes están vacíos.
 // prefetch={false} en esas tres: sin él, next/link las precarga en
 // segundo plano en cuanto entran en el viewport y genera 404 reales en
@@ -24,6 +24,13 @@ const cx = (...classes: Array<string | false | undefined>) => classes.filter(Boo
 // es un comportamiento del original (sitio estático sin prefetch), es un
 // artefacto propio de Next.js con rutas que aún no existen. No cambia la
 // navegación real: al hacer click, sigue yendo a la 404 tal cual debe.
+//
+// "Vender en Valencia" (/inmobiliaria-valencia, 2026-08-05) es distinta:
+// no es del oráculo original, es una página real y nueva del proyecto
+// (docs/INMOBILIARIA_VALENCIA_MASTERPLAN.md), con su propia ruta ya
+// creada (src/app/inmobiliaria-valencia/page.tsx) -- por eso lleva
+// prefetch por defecto, como Inicio, y no el prefetch={false} de las
+// tres pendientes.
 export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
   const { isScrolled, isOnDark, isHidden, isTransparent } = useHeaderState();
 
@@ -85,6 +92,7 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
           <Link href="/proyectos" prefetch={false}>
             Proyectos <sup>07</sup>
           </Link>
+          <Link href="/inmobiliaria-valencia">Vender en Valencia</Link>
           <Link href="/contacto" prefetch={false}>
             Contacto
           </Link>

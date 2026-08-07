@@ -8,12 +8,14 @@ import styles from "./MobileMenu.module.css";
 type MobileMenuLink = { href: string; label: string; index: string };
 
 // Mismas rutas que la navegación de escritorio (ver Header.tsx, incluido
-// el motivo de prefetch:false en las tres que aún no existen).
+// el motivo de prefetch:false en las tres que aún no existen -- y por qué
+// "Vender en Valencia" no lo lleva: ruta real, ya creada).
 const LINKS: MobileMenuLink[] = [
   { href: "/", label: "Inicio", index: "01" },
   { href: "/nosotros", label: "Nosotros", index: "02" },
   { href: "/proyectos", label: "Proyectos", index: "03" },
-  { href: "/contacto", label: "Contacto", index: "04" },
+  { href: "/inmobiliaria-valencia", label: "Vender en Valencia", index: "04" },
+  { href: "/contacto", label: "Contacto", index: "05" },
 ];
 
 type MobileMenuProps = {
@@ -61,7 +63,12 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
     >
       <div className={styles.inner}>
         {LINKS.map((link) => (
-          <Link key={link.href} href={link.href} prefetch={link.href === "/" ? undefined : false} onClick={onClose}>
+          <Link
+            key={link.href}
+            href={link.href}
+            prefetch={link.href === "/" || link.href === "/inmobiliaria-valencia" ? undefined : false}
+            onClick={onClose}
+          >
             {link.label} <span>{link.index}</span>
           </Link>
         ))}
