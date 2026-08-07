@@ -116,7 +116,27 @@ export function useAmbientLiquid<T extends HTMLElement>() {
     const hero = document.getElementById("inicio");
     if (!container || !canvas || !hero) return;
 
-    const renderer: LiquidRenderer | null = createLiquidRenderer(canvas);
+    // createLiquidRenderer ya no lanza (liquidBackground.ts, 2026-08-05):
+    // cualquier fallo de WebGL (no disponible, contexto perdido, shader
+    // que no compila) vuelve null con diagnóstico completo en consola.
+    // Este try/catch es solo una segunda red de seguridad -- si algo
+    // imprevisto lanzara de todos modos, un efecto de React que lanza sin
+    // capturar aborta el commit y fuerza a React a remontar el árbol
+    // entero para recuperarse (sin error boundary aquí), lo cual es
+    // exactamente lo que producía el "removeChild" en otro nodo de la
+    // página como síntoma secundario. Nunca debe llegar a ocurrir, pero
+    // si ocurre, el fondo líquido simplemente se desactiva -- Manifesto y
+    // el resto de la Home siguen funcionando con normalidad.
+    let renderer: LiquidRenderer | null = null;
+    try {
+      renderer = createLiquidRenderer(canvas);
+    } catch (error) {
+      console.error(
+        "[useAmbientLiquid] Fallo inesperado creando el renderer del fondo líquido -- se desactiva, el resto de Manifesto sigue funcionando.",
+        error,
+      );
+      renderer = null;
+    }
     if (!renderer) return;
 
     const reducedMotion = prefersReducedMotion();
