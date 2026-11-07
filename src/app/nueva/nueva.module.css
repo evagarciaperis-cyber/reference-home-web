@@ -54,7 +54,8 @@
    valoración y entra desde la derecha (ValuationScene lo mueve). */
 .hNext {
   position: relative;
-  z-index: 3;
+  /* Encima de la valoración (z-index 5) para la entrada en horizontal */
+  z-index: 6;
   margin-top: -100svh;
   transform: translate3d(100%, 0, 0);
 }

@@ -3,7 +3,9 @@
    repetirse. */
 .section {
   position: relative;
-  z-index: 2;
+  /* Por encima de todas las capas de la escena de compra (llegan a z-index 4):
+     así su texto nunca asoma sobre la puerta aunque su animación vaya con retraso. */
+  z-index: 5;
   margin-top: -100svh;
   height: 400svh;
   color: #f6efe6;
