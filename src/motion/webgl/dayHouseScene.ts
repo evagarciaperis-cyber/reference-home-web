@@ -37,10 +37,12 @@ export type DayHouseScene = {
 };
 
 // Tramos del scroll: [inicio, fin] de cada transición entre luces.
+// Tramos encadenados, sin pausas: la luz no deja de cambiar mientras se
+// baja, como un anochecer real.
 const TRANSITIONS: Array<[number, number]> = [
-  [0.1, 0.34], // día → tarde
-  [0.36, 0.6], // tarde → atardecer
-  [0.66, 0.84], // atardecer → noche
+  [0.04, 0.36], // día → tarde
+  [0.36, 0.64], // tarde → atardecer
+  [0.64, 0.88], // atardecer → noche
 ];
 
 // Recorrido del sol en coordenadas de la FOTO (x, y desde arriba, 0..1),
@@ -153,17 +155,16 @@ void main() {
   vec2 uv = coverUv(vUv);
   uv = 0.5 + (uv - 0.5) / uScale + uPointer * 0.006;
 
-  // --- Frente de luz que avanza a través del humo
-  float n = fbm(uv * vec2(2.4, 1.6) + vec2(uTime * 0.02, -uTime * 0.035));
-  float v = n * 0.72 + (1.0 - vUv.y) * 0.28;
-  float edge = uT * 1.45 - 0.22;
-  float m = 1.0 - smoothstep(edge - 0.1, edge + 0.1, v);
-  vec3 a = texture2D(uFrom, uv).rgb;
-  vec3 b = texture2D(uTo, uv).rgb;
-  vec3 col = mix(a, b, m);
+  // --- Paso de una luz a la siguiente: un anochecer continuo, sin
+  // manchas. Toda la imagen cambia a la vez (el cielo, apenas un poco por
+  // delante) y la mezcla se hace en luz lineal, que es como se suma la luz
+  // de verdad: así no se percibe un cambio de foto, solo que oscurece.
+  float lead = (vUv.y - 0.5) * 0.16 * sin(3.14159 * uT);
+  float m = smoothstep(0.0, 1.0, clamp(uT + lead, 0.0, 1.0));
+  vec3 a = pow(texture2D(uFrom, uv).rgb, vec3(2.2));
+  vec3 b = pow(texture2D(uTo, uv).rgb, vec3(2.2));
+  vec3 col = pow(mix(a, b, m), vec3(1.0 / 2.2));
   vec3 fogC = mix(uFogFrom, uFogTo, m);
-  float front = smoothstep(0.13, 0.0, abs(v - edge)) * sin(3.14159 * uT);
-  col = mix(col, fogC, front * 0.55);
 
   // --- Luces de la casa, encendiéndose por zonas
   if (uNightW > 0.001) {
@@ -184,20 +185,20 @@ void main() {
     col += glow * vec3(1.0, 0.78, 0.5) * 0.22 * on * uNightW;
   }
 
-  // --- Humo: nubes grandes con deformación de dominio que atraviesan la
-  // escena en cada cambio de luz, más una bruma baja que nunca desaparece.
-  vec2 wq = uv * vec2(1.2, 1.9);
-  vec2 warp = vec2(fbm(wq + vec2(uTime * 0.05, 0.0)), fbm(wq + vec2(5.2, 1.3) - vec2(0.0, uTime * 0.04)));
-  float cloud = fbm(wq * 1.3 + warp * 2.2 + vec2(uTime * 0.07 - uT * 1.6, uTime * 0.02));
-  float f2 = fbm(uv * 3.4 - vec2(uTime * 0.06, -uTime * 0.03) + warp);
-  float smoke = smoothstep(0.38, 0.82, cloud * 0.75 + f2 * 0.35);
-  float low = mix(0.45, 1.0, smoothstep(0.1, 0.8, 1.0 - vUv.y));
-  float band = smoothstep(0.45, 0.0, abs(v - edge)) * step(0.001, uT) * step(uT, 0.999);
-  float density = (sin(3.14159 * uT) * 0.28 + band * 0.12) * mix(0.75, 1.0, low)
-                + 0.05 * low
-                + (1.0 - smoothstep(0.2, 1.0, uIntro)) * 1.35;
-  vec3 smokeC = fogC * (0.78 + 0.42 * smoothstep(0.3, 0.9, f2)) + vec3(0.02);
-  col = mix(col, smokeC, clamp(smoke * density, 0.0, 0.94));
+  // --- Niebla solo en la apertura: la casa aparece entre la bruma al
+  // cargar. Durante el día no hay niebla, para que el anochecer sea limpio.
+  vec3 smokeC = fogC;
+  float smoke = 0.0;
+  if (uIntro < 0.999) {
+    vec2 wq = uv * vec2(1.2, 1.9);
+    vec2 warp = vec2(fbm(wq + vec2(uTime * 0.05, 0.0)), fbm(wq + vec2(5.2, 1.3) - vec2(0.0, uTime * 0.04)));
+    float cloud = fbm(wq * 1.3 + warp * 2.2 + vec2(uTime * 0.07, uTime * 0.02));
+    float f2 = fbm(uv * 3.4 - vec2(uTime * 0.06, -uTime * 0.03) + warp);
+    smoke = smoothstep(0.38, 0.82, cloud * 0.75 + f2 * 0.35);
+    smokeC = fogC * (0.78 + 0.42 * smoothstep(0.3, 0.9, f2)) + vec3(0.02);
+    float density = (1.0 - smoothstep(0.2, 1.0, uIntro)) * 1.35;
+    col = mix(col, smokeC, clamp(smoke * density, 0.0, 0.94));
+  }
 
   // --- El sol: disco, halo, dispersión en el cielo, reflejo en el agua y
   // destellos de cámara. Vive en coordenadas de la foto (uv), así que se
@@ -485,7 +486,7 @@ export function createDayHouseScene(canvas: HTMLCanvasElement, opts: DayHouseOpt
     uniforms.uNightW.value = ls.to === 3 ? (ls.from === 3 ? 1 : ls.t) : 0;
     uniforms.uScale.value = 1.08 - shown * 0.06;
     // De día no se oscurece la base de la imagen: el texto es oscuro.
-    uniforms.uDay.value = 1 - smooth(clamp01((shown - 0.42) / 0.16));
+    uniforms.uDay.value = 1 - smooth(clamp01((shown - 0.66) / 0.14));
 
     // Encuadre (en móvil sigue al sol) y posición del sol en pantalla.
     const focusX = opts.mobile ? interp(MOBILE_FOCUS, shown)[0] : 0.5 - Math.sin(Math.PI * clamp01((shown - 0.3) / 0.45)) * 0.06;

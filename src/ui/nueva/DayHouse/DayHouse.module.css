@@ -131,7 +131,7 @@
 .word {
   position: absolute;
   left: 50%;
-  top: 40%;
+  top: 34%;
   width: min(92vw, 60rem);
   transform: translate(-50%, -50%);
   text-align: center;
@@ -143,9 +143,10 @@
   letter-spacing: -0.01em;
 }
 
+/* La frase va encima del titular, sobre el cielo limpio. */
 .wordSub {
-  margin: 1.4rem auto 0;
-  max-width: 32rem;
+  margin: 0 auto 1.1rem;
+  max-width: 34rem;
   font: 500 clamp(0.95rem, 1.2vw, 1.1rem)/1.5 var(--nw-sans);
 }
 
@@ -381,7 +382,7 @@
   }
 
   .word {
-    top: 36%;
+    top: 30%;
   }
 
   .wordLogo {

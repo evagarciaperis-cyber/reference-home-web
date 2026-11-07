@@ -74,8 +74,8 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
       const phase = phaseAt(p);
       if (clockRef.current) clockRef.current.textContent = clockAt(p);
       // Tono del texto: tinta y logo rojo con el cielo claro de la mañana y
-      // la tarde; crema desde el atardecer.
-      const tone = p < 0.5 ? "dark" : "light";
+      // la tarde (y el atardecer, cuyo cielo es muy luminoso); crema de noche.
+      const tone = p < 0.74 ? "dark" : "light";
       if (stageRef.current && stageRef.current.dataset.tone !== tone) stageRef.current.dataset.tone = tone;
       if (phase !== lastPhase) {
         lastPhase = phase;
@@ -145,18 +145,18 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
             <img className={styles.wordLogo} src="/nueva/logo-rojo.png" alt="" />
           </div>
           {PHASES.map((ph, i) => (
-            <div key={ph.key} className={styles.word} data-word={i + 1} data-state="idle" data-tone={i < 2 ? "dark" : "light"}>
+            <div key={ph.key} className={styles.word} data-word={i + 1} data-state="idle" data-tone={i < 3 ? "dark" : "light"}>
+              <p className={styles.wordSub}>
+                <span className={styles.mask}>
+                  <span>{ph.sub}</span>
+                </span>
+              </p>
               <p className={styles.wordTitle}>
                 {ph.word.split(" ").map((w, k) => (
                   <span key={k} className={styles.mask}>
-                    <span style={{ transitionDelay: `${k * 90}ms` }}>{w}</span>
+                    <span style={{ transitionDelay: `${120 + k * 90}ms` }}>{w}</span>
                   </span>
                 ))}
-              </p>
-              <p className={styles.wordSub}>
-                <span className={styles.mask}>
-                  <span style={{ transitionDelay: "260ms" }}>{ph.sub}</span>
-                </span>
               </p>
             </div>
           ))}
