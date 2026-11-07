@@ -4,6 +4,10 @@ import { DayHouse } from "@/ui/nueva/DayHouse";
 import { CityScene } from "@/ui/nueva/CityScene";
 import { CasesScene } from "@/ui/nueva/CasesScene";
 import { MethodScene } from "@/ui/nueva/MethodScene";
+// Dos secciones de la web anterior que se mantienen tal cual (diseño y
+// movimiento): «No es el mercado. Es cómo se vende.» y «Cada paso importa».
+import { SellingErrors } from "@/ui/sections/SellingErrors";
+import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -39,6 +43,8 @@ export default function NuevaPage() {
         <CityScene />
         <CasesScene />
         <MethodScene />
+        <SellingErrors />
+        <ProjectsGallery />
         <section className={styles.next} aria-labelledby="next-title">
           <p className={styles.eyebrow}>Escena 6 · en construcción</p>
           <h2 id="next-title" className={styles.nextTitle}>
