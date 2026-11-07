@@ -8,9 +8,10 @@ import { ErrorsScene } from "@/ui/nueva/ErrorsScene";
 // «Cada paso importa» se mantiene tal cual (diseño y movimiento) de la web
 // anterior.
 import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
-// También tal cual: «Conoce nuestros últimos inmuebles» y «¿Cómo podemos
-// ayudarte?», en el mismo orden que en la web anterior.
-import { BuyerExperience } from "@/ui/sections/BuyerExperience";
+// «Conoce nuestros últimos inmuebles» (BuyerScene, copia que revela la
+// valoración nueva) y «¿Cómo podemos ayudarte?» tal cual.
+import { BuyerScene } from "@/ui/nueva/BuyerScene";
+import { ValuationScene } from "@/ui/nueva/ValuationScene";
 import { Process } from "@/ui/sections/Process";
 import { TeamScene } from "@/ui/nueva/TeamScene";
 import styles from "./nueva.module.css";
@@ -52,7 +53,8 @@ export default function NuevaPage() {
         {/* Sube por encima de la escena anterior como una hoja que la cubre. */}
         <div className={styles.cover}>
           <ProjectsGallery />
-          <BuyerExperience />
+          <BuyerScene />
+          <ValuationScene />
           <Process />
         </div>
         <TeamScene />

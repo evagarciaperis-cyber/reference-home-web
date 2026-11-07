@@ -79,10 +79,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
       const tone = p < 0.74 ? "dark" : "light";
       if (stageRef.current && stageRef.current.dataset.tone !== tone) {
         stageRef.current.dataset.tone = tone;
-        // La cabecera compartida lee el tono de la sección que tiene debajo.
-        if (tone === "light") section.setAttribute("data-header-tone", "dark");
-        else section.removeAttribute("data-header-tone");
-        requestHeaderToneRefresh();
+
       }
       // Arriba del todo la cabecera se ve siempre; al bajar se esconde y
       // reaparece al acercar el ratón (comportamiento de la cabecera).
@@ -135,7 +132,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
   }, [fontFamily]);
 
   return (
-    <section ref={sectionRef} className={styles.scene} aria-labelledby="dayhouse-title" data-header-transparent="true" data-header-force-visible="true">
+    <section ref={sectionRef} className={styles.scene} aria-labelledby="dayhouse-title" data-header-tone="dark" data-header-transparent="true" data-header-force-visible="true">
       <div ref={stageRef} className={styles.stage} data-tone="dark">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.poster} src={fallback ? "/nueva/atardecer.webp" : "/nueva/dia.webp"} alt="" fetchPriority="high" />

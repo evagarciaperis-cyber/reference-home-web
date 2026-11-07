@@ -36,18 +36,18 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(21, 17, 15, 0.7) 0%, rgba(21, 17, 15, 0.25) 38%, rgba(21, 17, 15, 0) 60%),
-    linear-gradient(0deg, rgba(21, 17, 15, 0.5) 0%, rgba(21, 17, 15, 0) 30%);
+    linear-gradient(180deg, rgba(21, 17, 15, 0.45) 0%, rgba(21, 17, 15, 0) 22%),
+    linear-gradient(0deg, rgba(21, 17, 15, 0.82) 0%, rgba(21, 17, 15, 0.45) 30%, rgba(21, 17, 15, 0) 55%);
 }
 
 .head {
   position: absolute;
   z-index: 3;
   left: var(--nw-pad);
-  top: clamp(90px, 14vh, 140px);
+  bottom: clamp(36px, 9vh, 90px);
   max-width: min(60rem, 90vw);
   opacity: var(--intro);
-  transform: translate3d(0, calc((1 - var(--intro)) * -30px), 0);
+  transform: translate3d(0, calc((1 - var(--intro)) * 30px), 0);
 }
 
 .eyebrow {
@@ -132,7 +132,7 @@
   z-index: 1;
   right: var(--nw-pad);
   top: 50%;
-  width: min(30vw, 46vh);
+  width: min(38vw, 62vh);
   aspect-ratio: 3 / 4;
   max-width: 100%;
   transform: translate3d(0, -50%, 0);
@@ -161,9 +161,9 @@
 .quotes {
   position: absolute;
   z-index: 2;
-  right: calc(var(--nw-pad) + min(30vw, 46vh) + clamp(2rem, 4vw, 4rem));
+  right: calc(var(--nw-pad) + min(38vw, 62vh) + clamp(2rem, 3.5vw, 3.5rem));
   bottom: clamp(36px, 10vh, 100px);
-  width: min(26rem, 30vw);
+  width: min(24rem, 26vw);
   opacity: calc(1 - var(--end));
 }
 

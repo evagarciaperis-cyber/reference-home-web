@@ -6,8 +6,7 @@ import styles from "./TeamScene.module.css";
 /**
  * Escena · «El hilo granate» (equipo).
  *
- * Retratos reales en blanco y negro con la americana granate de la marca en
- * color: unifica fondos distintos y convierte el granate en el hilo visual.
+ * Retratos en color y foto de grupo en blanco y negro.
  * Apertura con la foto de grupo a pantalla completa y el titular; después, los
  * nombres a la izquierda como créditos (se ilumina uno cada vez), el
  * retrato a la derecha con cortinilla vertical y su frase debajo.

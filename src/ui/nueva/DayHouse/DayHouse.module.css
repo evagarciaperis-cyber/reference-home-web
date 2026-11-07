@@ -5,6 +5,18 @@
   color: #f6efe6;
 }
 
+/* Velo oscuro suave en la franja superior: la cabecera compartida va en
+   blanco sobre la portada a cualquier hora (como en la web anterior). */
+.stage::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0 0 auto;
+  height: clamp(130px, 22vh, 220px);
+  background: linear-gradient(180deg, rgba(10, 8, 7, 0.5) 0%, rgba(10, 8, 7, 0.22) 55%, rgba(10, 8, 7, 0) 100%);
+  pointer-events: none;
+}
+
 .stage {
   --ink-dark: #241b17;
   --ink-light: #f6efe6;
