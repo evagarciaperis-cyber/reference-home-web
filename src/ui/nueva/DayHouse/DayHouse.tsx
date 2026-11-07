@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createDayHouseScene, textState, type DayHouseScene } from "@/motion/webgl/dayHouseScene";
+import { requestHeaderToneRefresh } from "@/motion/core/events";
 import styles from "./DayHouse.module.css";
 
 const PHASES = [
@@ -76,7 +77,21 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
       // Tono del texto: tinta y logo rojo con el cielo claro de la mañana y
       // la tarde (y el atardecer, cuyo cielo es muy luminoso); crema de noche.
       const tone = p < 0.74 ? "dark" : "light";
-      if (stageRef.current && stageRef.current.dataset.tone !== tone) stageRef.current.dataset.tone = tone;
+      if (stageRef.current && stageRef.current.dataset.tone !== tone) {
+        stageRef.current.dataset.tone = tone;
+        // La cabecera compartida lee el tono de la sección que tiene debajo.
+        if (tone === "light") section.setAttribute("data-header-tone", "dark");
+        else section.removeAttribute("data-header-tone");
+        requestHeaderToneRefresh();
+      }
+      // Arriba del todo la cabecera se ve siempre; al bajar se esconde y
+      // reaparece al acercar el ratón (comportamiento de la cabecera).
+      const atTop = p < 0.015;
+      if ((section.getAttribute("data-header-force-visible") === "true") !== atTop) {
+        if (atTop) section.setAttribute("data-header-force-visible", "true");
+        else section.removeAttribute("data-header-force-visible");
+        requestHeaderToneRefresh();
+      }
       if (phase !== lastPhase) {
         lastPhase = phase;
         if (phaseRef.current) phaseRef.current.textContent = `${PHASES[phase].label} · ${PHASES[phase].step}`;
@@ -120,27 +135,12 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
   }, [fontFamily]);
 
   return (
-    <section ref={sectionRef} className={styles.scene} aria-labelledby="dayhouse-title">
+    <section ref={sectionRef} className={styles.scene} aria-labelledby="dayhouse-title" data-header-transparent="true" data-header-force-visible="true">
       <div ref={stageRef} className={styles.stage} data-tone="dark">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.poster} src={fallback ? "/nueva/atardecer.webp" : "/nueva/dia.webp"} alt="" fetchPriority="high" />
         {!fallback && <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />}
 
-        <header className={styles.bar} data-exit="">
-          { }
-          <span className={styles.logo}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={styles.logoDark} src="/nueva/logo-rojo.png" alt="Reference Home" width={1600} height={229} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={styles.logoLight} src="/nueva/logo-blanco.png" alt="" width={1600} height={229} />
-          </span>
-          <nav className={styles.nav} aria-label="Principal">
-            <a href="#vender">Vender</a>
-            <a href="#comprar">Comprar</a>
-            <a href="#barrios">Barrios</a>
-            <a href="#equipo">Nosotros</a>
-          </nav>
-        </header>
 
         <div ref={wordsRef} className={styles.words} aria-hidden="true" data-exit="">
           <div className={styles.word} data-word="0" data-state="idle" data-tone="dark">

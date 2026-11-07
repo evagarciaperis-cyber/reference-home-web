@@ -41,3 +41,10 @@
   line-height: 1.6;
   opacity: 0.75;
 }
+
+.cover {
+  position: relative;
+  z-index: 8;
+  background: #fff;
+  box-shadow: 0 -30px 60px rgba(36, 27, 23, 0.12);
+}

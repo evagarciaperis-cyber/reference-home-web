@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import styles from "./MethodScene.module.css";
+import { requestHeaderToneRefresh } from "@/motion/core/events";
 
 /**
  * Escena 5 · Método (amanece un día nuevo).
@@ -106,6 +107,18 @@ export function MethodScene() {
         const h = 1 - clamp01((p - 0.08) / 0.12);
         headRef.current.style.opacity = String(h);
         headRef.current.style.transform = `translate3d(-50%, calc(-50% + ${(1 - h) * -30}px), 0)`;
+      }
+      // Cabecera: transparente y clara mientras el vídeo ocupa la pantalla.
+      const full = shrink < 0.35;
+      if ((section.getAttribute("data-header-tone") === "dark") !== full) {
+        if (full) {
+          section.setAttribute("data-header-tone", "dark");
+          section.setAttribute("data-header-transparent", "true");
+        } else {
+          section.removeAttribute("data-header-tone");
+          section.removeAttribute("data-header-transparent");
+        }
+        requestHeaderToneRefresh();
       }
       const copy = ease((p - 0.58) / 0.14);
       stage.style.setProperty("--copy", String(copy));

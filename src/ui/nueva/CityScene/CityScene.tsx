@@ -162,7 +162,7 @@ export function CityScene() {
   }, []);
 
   return (
-    <section ref={sectionRef} className={styles.scene} aria-labelledby="city-title">
+    <section ref={sectionRef} className={styles.scene} aria-labelledby="city-title" data-header-tone="dark" data-header-transparent="true">
       <div ref={stageRef} className={styles.stage}>
         <div ref={cityRef} className={styles.city}>
           {/* eslint-disable-next-line @next/next/no-img-element */}

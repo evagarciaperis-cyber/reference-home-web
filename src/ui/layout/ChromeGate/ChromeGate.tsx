@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation";
 
 /**
- * Oculta el "chrome" de la web actual (precargador, ruido, cursor y
- * cabecera) en las rutas de la web nueva, que traen el suyo propio.
+ * Oculta parte del "chrome" de la web actual (precargador, ruido y cursor)
+ * en las rutas de la web nueva. La cabecera sí se comparte.
  * Mientras conviven las dos webs en el mismo proyecto, esto evita tocar
  * cada componente por separado; cuando la web nueva sustituya a la actual,
  * este componente desaparece junto con el chrome antiguo.

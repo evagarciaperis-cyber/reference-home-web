@@ -80,8 +80,8 @@ export default function RootLayout({
               <Preloader />
               <NoiseOverlay />
               <CustomCursor />
-              <SiteHeader />
             </ChromeGate>
+            <SiteHeader />
             {children}
           </PreloaderProvider>
         </SmoothScrollProvider>

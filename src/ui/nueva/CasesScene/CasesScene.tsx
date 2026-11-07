@@ -95,7 +95,7 @@ export function CasesScene() {
   }, []);
 
   return (
-    <section ref={sectionRef} className={styles.scene} id="casos" aria-labelledby="cases-title">
+    <section ref={sectionRef} className={styles.scene} id="casos" aria-labelledby="cases-title" data-header-tone="dark" data-header-transparent="true">
       <div ref={stageRef} className={styles.stage}>
         {CASES.map((c, i) => (
           <div
