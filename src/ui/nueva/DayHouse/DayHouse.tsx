@@ -33,7 +33,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
   const clockRef = useRef<HTMLSpanElement>(null);
   const phaseRef = useRef<HTMLSpanElement>(null);
   const barRef = useRef<HTMLSpanElement>(null);
-  const subRef = useRef<HTMLParagraphElement>(null);
+  const wordsRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
   const stepsRef = useRef<HTMLOListElement>(null);
   const [fallback, setFallback] = useState(false);
@@ -49,7 +49,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
     try {
       scene = createDayHouseScene(canvas, {
         images: ["/nueva/dia.webp", "/nueva/tarde.webp", "/nueva/atardecer.webp", "/nueva/noche.webp"],
-        items: [{ kind: "image", src: "/nueva/logo-blanco.png" }, ...PHASES.map((ph) => ({ kind: "text" as const, text: ph.word }))],
+        items: [],
         fontFamily,
         mobile,
         reducedMotion,
@@ -61,6 +61,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
 
     const start = performance.now();
     let lastPhase = -1;
+    let activeWord = -2;
     let raf = 0;
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
@@ -78,16 +79,17 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
       }
       if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
       const intro = Math.min(1, (now - start) / 3200);
+      // Titulares: el scroll decide cuál toca; la entrada y la salida son
+      // animaciones con tiempo propio (CSS), no ligadas al scroll, para que
+      // se sientan naturales. Umbral con histéresis para no parpadear.
       const ts = textState(p, intro);
-      if (subRef.current) {
-        if (ts.index >= 1) {
-          const text = PHASES[ts.index - 1].sub;
-          if (subRef.current.textContent !== text) subRef.current.textContent = text;
-          subRef.current.style.opacity = String(Math.max(0, ts.amt * 1.4 - 0.4));
-          subRef.current.style.transform = `translate3d(0, ${(1 - ts.amt) * 14}px, 0)`;
-        } else {
-          subRef.current.style.opacity = "0";
-        }
+      const want = ts.amt > 0.45 ? ts.index : ts.amt < 0.2 ? -1 : activeWord;
+      if (want !== activeWord) {
+        activeWord = want;
+        wordsRef.current?.querySelectorAll<HTMLElement>("[data-word]").forEach((el) => {
+          const i = Number(el.dataset.word);
+          el.dataset.state = i === activeWord ? "in" : el.dataset.state === "in" ? "out" : el.dataset.state ?? "idle";
+        });
       }
       if (hintRef.current) hintRef.current.style.opacity = String(Math.max(0, 1 - p * 18) * Math.min(1, Math.max(0, (now - start - 2600) / 900)));
     };
@@ -127,7 +129,28 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
           </a>
         </header>
 
-        <p ref={subRef} className={styles.sub} aria-hidden="true" />
+        <div ref={wordsRef} className={styles.words} aria-hidden="true">
+          <div className={styles.word} data-word="0" data-state="idle">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={styles.wordLogo} src="/nueva/logo-blanco.png" alt="" />
+          </div>
+          {PHASES.map((ph, i) => (
+            <div key={ph.key} className={styles.word} data-word={i + 1} data-state="idle">
+              <p className={styles.wordTitle}>
+                {ph.word.split(" ").map((w, k) => (
+                  <span key={k} className={styles.mask}>
+                    <span style={{ transitionDelay: `${k * 90}ms` }}>{w}</span>
+                  </span>
+                ))}
+              </p>
+              <p className={styles.wordSub}>
+                <span className={styles.mask}>
+                  <span style={{ transitionDelay: "260ms" }}>{ph.sub}</span>
+                </span>
+              </p>
+            </div>
+          ))}
+        </div>
 
         <div className={styles.foot}>
           <div className={styles.intro}>
