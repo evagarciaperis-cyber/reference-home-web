@@ -12,6 +12,7 @@ import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
 // ayudarte?», en el mismo orden que en la web anterior.
 import { BuyerExperience } from "@/ui/sections/BuyerExperience";
 import { Process } from "@/ui/sections/Process";
+import { TeamScene } from "@/ui/nueva/TeamScene";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -54,6 +55,7 @@ export default function NuevaPage() {
           <BuyerExperience />
           <Process />
         </div>
+        <TeamScene />
         <section className={styles.next} aria-labelledby="next-title">
           <p className={styles.eyebrow}>Escena 6 · en construcción</p>
           <h2 id="next-title" className={styles.nextTitle}>

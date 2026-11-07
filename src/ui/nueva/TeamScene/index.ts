@@ -1,0 +1,1 @@
+export { TeamScene } from "./TeamScene";
