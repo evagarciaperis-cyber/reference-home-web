@@ -92,7 +92,7 @@ export function TeamScene() {
         {/* Apertura: la foto de grupo a pantalla completa */}
         <div className={styles.intro}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={styles.group} src="/nueva/equipo/equipo-reference-home.webp" alt="El equipo de Reference Home" loading="lazy" />
+          <img className={styles.group} src="/nueva/equipo/equipo-real.webp" alt="El equipo de Reference Home en la oficina" loading="lazy" />
         </div>
         <div className={styles.head}>
           <p className={styles.eyebrow}>Nuestro equipo</p>
