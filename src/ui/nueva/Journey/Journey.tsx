@@ -19,7 +19,7 @@ import styles from "./Journey.module.css";
  * horizontal). En móvil el recorrido se apila en vertical.
  */
 
-const VIDEO_MARKETING = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/video_marketing.mp4";
+const VIDEO_MARKETING = "/videos/video_marketing.mp4";
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 
 const ERRORS = [

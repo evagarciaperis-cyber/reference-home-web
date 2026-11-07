@@ -25,9 +25,9 @@ import styles from "./MarketingReel.module.css";
 // 2026-08-19: los tres vídeos pasan de /videos/ local a Supabase Storage
 // (bucket público web-videos) -- la web deja de depender de los archivos
 // pesados en disco. Los locales no se han borrado.
-const VIDEO_SRC_VALORACION = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/valoracion.mp4";
-const VIDEO_SRC_MARKETING = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/video_marketing.mp4";
-const VIDEO_SRC_RIGHT = "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/manos-v2.mp4";
+const VIDEO_SRC_VALORACION = "/videos/valoracion.mp4";
+const VIDEO_SRC_MARKETING = "/videos/video_marketing.mp4";
+const VIDEO_SRC_RIGHT = "/videos/manos-v2.mp4";
 
 // <article> (no <a>): los paneles serán clicables cuando existan destinos
 // reales -- por ahora no se crea ningún enlace vacío. La composición

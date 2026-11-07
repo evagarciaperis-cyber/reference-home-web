@@ -17,7 +17,7 @@ import { requestHeaderToneRefresh } from "@/motion/core/events";
 
 const VIDEO = {
   valoracion: "/videos/valoracion.mp4",
-  marketing: "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/video_marketing.mp4",
+  marketing: "/videos/video_marketing.mp4",
   negociacion: "/videos/manos-v2.mp4",
 };
 
