@@ -1735,3 +1735,12 @@ main {
     transform: none !important;
   }
 }
+
+/* Firma de Reference Home: la «r» de la marca */
+.ph__meta img.is-logo,
+.author img.is-logo {
+  object-fit: contain;
+  object-position: center;
+  background: var(--roto);
+  border: 1px solid var(--linea);
+}
