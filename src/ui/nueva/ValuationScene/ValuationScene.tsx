@@ -7,9 +7,8 @@ import styles from "./ValuationScene.module.css";
 /**
  * Valoración · «Cruza la puerta».
  *
- * 1. Umbral: sobre la pared crema solo se ve el hueco de la puerta de la foto
- *    del comedor (el marco de madera hace de puerta). Al bajar, la imagen se
- *    abre desde ese hueco hasta enseñar el comedor entero.
+ * 1. Umbral: una puerta real (foto) en una pared crema. Al bajar, sus dos
+ *    hojas se abren y la cámara cruza el umbral hasta el comedor.
  * 2. Dentro, a pantalla completa, una pregunta cada vez; cada respuesta
  *    cambia la escena:
  *    - «¿Dónde está?» → el comedor; tras responder, el salón con vistas y,
@@ -53,51 +52,35 @@ function findBarrio(address: string) {
 
 type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
 
+/**
+ * La puerta real: foto de la pared con el hueco recortado, y las dos hojas
+ * recortadas de la misma foto, que giran en 3D sobre sus bisagras. Todo va
+ * dentro de una caja con la proporción de la foto, así las hojas encajan al
+ * píxel en el hueco a cualquier tamaño de pantalla. Detrás, el comedor.
+ */
 function Door() {
   return (
     <div className={styles.wall} aria-hidden="true">
-      <p className={styles.wallText}>
-        ¿Cuánto vale <em>tu casa?</em>
-      </p>
-      <p className={styles.wallHint}>Pasa</p>
+      <div className={styles.doorBox}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={`${styles.leaf} ${styles.leafL}`} src="/nueva/viaje/puerta-hoja-izq.webp" alt="" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={`${styles.leaf} ${styles.leafR}`} src="/nueva/viaje/puerta-hoja-der.webp" alt="" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={styles.wallImg} src="/nueva/viaje/puerta-pared.webp" alt="" />
+        <p className={`${styles.flank} ${styles.flankL}`}>¿Cuánto vale</p>
+        <p className={`${styles.flank} ${styles.flankR}`}>
+          <em>tu casa?</em>
+        </p>
+      </div>
     </div>
   );
 }
 
-// Hueco de la puerta dentro de la foto del comedor (píxeles de la foto).
-const PHOTO = { w: 1672, h: 941 };
-const DOOR = { l: 657, t: 160, r: 1018, b: 700 };
-
-/** Recorta las escenas al hueco de la puerta (e = 0) o las deja enteras (e = 1). */
-function setDoorClip(stage: HTMLElement, e: number) {
-  const w = stage.clientWidth;
-  const h = stage.clientHeight;
-  const s = Math.max(w / PHOTO.w, h / PHOTO.h);
-  const ox = (w - PHOTO.w * s) / 2;
-  const oy = (h - PHOTO.h * s) / 2;
-  const L = ox + DOOR.l * s;
-  const T = oy + DOOR.t * s;
-  const R = w - (ox + DOOR.r * s);
-  const B = h - (oy + DOOR.b * s);
-  const k = 1 - e;
-  stage.style.setProperty("--clip", `inset(${(T * k).toFixed(1)}px ${(R * k).toFixed(1)}px ${(B * k).toFixed(1)}px ${(L * k).toFixed(1)}px)`);
-  stage.style.setProperty("--door-top", `${T.toFixed(1)}px`);
-  stage.style.setProperty("--door-bottom", `${(h - B).toFixed(1)}px`);
-}
-
 /** Primer fotograma (la puerta cerrada), para revelarlo detrás del vídeo de inmuebles. */
 export function ValuationIntro() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const fit = () => setDoorClip(el, 0);
-    fit();
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, []);
   return (
-    <div ref={ref} className={styles.stage} style={{ position: "relative", height: "100%", visibility: "visible" }} aria-hidden="true">
+    <div className={styles.stage} style={{ position: "relative", height: "100%", visibility: "visible" }} aria-hidden="true">
       <div className={styles.scenes}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.scene} data-on="" src={SCENES[0]} alt="" />
@@ -134,7 +117,6 @@ export function ValuationScene() {
       // 0–45 %: cruzar el arco. Después, ya dentro.
       const cross = ease(p / 0.45);
       stage.style.setProperty("--cross", cross.toFixed(4));
-      setDoorClip(stage, mobile.matches ? 1 : cross);
       stage.toggleAttribute("data-inside", cross > 0.92);
     };
     raf = requestAnimationFrame(loop);

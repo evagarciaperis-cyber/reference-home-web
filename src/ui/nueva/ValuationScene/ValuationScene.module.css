@@ -30,12 +30,13 @@
 }
 
 /* ---------- Escenas ---------- */
-/* Las escenas se recortan al hueco de la puerta de la foto y se abren al
-   bajar (--clip lo calcula el componente a partir del tamaño de pantalla). */
 .scenes {
   position: absolute;
   inset: 0;
-  clip-path: var(--clip, none);
+}
+
+.scenes > img {
+  scale: calc(1.3 - var(--cross) * 0.3);
 }
 
 .scene {
@@ -68,43 +69,85 @@
   opacity: calc(var(--cross) * 0.55);
 }
 
-/* ---------- Texto sobre la pared ---------- */
+/* ---------- La puerta real ----------
+   Caja con la proporción de la foto (1774 × 887) que cubre la pantalla.
+   Hojas posicionadas en % de la foto; giran sobre sus bisagras (3D) y la
+   caja entera se escala desde el centro del hueco: se cruza el umbral. */
 .wall {
+  --open: clamp(0, var(--cross) * 2.6, 1);
+  --push: clamp(0, (var(--cross) - 0.14) / 0.86, 1);
   position: absolute;
   inset: 0;
   z-index: 2;
-  color: #241b17;
+  overflow: hidden;
   pointer-events: none;
+  opacity: calc(1 - clamp(0, (var(--cross) - 0.9) * 10, 1));
 }
 
-.wallText {
-  z-index: 2;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(var(--door-bottom, 80svh) + 1.4rem);
-  margin: 0;
-  text-align: center;
-  font: 300 clamp(2.4rem, 4.6vw, 4.8rem)/1 var(--nw-serif, serif);
-  opacity: calc(1 - var(--cross) * 4);
-}
-
-.wallText em {
-  color: #a11f48;
-}
-
-.wallHint {
-  z-index: 2;
+.doorBox {
   position: absolute;
   left: 50%;
-  top: calc(var(--door-top, 26svh) - 2.2rem);
-  transform: translateX(-50%);
+  top: 50%;
+  width: max(100%, 200svh);
+  aspect-ratio: 1774 / 887;
+  transform: translate(-50%, -50%) scale(calc(1 + var(--push) * var(--push) * 7));
+  transform-origin: 49.94% 56.8%;
+  perspective: 1800px;
+}
+
+.wallImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.leaf {
+  position: absolute;
+  top: 22.77%;
+  height: 68.09%;
+  display: block;
+  backface-visibility: hidden;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.25);
+  filter: brightness(calc(1 - var(--open) * 0.35));
+}
+
+.leafL {
+  left: 39.06%;
+  width: 10.88%;
+  transform-origin: left center;
+  transform: rotateY(calc(var(--open) * -105deg));
+}
+
+.leafR {
+  left: 49.94%;
+  width: 10.65%;
+  transform-origin: right center;
+  transform: rotateY(calc(var(--open) * 105deg));
+}
+
+/* Texto a ambos lados de la puerta, sobre la pared */
+.flank {
+  position: absolute;
+  top: 46%;
   margin: 0;
-  font: 500 0.7rem/1 var(--nw-sans, sans-serif);
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: #7a1836;
-  opacity: calc(1 - var(--cross) * 6);
+  font: 300 clamp(1.8rem, 3.2vw, 3.6rem)/1 var(--nw-serif, serif);
+  color: #241b17;
+  opacity: calc(1 - var(--cross) * 4);
+  white-space: nowrap;
+}
+
+.flankL {
+  right: calc(100% - 36%);
+}
+
+.flankR {
+  left: 63.5%;
+}
+
+.flankR em {
+  color: #a11f48;
 }
 
 /* ---------- Dentro: una pregunta cada vez ---------- */
