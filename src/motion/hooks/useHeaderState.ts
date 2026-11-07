@@ -115,6 +115,15 @@ export function useHeaderState(): HeaderState {
         if (rect.top <= SAMPLE_Y && rect.bottom >= SAMPLE_Y) isOnDark = true;
       });
 
+      // Una sección puede pedir tono claro (menú oscuro) mientras la cubre
+      // con data-header-tone="light"; manda sobre cualquier sección oscura
+      // que se solape debajo (p. ej. relevos con margen negativo).
+      document.querySelectorAll('[data-header-tone="light"]').forEach((section) => {
+        if (!isOnDark) return;
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= SAMPLE_Y && rect.bottom >= SAMPLE_Y) isOnDark = false;
+      });
+
       let sectionHidden = false;
       document.querySelectorAll(HIDE_SECTION_SELECTOR).forEach((section) => {
         if (sectionHidden) return;

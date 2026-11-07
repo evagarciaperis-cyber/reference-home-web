@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Script from "next/script";
+import { HEADER_TONE_REFRESH_EVENT } from "@/motion/core/events";
 import styles from "./ValuationScene.module.css";
 
 /**
@@ -143,6 +144,13 @@ export function ValuationScene() {
       const cross = ease(p / 0.45);
       stage.style.setProperty("--cross", cross.toFixed(4));
       stage.toggleAttribute("data-inside", cross > 0.92);
+      // Delante de la pared crema el menú va oscuro; al abrirse la puerta,
+      // vuelve a blanco sobre el comedor.
+      const tone = !flat && r.top <= 1 && cross < 0.3 ? "light" : "dark";
+      if (section.dataset.headerTone !== tone) {
+        section.dataset.headerTone = tone;
+        window.dispatchEvent(new Event(HEADER_TONE_REFRESH_EVENT));
+      }
     };
     raf = requestAnimationFrame(loop);
     return () => {
