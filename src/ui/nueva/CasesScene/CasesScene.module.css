@@ -39,8 +39,9 @@
   z-index: 10;
   pointer-events: none;
   background:
-    linear-gradient(0deg, rgba(12, 9, 8, 0.72) 0%, rgba(12, 9, 8, 0.35) 38%, rgba(12, 9, 8, 0) 62%),
-    linear-gradient(180deg, rgba(12, 9, 8, 0.4) 0%, rgba(12, 9, 8, 0) 22%),
+    linear-gradient(rgba(12, 9, 8, 0.3), rgba(12, 9, 8, 0.3)),
+    linear-gradient(0deg, rgba(12, 9, 8, 0.45) 0%, rgba(12, 9, 8, 0) 30%),
+    linear-gradient(180deg, rgba(12, 9, 8, 0.35) 0%, rgba(12, 9, 8, 0) 22%),
     rgba(12, 9, 8, calc(var(--end) * 0.72));
 }
 
@@ -68,23 +69,30 @@
 }
 
 /* ---------- Texto de cada vivienda ---------- */
+/* Texto centrado en la pantalla; la etiqueta de imagen orientativa queda
+   abajo a la derecha. */
 .text {
   position: absolute;
   z-index: 11;
-  left: var(--nw-pad);
-  right: var(--nw-pad);
-  bottom: clamp(56px, 11vh, 110px);
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 0 var(--nw-pad);
+  text-align: center;
   opacity: calc(1 - var(--end));
+  pointer-events: none;
 }
 
 .barrio {
   margin: 0;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.3);
   font: italic 300 clamp(4rem, 13vw, 12.5rem)/0.9 var(--nw-serif);
   letter-spacing: -0.015em;
 }
 
 .data {
   margin: 1rem 0 0;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.45);
 }
 
 .data b {
@@ -109,8 +117,8 @@
 
 .note {
   position: absolute;
-  right: 0;
-  bottom: 0.2rem;
+  right: var(--nw-pad);
+  bottom: clamp(52px, 8vh, 84px);
   margin: 0;
   font: 500 0.58rem/1 var(--nw-sans);
   letter-spacing: 0.16em;
@@ -250,7 +258,7 @@
   }
 
   .note {
-    position: static;
-    margin-top: 0.8rem;
+    left: 0;
+    right: 0;
   }
 }
