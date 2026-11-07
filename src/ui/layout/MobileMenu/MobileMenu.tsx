@@ -15,8 +15,9 @@ const LINKS: MobileMenuLink[] = [
   { href: "/quieres-vender", label: "Vender", index: "02" },
   { href: "/quieres-comprar", label: "Comprar", index: "03" },
   { href: "/inmobiliaria-valencia", label: "Barrios", index: "04" },
-  { href: "/empresa/nosotros", label: "Nosotros", index: "05" },
-  { href: "/contacto", label: "Contacto", index: "06" },
+  { href: "/blog/", label: "Blog", index: "05" },
+  { href: "/empresa/nosotros", label: "Nosotros", index: "06" },
+  { href: "/contacto", label: "Contacto", index: "07" },
 ];
 
 type MobileMenuProps = {
