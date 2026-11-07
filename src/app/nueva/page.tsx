@@ -3,6 +3,13 @@ import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { DayHouse } from "@/ui/nueva/DayHouse";
 import { CityScene } from "@/ui/nueva/CityScene";
 import { Journey } from "@/ui/nueva/Journey";
+import { CasesScene } from "@/ui/nueva/CasesScene";
+import { MethodScene } from "@/ui/nueva/MethodScene";
+import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
+import { BuyerScene } from "@/ui/nueva/BuyerScene";
+import { ValuationScene } from "@/ui/nueva/ValuationScene";
+import { Process } from "@/ui/sections/Process";
+import { TeamScene } from "@/ui/nueva/TeamScene";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -36,8 +43,18 @@ export default function NuevaPage() {
       <main>
         <DayHouse fontFamily={serif.style.fontFamily} />
         <CityScene />
-        {/* Tras la noche, un único recorrido horizontal por capítulos. */}
+        {/* Tramo horizontal: manifiesto e imagen. */}
         <Journey />
+        <CasesScene />
+        <MethodScene />
+        {/* Sube por encima de la escena anterior como una hoja que la cubre. */}
+        <div className={styles.cover}>
+          <ProjectsGallery />
+          <BuyerScene />
+          <ValuationScene />
+          <Process />
+        </div>
+        <TeamScene />
       </main>
     </div>
   );

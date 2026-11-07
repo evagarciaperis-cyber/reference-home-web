@@ -10,7 +10,8 @@ import styles from "./Journey.module.css";
  *
  * Al bajar, la página se queda fija y avanza en horizontal por capítulos
  * encadenados, sin cortes: manifiesto → imagen → errores → casos → método
- * (vídeo) → cinco pasos → equipo → valoración. Cada capítulo tiene su
+ * (vídeo) → cinco pasos → equipo → valoración. Con `full={false}` (por
+ * defecto) solo se muestran los dos primeros capítulos: manifiesto e imagen. Cada capítulo tiene su
  * bloque de color de la marca y sus capas se mueven a distinta velocidad
  * (data-speed) para dar profundidad; las fotos se revelan al acercarse al
  * centro. Todo el texto está en el HTML (Google lo lee aunque se vea en
@@ -180,7 +181,7 @@ function ValuationQuestions() {
   );
 }
 
-export function Journey() {
+export function Journey({ full = false }: { full?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLSpanElement>(null);
@@ -279,7 +280,7 @@ export function Journey() {
       <div className={styles.sticky}>
         <div ref={trackRef} className={styles.track}>
           {/* 1 · Manifiesto */}
-          <article className={`${styles.ch} ${styles.manifesto}`} data-chapter="manifiesto" data-label="Manifiesto" id="vender">
+          <article className={`${styles.ch} ${styles.manifesto}`} data-chapter="manifiesto" data-label="Manifiesto">
             <p className={styles.kicker}>Por qué una vivienda no se vende</p>
             <h2 className={styles.giant}>
               <span data-speed="-0.6">No es</span>
@@ -321,6 +322,8 @@ export function Journey() {
             </div>
           </article>
 
+          {full && (
+            <>
           {/* 3 · Errores */}
           <article className={`${styles.ch} ${styles.errors}`} data-chapter="errores" data-label="Los errores">
             <h2 className={styles.chTitle} data-speed="-0.3">
@@ -427,6 +430,8 @@ export function Journey() {
             </div>
             <ValuationQuestions />
           </article>
+            </>
+          )}
         </div>
 
         <div className={styles.progress} aria-hidden="true">
