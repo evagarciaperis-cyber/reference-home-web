@@ -132,22 +132,23 @@
   position: absolute;
   top: 46%;
   margin: 0;
-  font: 300 clamp(1.8rem, 3.2vw, 3.6rem)/1 var(--nw-serif, serif);
-  color: #241b17;
+  font: 500 clamp(2rem, 3.5vw, 4rem)/1 var(--nw-serif, serif);
+  color: #1a1310;
+  text-shadow: 0 1px 2px rgba(60, 40, 25, 0.18), 0 4px 18px rgba(60, 40, 25, 0.12);
   opacity: calc(1 - var(--cross) * 4);
   white-space: nowrap;
 }
 
 .flankL {
-  right: calc(100% - 36%);
+  right: calc(100% - 34%);
 }
 
 .flankR {
-  left: 63.5%;
+  left: 66%;
 }
 
 .flankR em {
-  color: #a11f48;
+  color: #8f1a3f;
 }
 
 /* ---------- Dentro: una pregunta cada vez ---------- */
