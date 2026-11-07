@@ -38,9 +38,34 @@ export type DayHouseScene = {
 
 // Tramos del scroll: [inicio, fin] de cada transición entre luces.
 const TRANSITIONS: Array<[number, number]> = [
-  [0.12, 0.3], // día → tarde
-  [0.38, 0.58], // tarde → atardecer
-  [0.66, 0.86], // atardecer → noche
+  [0.1, 0.34], // día → tarde
+  [0.36, 0.6], // tarde → atardecer
+  [0.66, 0.84], // atardecer → noche
+];
+
+// Recorrido del sol en coordenadas de la FOTO (x, y desde arriba, 0..1),
+// anclado a las cuatro imágenes: alto y centrado de día, a la izquierda
+// por la tarde, tocando el horizonte del mar en el punto medido del
+// atardecer (11,8 % / 41,4 %) y hundiéndose después.
+const SUN_KEYS: Array<[number, number, number]> = [
+  [0.0, 0.56, 0.05],
+  [0.22, 0.38, 0.16],
+  [0.42, 0.22, 0.29],
+  [0.6, 0.125, 0.405],
+  [0.7, 0.112, 0.43],
+  [0.78, 0.105, 0.47],
+];
+const HORIZON_Y = 0.415; // línea del mar en la foto (desde arriba)
+
+// Encuadre horizontal en móvil: la cámara sigue al sol hasta el mar y
+// vuelve a la casa cuando se encienden las luces.
+const MOBILE_FOCUS: Array<[number, number]> = [
+  [0.0, 0.66],
+  [0.25, 0.5],
+  [0.5, 0.22],
+  [0.64, 0.08],
+  [0.76, 0.2],
+  [0.9, 0.68],
 ];
 
 // Ventanas de cada texto: [entra desde, formado en, empieza a irse, se ha ido].
@@ -92,6 +117,11 @@ uniform vec2 uFocus;
 uniform vec2 uPointer;
 uniform vec3 uFogFrom;
 uniform vec3 uFogTo;
+uniform vec2 uSun;
+uniform float uSunI;
+uniform float uSunLow;
+uniform float uHorizon;
+uniform vec2 uSunScreen;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
 float noise(vec2 p) {
@@ -162,11 +192,46 @@ void main() {
   float smoke = smoothstep(0.38, 0.82, cloud * 0.75 + f2 * 0.35);
   float low = mix(0.45, 1.0, smoothstep(0.1, 0.8, 1.0 - vUv.y));
   float band = smoothstep(0.45, 0.0, abs(v - edge)) * step(0.001, uT) * step(uT, 0.999);
-  float density = (sin(3.14159 * uT) * 0.95 + band * 0.5) * mix(0.75, 1.0, low)
-                + 0.1 * low
+  float density = (sin(3.14159 * uT) * 0.28 + band * 0.12) * mix(0.75, 1.0, low)
+                + 0.05 * low
                 + (1.0 - smoothstep(0.2, 1.0, uIntro)) * 1.35;
   vec3 smokeC = fogC * (0.78 + 0.42 * smoothstep(0.3, 0.9, f2)) + vec3(0.02);
   col = mix(col, smokeC, clamp(smoke * density, 0.0, 0.94));
+
+  // --- El sol: disco, halo, dispersión en el cielo, reflejo en el agua y
+  // destellos de cámara. Vive en coordenadas de la foto (uv), así que se
+  // mantiene en su sitio del cielo aunque cambie el encuadre.
+  if (uSunI > 0.001) {
+    float ia = uImg.x / uImg.y;
+    vec2 sd = (uv - uSun) * vec2(ia, 1.0);
+    float dist = length(sd);
+    float above = smoothstep(uHorizon - 0.004, uHorizon + 0.006, uv.y);
+    vec3 sunCol = mix(vec3(1.0, 0.97, 0.9), vec3(1.0, 0.58, 0.26), uSunLow);
+    float r = mix(0.013, 0.028, uSunLow);
+    float disc = smoothstep(r, r * 0.82, dist);
+    float halo = exp(-dist * mix(14.0, 6.5, uSunLow)) * mix(0.32, 0.55, uSunLow);
+    float sky = exp(-dist * 2.8) * mix(0.08, 0.38, uSunLow);
+    float flatH = exp(-abs(uv.y - uHorizon) * 18.0) * exp(-abs(sd.x) * 2.2) * uSunLow * 0.5;
+    vec3 add = sunCol * (disc * 1.25 * above + halo * above + sky * (0.4 + 0.6 * above) + flatH);
+    // Reflejo: columna de luz que tiembla sobre el mar y la piscina
+    if (uv.y < uHorizon) {
+      float depth = uHorizon - uv.y;
+      float wob = noise(vec2(uv.y * 160.0, uTime * 1.6)) - 0.5;
+      float column = exp(-abs(sd.x + wob * 0.02 * (0.5 + depth * 3.0)) * mix(60.0, 22.0, uSunLow));
+      float glint = smoothstep(0.55, 1.0, noise(vec2(uv.x * 220.0, uv.y * 900.0 + uTime * 3.0)));
+      add += sunCol * column * exp(-depth * mix(14.0, 5.0, uSunLow)) * (0.35 + glint * 0.9) * (0.25 + uSunLow * 0.75);
+    }
+    col += add * uSunI;
+    vec2 axis = vec2(0.5) - uSunScreen;
+    vec2 sp = vUv * vec2(sa, 1.0);
+    for (int k = 1; k <= 3; k++) {
+      float fk = float(k);
+      vec2 c = (uSunScreen + axis * (0.5 + fk * 0.45)) * vec2(sa, 1.0);
+      float rr = 0.025 + fk * 0.018;
+      float ring = smoothstep(rr, rr * 0.6, length(sp - c));
+      col += mix(vec3(1.0, 0.8, 0.55), vec3(0.6, 0.8, 1.0), fk / 3.0) * ring * 0.045 * uSunI * (1.0 - uSunLow * 0.3);
+    }
+  }
 
   // --- Titular condensándose desde el humo
   vec2 p = vUv - vec2(0.5, uTextY);
@@ -198,6 +263,7 @@ void main() {
     float ta = mix(soft, sharp, amt * amt) * vis * (0.35 + 0.65 * amt);
     float puff = halo * (sin(3.14159 * amt) * 0.9 + 0.1) * (0.55 + smoke * 0.7);
     col = mix(col, smokeC * 1.08 + 0.04, clamp(puff, 0.0, 0.8));
+    col *= 1.0 - clamp(halo * 0.32 + soft * 0.18, 0.0, 0.4) * amt;
     col = mix(col, vec3(0.985, 0.955, 0.91), clamp(ta * 1.05, 0.0, 0.97));
   }
 
@@ -216,6 +282,23 @@ function clamp01(v: number) {
 }
 function easeInOut(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function smooth(t: number) {
+  return t * t * (3 - 2 * t);
+}
+
+function interp<T extends number[]>(keys: T[], p: number): number[] {
+  if (p <= keys[0][0]) return keys[0].slice(1);
+  for (let i = 0; i < keys.length - 1; i++) {
+    const a = keys[i];
+    const b = keys[i + 1];
+    if (p <= b[0]) {
+      const t = smooth((p - a[0]) / (b[0] - a[0]));
+      return a.slice(1).map((v, k) => v + (b[k + 1] - v) * t);
+    }
+  }
+  return keys[keys.length - 1].slice(1);
 }
 
 function lightState(p: number): { from: number; to: number; t: number } {
@@ -306,6 +389,11 @@ export function createDayHouseScene(canvas: HTMLCanvasElement, opts: DayHouseOpt
     uPointer: { value: new THREE.Vector2(0, 0) },
     uFogFrom: { value: new THREE.Vector3(...FOG_COLORS[0]) },
     uFogTo: { value: new THREE.Vector3(...FOG_COLORS[0]) },
+    uSun: { value: new THREE.Vector2(0.5, 0.9) },
+    uSunI: { value: 1 },
+    uSunLow: { value: 0 },
+    uHorizon: { value: 1 - HORIZON_Y },
+    uSunScreen: { value: new THREE.Vector2(0.5, 0.9) },
   };
 
   const material = new THREE.ShaderMaterial({ vertexShader: vertex, fragmentShader: fragment, uniforms });
@@ -394,6 +482,23 @@ export function createDayHouseScene(canvas: HTMLCanvasElement, opts: DayHouseOpt
     uniforms.uFogTo.value.set(...FOG_COLORS[ls.to]);
     uniforms.uNightW.value = ls.to === 3 ? (ls.from === 3 ? 1 : ls.t) : 0;
     uniforms.uScale.value = 1.08 - shown * 0.06;
+
+    // Encuadre (en móvil sigue al sol) y posición del sol en pantalla.
+    const focusX = opts.mobile ? interp(MOBILE_FOCUS, shown)[0] : 0.5 - Math.sin(Math.PI * clamp01((shown - 0.3) / 0.45)) * 0.06;
+    uniforms.uFocus.value.set(focusX, 0.5);
+    const [sx, sy] = interp(SUN_KEYS, shown);
+    uniforms.uSun.value.set(sx, 1 - sy);
+    uniforms.uSunLow.value = clamp01((sy - 0.06) / (HORIZON_Y - 0.06));
+    uniforms.uSunI.value = 1 - smooth(clamp01((shown - 0.64) / 0.12));
+    const res = uniforms.uRes.value;
+    const img = uniforms.uImg.value;
+    const sa = res.x / res.y;
+    const ia = img.x / img.y;
+    const scx = sa > ia ? 1 : sa / ia;
+    const scy = sa > ia ? ia / sa : 1;
+    const ux = (sx - 0.5 - px * 0.006) * uniforms.uScale.value + 0.5;
+    const uy = (1 - sy - 0.5 - py * 0.006) * uniforms.uScale.value + 0.5;
+    uniforms.uSunScreen.value.set((ux - (1 - scx) * focusX) / scx, (uy - (1 - scy) * 0.5) / scy);
     uniforms.uIntro.value = intro;
     uniforms.uTime.value = time;
     uniforms.uPointer.value.set(px, py);

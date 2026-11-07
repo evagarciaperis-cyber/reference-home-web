@@ -1,6 +1,6 @@
 .scene {
   position: relative;
-  height: 640svh;
+  height: 560svh;
   background: #0b0b0d;
   color: #f6efe6;
 }
@@ -13,7 +13,7 @@
 }
 
 .canvas,
-.fallback {
+.poster {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -245,6 +245,10 @@
 }
 
 @media (max-width: 760px) {
+  .scene {
+    height: 470svh;
+  }
+
   .nav {
     display: none;
   }
@@ -277,4 +281,16 @@
   .hint i {
     animation: none;
   }
+}
+
+/* La foto de día se pinta como imagen normal desde el primer momento
+   (carga rápida y buena nota de velocidad en Google); el lienzo WebGL
+   aparece encima con un fundido cuando tiene sus texturas listas. */
+.canvas {
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.canvas[data-ready] {
+  opacity: 1;
 }

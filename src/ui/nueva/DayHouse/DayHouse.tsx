@@ -97,7 +97,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
       scene?.setPointer((e.clientX / window.innerWidth - 0.5) * 2, (0.5 - e.clientY / window.innerHeight) * 2);
     };
     window.addEventListener("pointermove", onPointer, { passive: true });
-    scene.ready.catch(() => setFallback(true));
+    scene.ready.then(() => canvas.setAttribute("data-ready", "")).catch(() => setFallback(true));
 
     return () => {
       cancelAnimationFrame(raf);
@@ -109,12 +109,9 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
   return (
     <section ref={sectionRef} className={styles.scene} aria-labelledby="dayhouse-title">
       <div className={styles.stage}>
-        {fallback ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img className={styles.fallback} src="/nueva/atardecer.webp" alt="" />
-        ) : (
-          <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={styles.poster} src={fallback ? "/nueva/atardecer.webp" : "/nueva/dia.webp"} alt="" fetchPriority="high" />
+        {!fallback && <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />}
 
         <header className={styles.bar}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
