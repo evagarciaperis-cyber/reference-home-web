@@ -7,9 +7,9 @@ import styles from "./ValuationScene.module.css";
 /**
  * Valoración · «Cruza la puerta».
  *
- * 1. Umbral: una puerta de verdad (dos hojas de madera pintada con molduras,
- *    marco de piedra) en una pared crema. Al bajar, las hojas se abren y la
- *    cámara avanza hasta cruzar el umbral y quedar dentro del comedor.
+ * 1. Umbral: sobre la pared crema solo se ve el hueco de la puerta de la foto
+ *    del comedor (el marco de madera hace de puerta). Al bajar, la imagen se
+ *    abre desde ese hueco hasta enseñar el comedor entero.
  * 2. Dentro, a pantalla completa, una pregunta cada vez; cada respuesta
  *    cambia la escena:
  *    - «¿Dónde está?» → el comedor; tras responder, el salón con vistas y,
@@ -35,7 +35,7 @@ const BARRIOS: Record<string, { name: string; days: number }> = {
 };
 
 // Fotos que no se usan en ninguna otra parte de la home.
-const SCENES = ["/nueva/viaje/comedor.webp", "/nueva/viaje/salon-mar.webp", "/nueva/viaje/terraza.webp"];
+const SCENES = ["/nueva/viaje/comedor-puerta.webp", "/nueva/viaje/salon-mar.webp", "/nueva/viaje/terraza.webp"];
 const TYPES = ["Piso", "Ático", "Dúplex", "Bajo", "Casa o chalet"];
 
 function clamp01(v: number) {
@@ -59,23 +59,45 @@ function Door() {
       <p className={styles.wallText}>
         ¿Cuánto vale <em>tu casa?</em>
       </p>
-      <div className={styles.doorway}>
-        <div className={`${styles.leaf} ${styles.leafL}`}>
-          <i className={styles.knob} />
-        </div>
-        <div className={`${styles.leaf} ${styles.leafR}`}>
-          <i className={styles.knob} />
-        </div>
-      </div>
       <p className={styles.wallHint}>Pasa</p>
     </div>
   );
 }
 
+// Hueco de la puerta dentro de la foto del comedor (píxeles de la foto).
+const PHOTO = { w: 1672, h: 941 };
+const DOOR = { l: 657, t: 160, r: 1018, b: 700 };
+
+/** Recorta las escenas al hueco de la puerta (e = 0) o las deja enteras (e = 1). */
+function setDoorClip(stage: HTMLElement, e: number) {
+  const w = stage.clientWidth;
+  const h = stage.clientHeight;
+  const s = Math.max(w / PHOTO.w, h / PHOTO.h);
+  const ox = (w - PHOTO.w * s) / 2;
+  const oy = (h - PHOTO.h * s) / 2;
+  const L = ox + DOOR.l * s;
+  const T = oy + DOOR.t * s;
+  const R = w - (ox + DOOR.r * s);
+  const B = h - (oy + DOOR.b * s);
+  const k = 1 - e;
+  stage.style.setProperty("--clip", `inset(${(T * k).toFixed(1)}px ${(R * k).toFixed(1)}px ${(B * k).toFixed(1)}px ${(L * k).toFixed(1)}px)`);
+  stage.style.setProperty("--door-top", `${T.toFixed(1)}px`);
+  stage.style.setProperty("--door-bottom", `${(h - B).toFixed(1)}px`);
+}
+
 /** Primer fotograma (la puerta cerrada), para revelarlo detrás del vídeo de inmuebles. */
 export function ValuationIntro() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => setDoorClip(el, 0);
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
   return (
-    <div className={styles.stage} style={{ position: "relative", height: "100%", visibility: "visible" }} aria-hidden="true">
+    <div ref={ref} className={styles.stage} style={{ position: "relative", height: "100%", visibility: "visible" }} aria-hidden="true">
       <div className={styles.scenes}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.scene} data-on="" src={SCENES[0]} alt="" />
@@ -112,6 +134,7 @@ export function ValuationScene() {
       // 0–45 %: cruzar el arco. Después, ya dentro.
       const cross = ease(p / 0.45);
       stage.style.setProperty("--cross", cross.toFixed(4));
+      setDoorClip(stage, mobile.matches ? 1 : cross);
       stage.toggleAttribute("data-inside", cross > 0.92);
     };
     raf = requestAnimationFrame(loop);

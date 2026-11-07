@@ -30,14 +30,12 @@
 }
 
 /* ---------- Escenas ---------- */
+/* Las escenas se recortan al hueco de la puerta de la foto y se abren al
+   bajar (--clip lo calcula el componente a partir del tamaño de pantalla). */
 .scenes {
   position: absolute;
   inset: 0;
-}
-
-/* El comedor, al fondo, se acerca a medida que se cruza la puerta */
-.scenes > img {
-  scale: calc(1.35 - var(--cross) * 0.35);
+  clip-path: var(--clip, none);
 }
 
 .scene {
@@ -59,6 +57,7 @@
 .shade {
   position: absolute;
   inset: 0;
+  opacity: var(--cross);
   background:
     linear-gradient(0deg, rgba(10, 8, 7, 0.82) 0%, rgba(10, 8, 7, 0.4) 45%, rgba(10, 8, 7, 0.25) 100%),
     rgba(10, 8, 7, calc(var(--cross) * 0.25));
@@ -66,119 +65,16 @@
 }
 
 .shade[data-done] {
-  opacity: 0.55;
+  opacity: calc(var(--cross) * 0.55);
 }
 
-/* ---------- La puerta ----------
-   El hueco de la puerta pinta la pared crema alrededor con una sombra
-   gigante, así el comedor solo se ve a través del hueco. Al bajar, las
-   hojas se abren (3D) y todo el conjunto se escala desde el centro de la
-   puerta: la cámara cruza el umbral. */
+/* ---------- Texto sobre la pared ---------- */
 .wall {
-  --open: clamp(0, var(--cross) * 3.2, 1);
-  --push: clamp(0, (var(--cross) - 0.12) / 0.88, 1);
   position: absolute;
   inset: 0;
   z-index: 2;
   color: #241b17;
   pointer-events: none;
-  transform-origin: 50% 57%;
-  transform: scale(calc(1 + var(--push) * var(--push) * 9));
-  opacity: calc(1 - clamp(0, (var(--cross) - 0.9) * 10, 1));
-}
-
-.doorway {
-  z-index: 1;
-  position: absolute;
-  left: 50%;
-  top: 26svh;
-  width: min(25vw, 42svh);
-  height: 62svh;
-  transform: translateX(-50%);
-  perspective: 1400px;
-  box-shadow:
-    0 0 0 14px #d9cfbf,
-    0 0 0 15px rgba(36, 27, 23, 0.18),
-    0 0 0 300vmax #ece6dc;
-  border-radius: 2px 2px 0 0;
-}
-
-/* Sombra del umbral sobre el suelo */
-.doorway::after {
-  content: "";
-  position: absolute;
-  left: -30px;
-  right: -30px;
-  bottom: -26px;
-  height: 26px;
-  background: radial-gradient(60% 100% at 50% 0%, rgba(36, 27, 23, 0.22), transparent 70%);
-}
-
-.leaf {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.1)),
-    #3e504d;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
-  backface-visibility: hidden;
-  transition: none;
-}
-
-/* Molduras: dos cuarterones por hoja */
-.leaf::before,
-.leaf::after {
-  content: "";
-  position: absolute;
-  left: 16%;
-  right: 16%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    inset 0 0 0 5px rgba(0, 0, 0, 0.12),
-    inset 0 0 0 6px rgba(255, 255, 255, 0.06),
-    0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.leaf::before {
-  top: 7%;
-  height: 46%;
-}
-
-.leaf::after {
-  top: 58%;
-  height: 35%;
-}
-
-.leafL {
-  left: 0;
-  transform-origin: left center;
-  transform: rotateY(calc(var(--open) * -108deg));
-}
-
-.leafR {
-  right: 0;
-  transform-origin: right center;
-  transform: rotateY(calc(var(--open) * 108deg));
-}
-
-.knob {
-  position: absolute;
-  top: 52%;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #f6deb0, #a8823f 70%);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-}
-
-.leafL .knob {
-  right: 8%;
-}
-
-.leafR .knob {
-  left: 8%;
 }
 
 .wallText {
@@ -186,7 +82,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: clamp(80px, 9svh, 110px);
+  top: calc(var(--door-bottom, 80svh) + 1.4rem);
   margin: 0;
   text-align: center;
   font: 300 clamp(2.4rem, 4.6vw, 4.8rem)/1 var(--nw-serif, serif);
@@ -201,7 +97,7 @@
   z-index: 2;
   position: absolute;
   left: 50%;
-  top: calc(26svh - 2.4rem);
+  top: calc(var(--door-top, 26svh) - 2.2rem);
   transform: translateX(-50%);
   margin: 0;
   font: 500 0.7rem/1 var(--nw-sans, sans-serif);
