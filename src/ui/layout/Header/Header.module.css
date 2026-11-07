@@ -250,3 +250,50 @@
     height: 50px;
   }
 }
+
+/* Desplegable de «Vender», igual que en las páginas interiores */
+.drop {
+  position: relative;
+  display: inline-flex;
+}
+
+.dropMenu {
+  position: absolute;
+  top: 100%;
+  left: -1.3rem;
+  min-width: 210px;
+  padding: 0.6rem 0;
+  display: grid;
+  background: rgba(248, 246, 242, 0.97);
+  border: 1px solid rgba(43, 43, 43, 0.12);
+  border-radius: 14px;
+  box-shadow: 0 24px 50px -30px rgba(74, 93, 90, 0.5);
+  color: #3a2f2b;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: opacity 0.25s var(--ease), transform 0.35s var(--ease), visibility 0s linear 0.35s;
+}
+
+.drop:hover .dropMenu,
+.drop:focus-within .dropMenu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+
+.desktopNav .dropMenu a {
+  padding: 0.55rem 1.3rem;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: color 0.3s, padding 0.4s var(--ease);
+}
+
+.desktopNav .dropMenu a::after {
+  display: none;
+}
+
+.desktopNav .dropMenu a:hover {
+  padding-left: 1.6rem;
+}

@@ -85,18 +85,25 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
           </span>
         </Link>
 
+        {/* Mismo menú que las páginas interiores de Joomla (rutas reales
+            de referencehome.es, por eso <a> y no <Link>). */}
         <nav className={styles.desktopNav} aria-label="Navegación principal">
           <Link href="/">Inicio</Link>
-          <Link href="/nosotros" prefetch={false}>
-            Nosotros
-          </Link>
-          <Link href="/proyectos" prefetch={false}>
-            Proyectos <sup>07</sup>
-          </Link>
-          <Link href="/inmobiliaria-valencia">Vender en Valencia</Link>
-          <Link href="/contacto" prefetch={false}>
-            Contacto
-          </Link>
+          <span className={styles.drop}>
+            <a href="/quieres-vender" aria-haspopup="true">
+              Vender
+            </a>
+            <span className={styles.dropMenu}>
+              <a href="/quieres-vender/valoracion">Valoración</a>
+              <a href="/quieres-vender/antes-y-despues">Antes y después</a>
+              <a href="/quieres-vender/asegura-tu-venta">Asegura tu venta</a>
+              <a href="/quieres-vender/vender-en-ruzafa">Vender en Ruzafa</a>
+            </span>
+          </span>
+          <a href="/quieres-comprar">Comprar</a>
+          <a href="/inmobiliaria-valencia">Barrios</a>
+          <a href="/empresa/nosotros">Nosotros</a>
+          <a href="/contacto">Contacto</a>
         </nav>
 
         <button

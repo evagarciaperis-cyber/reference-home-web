@@ -12,10 +12,11 @@ type MobileMenuLink = { href: string; label: string; index: string };
 // "Vender en Valencia" no lo lleva: ruta real, ya creada).
 const LINKS: MobileMenuLink[] = [
   { href: "/", label: "Inicio", index: "01" },
-  { href: "/nosotros", label: "Nosotros", index: "02" },
-  { href: "/proyectos", label: "Proyectos", index: "03" },
-  { href: "/inmobiliaria-valencia", label: "Vender en Valencia", index: "04" },
-  { href: "/contacto", label: "Contacto", index: "05" },
+  { href: "/quieres-vender", label: "Vender", index: "02" },
+  { href: "/quieres-comprar", label: "Comprar", index: "03" },
+  { href: "/inmobiliaria-valencia", label: "Barrios", index: "04" },
+  { href: "/empresa/nosotros", label: "Nosotros", index: "05" },
+  { href: "/contacto", label: "Contacto", index: "06" },
 ];
 
 type MobileMenuProps = {
