@@ -20,8 +20,8 @@ const TEAM = [
   { slug: "sem-fernandez", name: "Sem Fernández", role: "Agente de propietarios", quote: "Detrás de cada vivienda hay una historia que merece ser entendida y defendida." },
   { slug: "felipe-martinez", name: "Felipe Martínez", role: "Agente de propietarios", quote: "La confianza se construye hablando claro y estando cerca durante todo el camino." },
   { slug: "jorge-garcia", name: "Jorge García", role: "Agente de compradores", quote: "Encontrar una casa también es descubrir el lugar donde alguien empezará una nueva etapa." },
-  // Frase tomada de su propio texto en referencehome.es/empresa/nosotros/clara-vazquez.
-  { slug: "clara-vazquez", name: "Clara Vázquez", role: "Agente de propietarios", quote: "Siempre estaré ahí, acompañándote en el camino a tus objetivos." },
+  // Frase redactada para la web a partir de su perfil (valoración y asesoría fiscal en la venta).
+  { slug: "clara-vazquez", name: "Clara Vázquez", role: "Agente de propietarios", quote: "Una buena venta empieza por un precio honesto y unas cuentas claras." },
 ] as const;
 
 function clamp01(v: number) {
