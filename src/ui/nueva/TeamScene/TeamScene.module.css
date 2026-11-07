@@ -219,16 +219,21 @@
 }
 
 /* ---------- Cierre ---------- */
+/* Foto del equipo en el sofá: ocupa la parte derecha, entera (de las
+   cabezas a los pies) y el texto vive a la izquierda, sobre el fondo. */
 .endPhoto {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
   z-index: 3;
-  width: 100%;
+  width: 62%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 35%;
+  object-position: 52% 50%;
   opacity: var(--end);
-  transform: scale(calc(1.08 - var(--end) * 0.08));
+  transform: scale(calc(1.06 - var(--end) * 0.06));
+  transform-origin: 70% 50%;
   pointer-events: none;
 }
 
@@ -237,7 +242,7 @@
   position: absolute;
   inset: 0;
   z-index: 3;
-  background: linear-gradient(0deg, rgba(15, 11, 9, 0.85) 0%, rgba(15, 11, 9, 0.45) 35%, rgba(15, 11, 9, 0) 60%);
+  background: linear-gradient(90deg, #15110f 0%, #15110f 38%, rgba(21, 17, 15, 0.6) 46%, rgba(21, 17, 15, 0) 58%);
   opacity: var(--end);
   pointer-events: none;
 }
@@ -247,7 +252,7 @@
   z-index: 4;
   left: var(--nw-pad);
   bottom: clamp(36px, 9vh, 90px);
-  max-width: min(44rem, 88vw);
+  max-width: min(34rem, calc(40vw - var(--nw-pad)));
   transform: translate3d(0, calc((1 - var(--end)) * 30px), 0);
   opacity: var(--end);
   visibility: hidden;
@@ -259,7 +264,7 @@
 
 .endTitle {
   margin: 0;
-  font: 300 clamp(2.4rem, 5.4vw, 5.2rem)/1 var(--nw-serif);
+  font: 300 clamp(2.4rem, 4.3vw, 4.6rem)/1 var(--nw-serif);
   text-wrap: balance;
 }
 
@@ -318,6 +323,25 @@
 
   .quote {
     left: 0;
+  }
+
+  /* En vertical la foto se ve entera, arriba, y el texto debajo. */
+  .endPhoto {
+    top: 13svh;
+    bottom: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2000 / 1548;
+    transform-origin: 50% 50%;
+  }
+
+  .stage::after {
+    background: none;
+  }
+
+  .end {
+    max-width: none;
+    right: var(--nw-pad);
   }
 
   .mobileName {

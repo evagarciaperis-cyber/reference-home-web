@@ -159,7 +159,7 @@ export function TeamScene() {
         {/* Cierre */}
         {/* Cierre: el equipo en color a pantalla completa */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.endPhoto} src="/nueva/equipo/equipo-color.webp" alt="" aria-hidden="true" loading="lazy" />
+        <img className={styles.endPhoto} src="/nueva/equipo/equipo-sofa.webp" alt="" aria-hidden="true" loading="lazy" />
         <div className={styles.end}>
           <p className={styles.endTitle}>
             Habla con una persona, <em>no con una centralita.</em>
