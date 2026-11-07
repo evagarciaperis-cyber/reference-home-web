@@ -10,6 +10,7 @@ import { BuyerScene } from "@/ui/nueva/BuyerScene";
 import { ValuationScene } from "@/ui/nueva/ValuationScene";
 import { Process } from "@/ui/sections/Process";
 import { TeamScene } from "@/ui/nueva/TeamScene";
+import { Closing } from "@/ui/nueva/Closing";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -56,6 +57,7 @@ export default function NuevaPage() {
         </div>
         <TeamScene />
       </main>
+      <Closing />
     </div>
   );
 }
