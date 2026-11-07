@@ -45,6 +45,23 @@
 .cover {
   position: relative;
   z-index: 8;
+  overflow-x: clip;
   background: #fff;
   box-shadow: 0 -30px 60px rgba(36, 27, 23, 0.12);
+}
+
+/* «¿Cómo podemos ayudarte?» se monta sobre la última pantalla de la
+   valoración y entra desde la derecha (ValuationScene lo mueve). */
+.hNext {
+  position: relative;
+  z-index: 3;
+  margin-top: -100svh;
+  transform: translate3d(100%, 0, 0);
+}
+
+@media (max-width: 760px), (prefers-reduced-motion: reduce) {
+  .hNext {
+    margin-top: 0;
+    transform: none;
+  }
 }

@@ -53,7 +53,10 @@ export default function NuevaPage() {
           <ProjectsGallery />
           <BuyerScene />
           <ValuationScene />
-          <Process />
+          {/* Entra en horizontal empujando a la valoración. */}
+          <div className={styles.hNext} data-hslide-next>
+            <Process />
+          </div>
         </div>
         <TeamScene />
       </main>

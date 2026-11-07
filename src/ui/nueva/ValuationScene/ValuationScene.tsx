@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Script from "next/script";
 import styles from "./ValuationScene.module.css";
 
@@ -106,21 +107,49 @@ export function ValuationScene() {
     if (!section || !stage) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const mobile = window.matchMedia("(max-width: 760px)");
+    // Sección siguiente («¿Cómo podemos ayudarte?»): entra en horizontal
+    // durante la última pantalla, empujando a esta hacia la izquierda.
+    const nextEl = section.nextElementSibling instanceof HTMLElement && section.nextElementSibling.hasAttribute("data-hslide-next")
+      ? section.nextElementSibling
+      : null;
+    let measuring = false;
+    const onRefreshInit = () => {
+      measuring = true;
+      if (nextEl) nextEl.style.transform = "none";
+    };
+    const onRefresh = () => {
+      measuring = false;
+    };
+    ScrollTrigger.addEventListener("refreshInit", onRefreshInit);
+    ScrollTrigger.addEventListener("refresh", onRefresh);
     let raf = 0;
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const r = section.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const flat = reduced || mobile.matches;
       const show = mobile.matches || r.top <= 1;
       if (stage.style.visibility !== (show ? "visible" : "hidden")) stage.style.visibility = show ? "visible" : "hidden";
-      if (r.bottom < -100 || r.top > window.innerHeight + 100) return;
-      const p = reduced || mobile.matches ? 1 : clamp01(-r.top / Math.max(1, r.height - window.innerHeight));
+      if (nextEl && !measuring) {
+        const top = r.bottom - vh;
+        nextEl.style.transform = flat || top <= 0 ? "none" : top >= vh ? "" : `translate3d(${((top / vh) * 100).toFixed(3)}%, ${(-top).toFixed(1)}px, 0)`;
+      }
+      if (r.bottom < -100 || r.top > vh + 100) return;
+      const run = Math.max(1, r.height - 2 * vh);
+      const p = flat ? 1 : clamp01(-r.top / run);
+      const tail = flat ? 0 : clamp01((-r.top - run) / vh);
+      stage.style.transform = tail > 0 ? `translate3d(${(-tail * 100).toFixed(3)}%, 0, 0)` : "";
       // 0–45 %: cruzar el arco. Después, ya dentro.
       const cross = ease(p / 0.45);
       stage.style.setProperty("--cross", cross.toFixed(4));
       stage.toggleAttribute("data-inside", cross > 0.92);
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      ScrollTrigger.removeEventListener("refreshInit", onRefreshInit);
+      ScrollTrigger.removeEventListener("refresh", onRefresh);
+    };
   }, []);
 
   const next = (e: React.MouseEvent<HTMLButtonElement>) => {
