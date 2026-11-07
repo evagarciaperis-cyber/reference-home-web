@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { DayHouse } from "@/ui/nueva/DayHouse";
+import { CityScene } from "@/ui/nueva/CityScene";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -33,13 +34,14 @@ export default function NuevaPage() {
     <div className={`${serif.variable} ${sans.variable} ${styles.root}`}>
       <main>
         <DayHouse fontFamily={serif.style.fontFamily} />
+        <CityScene />
         <section className={styles.next} aria-labelledby="next-title">
-          <p className={styles.eyebrow}>Escena 3 · en construcción</p>
+          <p className={styles.eyebrow}>Escena 4 · en construcción</p>
           <h2 id="next-title" className={styles.nextTitle}>
-            De la ventana <em>a la ciudad</em>
+            Casos <em>reales</em>
           </h2>
           <p className={styles.nextText}>
-            Aquí la cámara entrará por la ventana iluminada y saldrá a Valencia de noche, con los barrios encendiéndose uno a uno.
+            Aquí llegarán las viviendas vendidas en un vuelo en profundidad: cada una con su precio y los días que tardó en venderse.
           </p>
         </section>
       </main>

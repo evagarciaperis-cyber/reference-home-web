@@ -1,0 +1,240 @@
+.scene {
+  position: relative;
+  height: 420svh;
+  background: #0b0b0d;
+  color: #f6efe6;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* ---------- Casa de noche: la cámara entra por la ventana ---------- */
+.house {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+  transform: scale(1.02);
+}
+
+/* Luz cálida de la ventana que acaba llenando la pantalla */
+.glow {
+  --gx: 61%;
+  --gy: 50%;
+  --gr: 20vmax;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle var(--gr) at var(--gx) var(--gy), #fff3df 0%, #f6d7a6 38%, rgba(240, 190, 120, 0.85) 62%, rgba(240, 190, 120, 0) 100%);
+}
+
+/* ---------- Valencia en la hora azul ---------- */
+.city {
+  --city-pos: 50% 50%;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.cityImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--city-pos);
+  filter: brightness(0.74) saturate(0.82) contrast(1.1);
+}
+
+/* Gradación de hora azul sobre la foto del atardecer: cielo azul profundo
+   arriba, calidez residual en el horizonte y base oscura para leer. */
+.cityGrade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 22, 66, 0.92) 0%, rgba(18, 40, 96, 0.7) 30%, rgba(70, 60, 110, 0.35) 44%, rgba(8, 12, 30, 0.6) 100%);
+  mix-blend-mode: multiply;
+}
+
+/* Brillo azul del cielo en la hora azul y resto cálido en el horizonte */
+.cityGrade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(40, 80, 170, 0.35) 0%, rgba(40, 80, 170, 0) 40%),
+    radial-gradient(90% 30% at 35% 40%, rgba(255, 150, 90, 0.28), rgba(255, 150, 90, 0) 70%);
+  mix-blend-mode: screen;
+}
+
+.lights {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+}
+
+/* ---------- Titular ---------- */
+.copy {
+  opacity: 0;
+  position: absolute;
+  z-index: 3;
+  left: var(--nw-pad);
+  bottom: clamp(28px, 7vh, 72px);
+  max-width: min(40rem, 88vw);
+}
+
+.eyebrow {
+  margin: 0 0 0.9rem;
+  font: 500 0.7rem/1 var(--nw-sans);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.title {
+  margin: 0;
+  font: 300 clamp(2.6rem, 6.4vw, 6rem)/0.98 var(--nw-serif);
+  text-wrap: balance;
+}
+
+/* Relleno palabra a palabra ligado al scroll: de apagado a crema. */
+.title [data-w] {
+  --f: 0;
+  color: color-mix(in srgb, #f6efe6 calc(22% + var(--f) * 78%), transparent);
+  font-style: italic;
+}
+
+.title [data-w]:first-child {
+  font-style: normal;
+}
+
+.lead {
+  margin: 1.2rem 0 0;
+  max-width: 30rem;
+  font: 400 clamp(0.95rem, 1.15vw, 1.05rem)/1.55 var(--nw-sans);
+  opacity: 0;
+}
+
+/* ---------- Barrios que se encienden ---------- */
+.pins {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.pin {
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  transform: translate(-7px, -7px);
+}
+
+.pin[data-offscreen] {
+  display: none;
+}
+
+/* Cerca del borde derecho, la etiqueta va a la izquierda del punto */
+.pin[data-flip] {
+  flex-direction: row-reverse;
+  transform: translate(calc(-100% + 7px), -7px);
+  text-align: right;
+}
+
+.dot {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffe2b0;
+  box-shadow: 0 0 0 0 rgba(255, 210, 150, 0.6), 0 0 18px 6px rgba(255, 196, 120, 0.55);
+  transform: scale(0);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dot::after {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 226, 176, 0.6);
+  opacity: 0;
+}
+
+.pin[data-on] .dot {
+  transform: scale(1);
+}
+
+.pin[data-on] .dot::after {
+  animation: ring 2.6s ease-out 0.2s infinite;
+}
+
+@keyframes ring {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.label {
+  display: grid;
+  gap: 0.15rem;
+  font: 400 0.78rem/1.3 var(--nw-sans);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate3d(-6px, 0, 0);
+  transition: opacity 0.7s ease 0.15s, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
+
+.label strong {
+  font: italic 400 1.35rem/1 var(--nw-serif);
+}
+
+.label em {
+  font-style: normal;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ffd9a0;
+}
+
+.pin[data-on] .label {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .scene {
+    height: 360svh;
+  }
+
+  .label {
+    font-size: 0.7rem;
+  }
+
+  .label strong {
+    font-size: 1.1rem;
+  }
+
+  .label span {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin[data-on] .dot::after {
+    animation: none;
+  }
+}
