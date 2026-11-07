@@ -96,6 +96,12 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
           el.dataset.state = i === activeWord ? "in" : el.dataset.state === "in" ? "out" : el.dataset.state ?? "idle";
         });
       }
+      // Justo antes del relevo con la escena siguiente, la interfaz de la
+      // portada se retira para que solo quede la casa.
+      const exit = String(1 - Math.min(1, Math.max(0, (p - 0.93) / 0.06)));
+      stageRef.current?.querySelectorAll<HTMLElement>("[data-exit]").forEach((el) => {
+        el.style.opacity = exit;
+      });
       if (hintRef.current) hintRef.current.style.opacity = String(Math.max(0, 1 - p * 18) * Math.min(1, Math.max(0, (now - start - 2600) / 900)));
     };
     raf = requestAnimationFrame(loop);
@@ -120,7 +126,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
         <img className={styles.poster} src={fallback ? "/nueva/atardecer.webp" : "/nueva/dia.webp"} alt="" fetchPriority="high" />
         {!fallback && <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />}
 
-        <header className={styles.bar}>
+        <header className={styles.bar} data-exit="">
           { }
           <span className={styles.logo}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -139,7 +145,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
           </a>
         </header>
 
-        <div ref={wordsRef} className={styles.words} aria-hidden="true">
+        <div ref={wordsRef} className={styles.words} aria-hidden="true" data-exit="">
           <div className={styles.word} data-word="0" data-state="idle" data-tone="dark">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className={styles.wordLogo} src="/nueva/logo-rojo.png" alt="" />
@@ -162,7 +168,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
           ))}
         </div>
 
-        <div className={styles.foot}>
+        <div className={styles.foot} data-exit="">
           <div className={styles.intro}>
             <p className={styles.eyebrow}>Inmobiliaria en Valencia</p>
             <h1 id="dayhouse-title" className={styles.title}>

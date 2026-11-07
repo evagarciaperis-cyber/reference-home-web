@@ -473,7 +473,8 @@ export function createDayHouseScene(canvas: HTMLCanvasElement, opts: DayHouseOpt
     if (!visible || images.length < 4) return;
     const time = opts.reducedMotion ? 4 : now / 1000;
     const intro = started ? clamp01((now - started) / (opts.reducedMotion ? 1 : 3200)) : 0;
-    shown += (target - shown) * 0.14;
+    shown += (target - shown) * 0.24;
+    if (target >= 0.999 && shown > 0.985) shown = 1;
     px += (tx - px) * 0.05;
     py += (ty - py) * 0.05;
 

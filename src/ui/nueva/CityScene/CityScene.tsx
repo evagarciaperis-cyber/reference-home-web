@@ -20,32 +20,16 @@ const CITY_RATIO = 1717 / 916;
 
 // Puntos sobre la vista de la ciudad (coordenadas de la foto). Es una vista
 // evocadora, no un mapa: cada punto sitúa un barrio en el horizonte.
+// Cada barrio es una ventana real de un edificio de la foto: son las únicas
+// luces de la ciudad («cada luz es una vivienda que hemos vendido»).
 const BARRIOS = [
-  { name: "Ciutat Vella", x: 0.3, y: 0.36, rooms: "Piso · 2 hab.", price: "198.000 €", days: 12 },
-  { name: "Ruzafa", x: 0.66, y: 0.56, rooms: "Piso · 3 hab.", price: "315.000 €", days: 14 },
-  { name: "Benimaclet", x: 0.1, y: 0.45, rooms: "Piso · 4 hab.", price: "235.000 €", days: 19 },
-  { name: "Campanar", x: 0.47, y: 0.43, rooms: "Piso · 4 hab.", price: "365.000 €", days: 22 },
-  { name: "Cánovas", x: 0.9, y: 0.63, rooms: "Piso · 3 hab.", price: "385.000 €", days: 26 },
-  { name: "Patraix", x: 0.8, y: 0.44, rooms: "Piso · 3 hab.", price: "205.000 €", days: 35 },
+  { name: "Benimaclet", x: 0.12, y: 0.47, rooms: "Piso · 4 hab.", price: "235.000 €", days: 19 },
+  { name: "Ciutat Vella", x: 0.31, y: 0.617, rooms: "Piso · 2 hab.", price: "198.000 €", days: 12 },
+  { name: "Campanar", x: 0.565, y: 0.47, rooms: "Piso · 4 hab.", price: "365.000 €", days: 22 },
+  { name: "Patraix", x: 0.72, y: 0.6, rooms: "Piso · 3 hab.", price: "205.000 €", days: 35 },
+  { name: "Ruzafa", x: 0.815, y: 0.47, rooms: "Piso · 3 hab.", price: "315.000 €", days: 14 },
+  { name: "Cánovas", x: 0.905, y: 0.545, rooms: "Piso · 3 hab.", price: "385.000 €", days: 26 },
 ] as const;
-
-// Luces de la ciudad: puntos cálidos (ventanas, farolas) en la zona de
-// edificios de la foto, que se encienden poco a poco. Semilla fija para que
-// siempre salgan en el mismo sitio.
-function cityLights(n: number) {
-  let seed = 7;
-  const rnd = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-  return Array.from({ length: n }, () => ({
-    x: rnd(),
-    y: 0.44 + Math.pow(rnd(), 1.3) * 0.5,
-    r: 0.5 + rnd() * 0.9,
-    t: rnd(),
-    warm: rnd(),
-  }));
-}
 
 const TITLE = "Valencia, barrio a barrio.";
 
@@ -84,7 +68,7 @@ export function CityScene() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const leadRef = useRef<HTMLParagraphElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
-  const lightsRef = useRef<HTMLCanvasElement>(null);
+  const houseGradeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -96,32 +80,6 @@ export function CityScene() {
     let raf = 0;
     let lastW = 0;
     let lastH = 0;
-    let lastLit = -1;
-    const lights = cityLights(window.innerWidth < 760 ? 260 : 700);
-    const canvas = lightsRef.current;
-    const ctx = canvas?.getContext("2d") ?? null;
-    let cityFxNow = 0.5;
-    const drawLights = (lit: number) => {
-      if (!canvas || !ctx) return;
-      const w = lastW;
-      const h = lastH;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const dpr = canvas.width / Math.max(1, w);
-      for (const L of lights) {
-        if (L.t > lit) continue;
-        const pt = coverPoint(w, h, CITY_RATIO, cityFxNow, L.x, L.y);
-        const fade = Math.min(1, (lit - L.t) * 8);
-        const g = ctx.createRadialGradient(pt.x * dpr, pt.y * dpr, 0, pt.x * dpr, pt.y * dpr, L.r * 3 * dpr);
-        const c = L.warm > 0.18 ? "255,204,138" : "214,228,255";
-        g.addColorStop(0, `rgba(${c},${0.9 * fade})`);
-        g.addColorStop(0.3, `rgba(${c},${0.3 * fade})`);
-        g.addColorStop(1, `rgba(${c},0)`);
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(pt.x * dpr, pt.y * dpr, L.r * 3 * dpr, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    };
 
     const layout = () => {
       const w = stage.clientWidth;
@@ -141,13 +99,7 @@ export function CityScene() {
         }
       }
       const cityFx = mobile ? 0.55 : 0.5;
-      cityFxNow = cityFx;
-      if (canvas) {
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = Math.round(w * dpr);
-        canvas.height = Math.round(h * dpr);
-        lastLit = -1;
-      }
+
       cityRef.current?.style.setProperty("--city-pos", `${cityFx * 100}% 50%`);
       pins.forEach((li, i) => {
         const b = BARRIOS[i];
@@ -168,6 +120,10 @@ export function CityScene() {
       layout();
       const r = section.getBoundingClientRect();
       const p = clamp01(-r.top / Math.max(1, r.height - window.innerHeight));
+      // La escena se solapa con la última pantalla de la portada: no se
+      // muestra hasta que llega arriba del todo, justo en el relevo.
+      const show = r.top <= 1;
+      if (stage.style.visibility !== (show ? "visible" : "hidden")) stage.style.visibility = show ? "visible" : "hidden";
       if (r.bottom < -100 || r.top > window.innerHeight + 100) return;
 
       // 1 · La cámara se acerca a la ventana y su luz llena la pantalla.
@@ -175,6 +131,7 @@ export function CityScene() {
       if (houseRef.current) {
         houseRef.current.style.transform = `scale(${1.02 + zoom * 5.5})`;
         houseRef.current.style.opacity = String(1 - smooth((p - 0.3) / 0.04));
+        if (houseGradeRef.current) houseGradeRef.current.style.opacity = String(1 - smooth(p / 0.12));
       }
       const glow = smooth((p - 0.1) / 0.2) * (1 - smooth((p - 0.31) / 0.14));
       if (glowRef.current) {
@@ -186,12 +143,6 @@ export function CityScene() {
       if (cityRef.current) {
         cityRef.current.style.opacity = String(city);
         cityRef.current.style.transform = `scale(${1.14 - smooth((p - 0.27) / 0.4) * 0.14})`;
-      }
-      // Las luces de la ciudad se encienden mientras cae la noche.
-      const lit = Math.round(smooth((p - 0.3) / 0.45) * 200) / 200;
-      if (lit !== lastLit) {
-        lastLit = lit;
-        drawLights(lit);
       }
       if (copyRef.current) copyRef.current.style.opacity = String(city);
 
@@ -217,11 +168,11 @@ export function CityScene() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img className={styles.cityImg} src="/nueva/valencia.webp" alt="Valencia vista desde arriba en la hora azul" loading="lazy" />
           <div className={styles.cityGrade} aria-hidden="true" />
-          <canvas ref={lightsRef} className={styles.lights} aria-hidden="true" />
         </div>
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={houseRef} className={styles.house} src="/nueva/noche.webp" alt="" aria-hidden="true" loading="lazy" />
+        <img ref={houseRef} className={styles.house} src="/nueva/noche.webp" alt="" aria-hidden="true" />
+        <div ref={houseGradeRef} className={styles.houseGrade} aria-hidden="true" />
         <div ref={glowRef} className={styles.glow} aria-hidden="true" />
 
         <div ref={copyRef} className={styles.copy}>
@@ -234,7 +185,7 @@ export function CityScene() {
             ))}
           </h2>
           <p ref={leadRef} className={styles.lead}>
-            Cada luz es una vivienda que hemos vendido: el precio y los días que estuvo a la venta.
+            Cada ventana encendida es una vivienda que hemos vendido: el precio y los días que estuvo a la venta.
           </p>
         </div>
 

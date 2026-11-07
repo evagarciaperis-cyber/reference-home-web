@@ -221,8 +221,21 @@
 }
 
 /* ---------- Pie de la escena ---------- */
+/* El pie siempre en crema sobre un degradado suave en la base de la
+   imagen: es la parte más cambiante de la foto (árboles, agua). */
+.foot::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: auto 0 0;
+  height: max(46vh, 100%);
+  background: linear-gradient(0deg, rgba(14, 10, 8, 0.55) 0%, rgba(14, 10, 8, 0.28) 45%, rgba(14, 10, 8, 0) 100%);
+  pointer-events: none;
+}
+
 .foot {
   position: absolute;
+  color: var(--ink-light);
   inset: auto 0 0;
   z-index: 2;
   display: flex;
