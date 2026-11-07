@@ -1390,7 +1390,11 @@ main {
   transition: color 0.4s;
 }
 
-.arras__out div:last-child strong {
+.prose .arras__out strong {
+  color: var(--roto);
+}
+
+.prose .arras__out div:last-child strong {
   color: var(--beige);
 }
 
