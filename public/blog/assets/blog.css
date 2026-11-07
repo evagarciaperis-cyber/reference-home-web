@@ -30,6 +30,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
 }
 
 html.lenis,
@@ -438,8 +439,7 @@ main {
 
 .bh {
   position: relative;
-  overflow-x: clip;
-  max-width: var(--max);
+  max-width: calc(var(--max) + 2 * var(--g));
   margin: 0 auto;
   padding: clamp(170px, 24vh, 230px) var(--g) clamp(40px, 7vh, 70px);
   isolation: isolate;
@@ -447,7 +447,11 @@ main {
 
 .bh__bg {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
@@ -544,7 +548,7 @@ main {
 .feat,
 .grid-wrap,
 .related {
-  max-width: var(--max);
+  max-width: calc(var(--max) + 2 * var(--g));
   margin: 0 auto;
   padding: 0 var(--g);
 }
@@ -811,7 +815,7 @@ main {
 }
 
 .post__layout {
-  max-width: var(--max);
+  max-width: calc(var(--max) + 2 * var(--g));
   margin: 0 auto;
   padding: clamp(50px, 9vh, 90px) var(--g) 0;
   display: grid;
