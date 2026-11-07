@@ -6,6 +6,11 @@
 }
 
 .stage {
+  --ink-dark: #241b17;
+  --ink-light: #f6efe6;
+  --wine: #7a1836;
+  color: var(--ink-light);
+  transition: color 0.9s ease;
   position: sticky;
   top: 0;
   height: 100svh;
@@ -34,9 +39,31 @@
   padding: calc(env(safe-area-inset-top, 0px) + clamp(16px, 2.4vw, 30px)) var(--nw-pad) 0;
 }
 
+.stage[data-tone="dark"] {
+  color: var(--ink-dark);
+}
+
 .logo {
+  position: relative;
+  display: block;
   width: clamp(120px, 11vw, 170px);
+}
+
+.logo img {
+  display: block;
+  width: 100%;
   height: auto;
+  transition: opacity 0.9s ease;
+}
+
+.logoLight {
+  position: absolute;
+  inset: 0;
+}
+
+.stage[data-tone="dark"] .logoLight,
+.stage[data-tone="light"] .logoDark {
+  opacity: 0;
 }
 
 .nav {
@@ -78,7 +105,7 @@
   font: 500 0.78rem/1 var(--nw-sans);
   letter-spacing: 0.06em;
   padding: 0.95rem 1.3rem;
-  border: 1px solid rgba(246, 239, 230, 0.55);
+  border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
   border-radius: 999px;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -86,9 +113,9 @@
 }
 
 .cta:hover {
-  background: #f6efe6;
-  color: #7a1836;
-  border-color: #f6efe6;
+  background: var(--wine);
+  color: var(--ink-light);
+  border-color: var(--wine);
 }
 
 /* ---------- Titulares de cada momento ----------
@@ -114,30 +141,55 @@
   margin: 0;
   font: italic 300 clamp(3.2rem, 9vw, 8.6rem)/1 var(--nw-serif);
   letter-spacing: -0.01em;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.45), 0 8px 40px rgba(0, 0, 0, 0.3);
 }
 
 .wordSub {
   margin: 1.4rem auto 0;
   max-width: 32rem;
   font: 500 clamp(0.95rem, 1.2vw, 1.1rem)/1.5 var(--nw-sans);
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55), 0 6px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Mañana y tarde: titular en vino de la marca y frase en tinta, sin
+   sombras. Atardecer y noche: crema con una sombra muy suave. */
+.word[data-tone="dark"] {
+  color: var(--ink-dark);
+}
+
+.word[data-tone="dark"] .wordTitle {
+  color: var(--wine);
+}
+
+.word[data-tone="light"] {
+  color: var(--ink-light);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.32);
 }
 
 .wordLogo {
-  filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.4)) drop-shadow(0 8px 36px rgba(0, 0, 0, 0.25));
   display: block;
   width: min(46vw, 640px);
   height: auto;
   margin: 0 auto;
 }
 
+/* La máscara solo recorta por abajo (de donde sube la palabra) y solo
+   mientras entra: en cuanto la palabra ha llegado se abre del todo, para
+   que la sombra del texto se difumine libre y no quede cortada en caja. */
 .mask {
   display: inline-block;
-  overflow: hidden;
   vertical-align: top;
   padding: 0.08em 0.12em 0.14em;
   margin: -0.08em 0 -0.14em;
+  clip-path: inset(-4em -4em 0 -4em);
+  transition: clip-path 0s linear 1.15s;
+}
+
+.word[data-state="in"] .mask,
+.word[data-state="out"] .mask {
+  clip-path: none;
+}
+
+.word[data-state="out"] .mask {
+  transition-delay: 0s;
 }
 
 .mask > span,
@@ -226,14 +278,14 @@
   display: block;
   position: relative;
   height: 1px;
-  background: rgba(246, 239, 230, 0.25);
+  background: color-mix(in srgb, currentColor 25%, transparent);
   overflow: hidden;
 }
 
 .fill {
   position: absolute;
   inset: 0;
-  background: #f6efe6;
+  background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -293,7 +345,7 @@
 .hint i {
   width: 1px;
   height: 42px;
-  background: linear-gradient(#f6efe6, transparent);
+  background: linear-gradient(currentColor, transparent);
   animation: hint 2.2s var(--nw-ease) infinite;
   transform-origin: top;
 }

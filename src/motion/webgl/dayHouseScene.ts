@@ -122,6 +122,7 @@ uniform float uSunI;
 uniform float uSunLow;
 uniform float uHorizon;
 uniform vec2 uSunScreen;
+uniform float uDay;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
 float noise(vec2 p) {
@@ -270,8 +271,8 @@ void main() {
   // --- Apertura desde negro, viñeta, lectura del texto inferior y grano
   col *= smoothstep(0.0, 0.3, uIntro);
   float vig = smoothstep(1.25, 0.35, length((vUv - 0.5) * vec2(sa * 0.55, 1.0)));
-  col *= mix(0.72, 1.0, vig);
-  col *= mix(0.62, 1.0, smoothstep(0.0, 0.42, vUv.y));
+  col *= mix(mix(0.72, 0.9, uDay), 1.0, vig);
+  col *= mix(mix(0.62, 0.94, uDay), 1.0, smoothstep(0.0, 0.42, vUv.y));
   col += (hash(vUv * uRes + fract(uTime) * 17.0) - 0.5) * 0.035;
   gl_FragColor = vec4(col, 1.0);
 }
@@ -394,6 +395,7 @@ export function createDayHouseScene(canvas: HTMLCanvasElement, opts: DayHouseOpt
     uSunLow: { value: 0 },
     uHorizon: { value: 1 - HORIZON_Y },
     uSunScreen: { value: new THREE.Vector2(0.5, 0.9) },
+    uDay: { value: 1 },
   };
 
   const material = new THREE.ShaderMaterial({ vertexShader: vertex, fragmentShader: fragment, uniforms });
@@ -482,6 +484,8 @@ export function createDayHouseScene(canvas: HTMLCanvasElement, opts: DayHouseOpt
     uniforms.uFogTo.value.set(...FOG_COLORS[ls.to]);
     uniforms.uNightW.value = ls.to === 3 ? (ls.from === 3 ? 1 : ls.t) : 0;
     uniforms.uScale.value = 1.08 - shown * 0.06;
+    // De día no se oscurece la base de la imagen: el texto es oscuro.
+    uniforms.uDay.value = 1 - smooth(clamp01((shown - 0.42) / 0.16));
 
     // Encuadre (en móvil sigue al sol) y posición del sol en pantalla.
     const focusX = opts.mobile ? interp(MOBILE_FOCUS, shown)[0] : 0.5 - Math.sin(Math.PI * clamp01((shown - 0.3) / 0.45)) * 0.06;

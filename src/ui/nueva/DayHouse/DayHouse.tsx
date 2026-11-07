@@ -29,6 +29,7 @@ function clockAt(p: number) {
 
 export function DayHouse({ fontFamily }: { fontFamily: string }) {
   const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const clockRef = useRef<HTMLSpanElement>(null);
   const phaseRef = useRef<HTMLSpanElement>(null);
@@ -72,6 +73,10 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
 
       const phase = phaseAt(p);
       if (clockRef.current) clockRef.current.textContent = clockAt(p);
+      // Tono del texto: tinta y logo rojo con el cielo claro de la mañana y
+      // la tarde; crema desde el atardecer.
+      const tone = p < 0.5 ? "dark" : "light";
+      if (stageRef.current && stageRef.current.dataset.tone !== tone) stageRef.current.dataset.tone = tone;
       if (phase !== lastPhase) {
         lastPhase = phase;
         if (phaseRef.current) phaseRef.current.textContent = `${PHASES[phase].label} · ${PHASES[phase].step}`;
@@ -110,14 +115,19 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
 
   return (
     <section ref={sectionRef} className={styles.scene} aria-labelledby="dayhouse-title">
-      <div className={styles.stage}>
+      <div ref={stageRef} className={styles.stage} data-tone="dark">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.poster} src={fallback ? "/nueva/atardecer.webp" : "/nueva/dia.webp"} alt="" fetchPriority="high" />
         {!fallback && <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />}
 
         <header className={styles.bar}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={styles.logo} src="/nueva/logo-blanco.png" alt="Reference Home" width={1600} height={229} />
+          { }
+          <span className={styles.logo}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={styles.logoDark} src="/nueva/logo-rojo.png" alt="Reference Home" width={1600} height={229} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={styles.logoLight} src="/nueva/logo-blanco.png" alt="" width={1600} height={229} />
+          </span>
           <nav className={styles.nav} aria-label="Principal">
             <a href="#vender">Vender</a>
             <a href="#comprar">Comprar</a>
@@ -130,12 +140,12 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
         </header>
 
         <div ref={wordsRef} className={styles.words} aria-hidden="true">
-          <div className={styles.word} data-word="0" data-state="idle">
+          <div className={styles.word} data-word="0" data-state="idle" data-tone="dark">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={styles.wordLogo} src="/nueva/logo-blanco.png" alt="" />
+            <img className={styles.wordLogo} src="/nueva/logo-rojo.png" alt="" />
           </div>
           {PHASES.map((ph, i) => (
-            <div key={ph.key} className={styles.word} data-word={i + 1} data-state="idle">
+            <div key={ph.key} className={styles.word} data-word={i + 1} data-state="idle" data-tone={i < 2 ? "dark" : "light"}>
               <p className={styles.wordTitle}>
                 {ph.word.split(" ").map((w, k) => (
                   <span key={k} className={styles.mask}>
