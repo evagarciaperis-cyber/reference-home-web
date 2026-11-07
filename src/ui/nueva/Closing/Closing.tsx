@@ -188,7 +188,7 @@ export function Closing() {
             <a href="/quieres-vender">Vender</a>
             <a href="/quieres-comprar">Comprar</a>
             <a href="/quieres-vender/valoracion">Valoración gratis</a>
-            <a href="/inmobiliaria-valencia">Barrios de Valencia</a>
+            <a href="/inmobiliaria-valencia">Inmobiliaria en Valencia</a>
           </nav>
           <nav className={styles.col} aria-label="Reference Home">
             <h3>Reference Home</h3>

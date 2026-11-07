@@ -101,7 +101,7 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
             </span>
           </span>
           <a href="/quieres-comprar">Comprar</a>
-          <a href="/inmobiliaria-valencia">Barrios</a>
+          <a href="/inmobiliaria-valencia">Inmobiliaria en Valencia</a>
           <a href="/blog/">Blog</a>
           <a href="/empresa/nosotros">Nosotros</a>
           <a href="/contacto">Contacto</a>
