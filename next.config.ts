@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
     // mucho el peso); 75 es el valor por defecto del resto del sitio.
     qualities: [70, 75],
   },
+  // Vista previa del blog estático (public/blog, generado en
+  // mini-crm-referencehome/blog): /blog y /blog/<artículo> sirven su index.html.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: "/blog", destination: "/blog/index.html" },
+        { source: "/blog/:slug([a-z0-9-]+)", destination: "/blog/:slug/index.html" },
+      ],
+    };
+  },
 };
 
 export default nextConfig;
