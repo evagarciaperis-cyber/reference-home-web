@@ -2,18 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { DayHouse } from "@/ui/nueva/DayHouse";
 import { CityScene } from "@/ui/nueva/CityScene";
-import { CasesScene } from "@/ui/nueva/CasesScene";
-import { MethodScene } from "@/ui/nueva/MethodScene";
-import { ErrorsScene } from "@/ui/nueva/ErrorsScene";
-// «Cada paso importa» se mantiene tal cual (diseño y movimiento) de la web
-// anterior.
-import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
-// «Conoce nuestros últimos inmuebles» (BuyerScene, copia que revela la
-// valoración nueva) y «¿Cómo podemos ayudarte?» tal cual.
-import { BuyerScene } from "@/ui/nueva/BuyerScene";
-import { ValuationScene } from "@/ui/nueva/ValuationScene";
-import { Process } from "@/ui/sections/Process";
-import { TeamScene } from "@/ui/nueva/TeamScene";
+import { Journey } from "@/ui/nueva/Journey";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -47,26 +36,8 @@ export default function NuevaPage() {
       <main>
         <DayHouse fontFamily={serif.style.fontFamily} />
         <CityScene />
-        <CasesScene />
-        <MethodScene />
-        <ErrorsScene />
-        {/* Sube por encima de la escena anterior como una hoja que la cubre. */}
-        <div className={styles.cover}>
-          <ProjectsGallery />
-          <BuyerScene />
-          <ValuationScene />
-          <Process />
-        </div>
-        <TeamScene />
-        <section className={styles.next} aria-labelledby="next-title">
-          <p className={styles.eyebrow}>Escena 6 · en construcción</p>
-          <h2 id="next-title" className={styles.nextTitle}>
-            ¿Cuánto vale <em>tu casa</em>?
-          </h2>
-          <p className={styles.nextText}>
-            Aquí llegará la valoración: amanece sobre una vivienda y aparece el formulario para pedir la tuya.
-          </p>
-        </section>
+        {/* Tras la noche, un único recorrido horizontal por capítulos. */}
+        <Journey />
       </main>
     </div>
   );
