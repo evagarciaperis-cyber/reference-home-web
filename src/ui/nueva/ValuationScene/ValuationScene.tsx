@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Script from "next/script";
 import { HEADER_TONE_REFRESH_EVENT } from "@/motion/core/events";
+import { subscribeFrame } from "@/motion/core/frameTicker";
 import styles from "./ValuationScene.module.css";
 
 /**
@@ -123,9 +124,9 @@ export function ValuationScene() {
     };
     ScrollTrigger.addEventListener("refreshInit", onRefreshInit);
     ScrollTrigger.addEventListener("refresh", onRefresh);
-    let raf = 0;
+    // Va en el mismo fotograma que el scroll suave (después de lenis.raf):
+    // así la sección siguiente no va un fotograma por detrás y no da tirones.
     const loop = () => {
-      raf = requestAnimationFrame(loop);
       const r = section.getBoundingClientRect();
       const vh = window.innerHeight;
       const flat = reduced || mobile.matches;
@@ -152,9 +153,12 @@ export function ValuationScene() {
         window.dispatchEvent(new Event(HEADER_TONE_REFRESH_EVENT));
       }
     };
-    raf = requestAnimationFrame(loop);
+    const unsubscribe = subscribeFrame(loop);
+    window.addEventListener("scroll", loop, { passive: true });
+    loop();
     return () => {
-      cancelAnimationFrame(raf);
+      unsubscribe();
+      window.removeEventListener("scroll", loop);
       ScrollTrigger.removeEventListener("refreshInit", onRefreshInit);
       ScrollTrigger.removeEventListener("refresh", onRefresh);
     };

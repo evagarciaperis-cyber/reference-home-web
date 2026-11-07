@@ -16,9 +16,9 @@ import { requestHeaderToneRefresh } from "@/motion/core/events";
  */
 
 const VIDEO = {
-  valoracion: "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/valoracion.mp4",
+  valoracion: "/videos/valoracion.mp4",
   marketing: "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/video_marketing.mp4",
-  negociacion: "https://yjjiwgpycvlmfyhypgun.supabase.co/storage/v1/object/public/web-videos/manos-v2.mp4",
+  negociacion: "/videos/manos-v2.mp4",
 };
 
 const PANELS = [

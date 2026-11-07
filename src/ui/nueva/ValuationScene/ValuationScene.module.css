@@ -18,6 +18,7 @@
   overflow: clip;
   background: #ece6dc;
   visibility: hidden;
+  will-change: transform;
 }
 
 .srOnly {
