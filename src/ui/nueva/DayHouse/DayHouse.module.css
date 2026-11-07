@@ -28,14 +28,16 @@
 }
 
 /* ---------- Barra superior ---------- */
+/* Logo y menú juntos a la izquierda, sobre el cielo (a la derecha están el
+   árbol y la casa, donde el texto se perdía). */
 .bar {
   position: absolute;
   inset: 0 0 auto;
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  justify-content: flex-start;
+  gap: clamp(2rem, 4vw, 4.5rem);
   padding: calc(env(safe-area-inset-top, 0px) + clamp(16px, 2.4vw, 30px)) var(--nw-pad) 0;
 }
 
@@ -228,8 +230,8 @@
   position: absolute;
   z-index: -1;
   inset: auto 0 0;
-  height: max(46vh, 100%);
-  background: linear-gradient(0deg, rgba(14, 10, 8, 0.55) 0%, rgba(14, 10, 8, 0.28) 45%, rgba(14, 10, 8, 0) 100%);
+  height: max(62vh, calc(100% + 18vh));
+  background: linear-gradient(0deg, rgba(14, 10, 8, 0.72) 0%, rgba(14, 10, 8, 0.5) 40%, rgba(14, 10, 8, 0.18) 75%, rgba(14, 10, 8, 0) 100%);
   pointer-events: none;
 }
 

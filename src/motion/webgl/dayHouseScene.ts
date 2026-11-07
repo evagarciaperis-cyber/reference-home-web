@@ -185,20 +185,10 @@ void main() {
     col += glow * vec3(1.0, 0.78, 0.5) * 0.22 * on * uNightW;
   }
 
-  // --- Niebla solo en la apertura: la casa aparece entre la bruma al
-  // cargar. Durante el día no hay niebla, para que el anochecer sea limpio.
+  // Sin humo ni niebla: la casa aparece con un fundido limpio desde negro
+  // (ver «Apertura» más abajo).
   vec3 smokeC = fogC;
   float smoke = 0.0;
-  if (uIntro < 0.999) {
-    vec2 wq = uv * vec2(1.2, 1.9);
-    vec2 warp = vec2(fbm(wq + vec2(uTime * 0.05, 0.0)), fbm(wq + vec2(5.2, 1.3) - vec2(0.0, uTime * 0.04)));
-    float cloud = fbm(wq * 1.3 + warp * 2.2 + vec2(uTime * 0.07, uTime * 0.02));
-    float f2 = fbm(uv * 3.4 - vec2(uTime * 0.06, -uTime * 0.03) + warp);
-    smoke = smoothstep(0.38, 0.82, cloud * 0.75 + f2 * 0.35);
-    smokeC = fogC * (0.78 + 0.42 * smoothstep(0.3, 0.9, f2)) + vec3(0.02);
-    float density = (1.0 - smoothstep(0.2, 1.0, uIntro)) * 1.35;
-    col = mix(col, smokeC, clamp(smoke * density, 0.0, 0.94));
-  }
 
   // --- El sol: disco, halo, dispersión en el cielo, reflejo en el agua y
   // destellos de cámara. Vive en coordenadas de la foto (uv), así que se
@@ -270,7 +260,7 @@ void main() {
   }
 
   // --- Apertura desde negro, viñeta, lectura del texto inferior y grano
-  col *= smoothstep(0.0, 0.3, uIntro);
+  col *= smoothstep(0.0, 0.55, uIntro);
   float vig = smoothstep(1.25, 0.35, length((vUv - 0.5) * vec2(sa * 0.55, 1.0)));
   col *= mix(mix(0.72, 0.9, uDay), 1.0, vig);
   col *= mix(mix(0.62, 0.94, uDay), 1.0, smoothstep(0.0, 0.42, vUv.y));

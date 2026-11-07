@@ -4,18 +4,16 @@ import { useEffect, useRef } from "react";
 import styles from "./CasesScene.module.css";
 
 /**
- * Escena 4 · Casos reales.
+ * Escena 4 · Casos reales, a pantalla completa.
  *
- * Vuelo tipográfico en profundidad: cada vivienda vendida (datos reales de
- * la web actual) llega desde el fondo, se queda nítida un momento y pasa de
- * largo por delante de la cámara, con su foto encima y los datos debajo.
- * Mientras tanto el fondo pasa de la noche a las primeras luces del amanecer.
+ * Cada vivienda vendida ocupa toda la pantalla. Al bajar, la foto siguiente
+ * se abre desde el centro como una ventana hasta cubrirlo todo (con un zoom
+ * lento) y su barrio entra en grande, con el precio y los días en venta.
+ * Datos reales de la web actual. Las fotos son las que acompañan a cada caso
+ * en esa web: orientativas (la mayoría generadas), y así se indica. Si llega
+ * la foto real de un caso, se sustituye y se pone `real: true`.
  */
 
-// Fotos: las mismas que acompañan a cada caso en la web actual. Son
-// imágenes orientativas (la mayoría generadas), no fotos de la vivienda
-// vendida, y así se indica en cada tarjeta. Si llega la foto real de un
-// caso, se sustituye y se pone `real: true` para quitar la etiqueta.
 const CASES = [
   { barrio: "Ruzafa", rooms: "Piso · 3 habitaciones", price: "315.000 €", days: 14, img: "ruzafa", real: false },
   { barrio: "Benimaclet", rooms: "Piso · 4 habitaciones", price: "235.000 €", days: 19, img: "benimaclet", real: false },
@@ -26,21 +24,20 @@ const CASES = [
 ] as const;
 
 const AVG_DAYS = Math.round(CASES.reduce((s, c) => s + c.days, 0) / CASES.length);
-const TITLE = "Resultados reales.";
 
 function clamp01(v: number) {
   return v < 0 ? 0 : v > 1 ? 1 : v;
 }
-function smooth(t: number) {
+function ease(t: number) {
   const c = clamp01(t);
-  return c * c * (3 - 2 * c);
+  return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
 }
 
 export function CasesScene() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLOListElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const layersRef = useRef<Array<HTMLDivElement | null>>([]);
+  const textsRef = useRef<Array<HTMLDivElement | null>>([]);
   const countRef = useRef<HTMLSpanElement>(null);
   const barRef = useRef<HTMLSpanElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -50,48 +47,48 @@ export function CasesScene() {
     const stage = stageRef.current;
     if (!section || !stage) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const desktop = window.matchMedia("(min-width: 761px)").matches;
-    const cards = Array.from(cardsRef.current?.querySelectorAll<HTMLElement>("li") ?? []);
-    const words = Array.from(titleRef.current?.querySelectorAll<HTMLElement>("[data-w]") ?? []);
-    const n = cards.length;
+    const n = CASES.length;
     let raf = 0;
-    let lastIdx = -1;
+    let active = -2;
 
     const loop = () => {
       raf = requestAnimationFrame(loop);
       const r = section.getBoundingClientRect();
       if (r.bottom < -100 || r.top > window.innerHeight + 100) return;
       const p = clamp01(-r.top / Math.max(1, r.height - window.innerHeight));
+      // Recorrido de las seis viviendas en el 0–88 % de la escena.
+      const flight = clamp01(p / 0.88) * n;
 
-      // Noche → primeras luces del amanecer.
-      stage.style.setProperty("--dawn", String(smooth((p - 0.15) / 0.85)));
-
-      words.forEach((el, i) => el.style.setProperty("--f", String(smooth((p / 0.12) * words.length - i))));
-
-      // Vuelo: cada tarjeta ocupa un tramo; t = -1 lejos, 0 delante, +1 ya pasó.
-      const flight = clamp01(p / 0.86) * (n - 0.001);
-      cards.forEach((el, i) => {
-        const t = Math.max(-1.2, Math.min(1.2, flight - i - 0.32));
-        const scale = reduced ? 1 : t < 0 ? 1 + t * 0.7 : 1 + t * t * 1.4 + t * 0.3;
-        const opacity = t < 0 ? smooth((t + 0.5) / 0.38) : 1 - smooth((t - 0.12) / 0.3);
-        const blur = reduced || !desktop ? 0 : Math.abs(t) > 0.25 ? (Math.abs(t) - 0.25) * 10 : 0;
-        el.style.opacity = opacity.toFixed(3);
-        el.style.transform = `translate3d(-50%, calc(-50% + ${(t * -4).toFixed(2)}vh), 0) scale(${scale.toFixed(3)})`;
-        el.style.filter = blur > 0.1 ? `blur(${blur.toFixed(1)}px)` : "none";
-        el.style.visibility = opacity < 0.01 ? "hidden" : "visible";
+      layersRef.current.forEach((el, i) => {
+        if (!el) return;
+        // La primera ya está abierta; las demás se abren desde el centro.
+        const open = i === 0 ? 1 : reduced ? (flight > i ? 1 : 0) : ease((flight - i + 0.15) / 0.6);
+        const inset = (1 - open) * 34;
+        const insetX = (1 - open) * 38;
+        el.style.clipPath = `inset(${inset}% ${insetX}% ${inset}% ${insetX}% round ${(1 - open) * 16}px)`;
+        el.style.visibility = open <= 0.001 ? "hidden" : "visible";
+        // Zoom lento: entra cerca y se va alejando mientras está en pantalla.
+        const life = clamp01((flight - i + 0.15) / 1.4);
+        const img = el.firstElementChild as HTMLElement | null;
+        if (img && !reduced) img.style.transform = `scale(${(1.28 - life * 0.2).toFixed(3)})`;
       });
-      const idx = Math.min(n - 1, Math.floor(flight));
-      if (idx !== lastIdx) {
-        lastIdx = idx;
-        if (countRef.current) countRef.current.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}`;
+
+      // El texto de la vivienda que está delante entra con su propio tiempo.
+      const want = p > 0.9 ? -1 : Math.max(0, Math.min(n - 1, Math.floor(flight - 0.2)));
+      if (want !== active) {
+        active = want;
+        textsRef.current.forEach((el, i) => {
+          if (!el) return;
+          el.dataset.state = i === active ? "in" : el.dataset.state === "in" ? "out" : el.dataset.state ?? "idle";
+        });
+        if (countRef.current && active >= 0) countRef.current.textContent = `${String(active + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}`;
       }
-      if (barRef.current) barRef.current.style.transform = `scaleX(${clamp01(p / 0.86)})`;
-      if (endRef.current) {
-        const e = smooth((p - 0.88) / 0.08);
-        endRef.current.style.opacity = String(e);
-        endRef.current.style.transform = `translate3d(-50%, calc(-50% + ${(1 - e) * 24}px), 0)`;
-        endRef.current.style.visibility = e < 0.01 ? "hidden" : "visible";
-      }
+      if (barRef.current) barRef.current.style.transform = `scaleX(${clamp01(p / 0.88)})`;
+
+      // Cierre: la imagen se oscurece y aparece la media de días.
+      const e = ease((p - 0.88) / 0.1);
+      stage.style.setProperty("--end", String(e));
+      if (endRef.current) endRef.current.style.visibility = e < 0.01 ? "hidden" : "visible";
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
@@ -100,37 +97,54 @@ export function CasesScene() {
   return (
     <section ref={sectionRef} className={styles.scene} id="casos" aria-labelledby="cases-title">
       <div ref={stageRef} className={styles.stage}>
+        {CASES.map((c, i) => (
+          <div
+            key={c.barrio}
+            ref={(el) => {
+              layersRef.current[i] = el;
+            }}
+            className={styles.layer}
+            style={{ zIndex: i + 1 }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/nueva/casos/${c.img}.webp`} alt={`Imagen orientativa del caso de ${c.barrio}`} loading="lazy" />
+          </div>
+        ))}
+        <div className={styles.shade} aria-hidden="true" />
+
         <div className={styles.head}>
           <p className={styles.eyebrow}>Casos reales</p>
-          <h2 ref={titleRef} id="cases-title" className={styles.title}>
-            {TITLE.split(" ").map((w, i) => (
-              <span key={i} data-w="">
-                {w}{" "}
-              </span>
-            ))}
+          <h2 id="cases-title" className={styles.srOnly}>
+            Viviendas que hemos vendido en Valencia
           </h2>
         </div>
 
-        <ol ref={cardsRef} className={styles.cards}>
-          {CASES.map((c, i) => (
-            <li key={c.barrio} className={styles.card}>
-              <figure className={styles.photo}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/nueva/casos/${c.img}.webp`} alt={`Vivienda de referencia para el caso de ${c.barrio}`} loading="lazy" />
-                {!c.real && <figcaption>Imagen orientativa</figcaption>}
-              </figure>
-              <span className={styles.index}>{String(i + 1).padStart(2, "0")}</span>
-              <h3 className={styles.barrio}>{c.barrio}</h3>
-              <p className={styles.price}>{c.price}</p>
-              <p className={styles.meta}>
-                <span>{c.rooms}</span>
-                <span className={styles.days}>
-                  Vendido en <strong>{c.days}</strong> días
+        {CASES.map((c, i) => (
+          <div
+            key={c.barrio}
+            ref={(el) => {
+              textsRef.current[i] = el;
+            }}
+            className={styles.text}
+            data-state="idle"
+          >
+            <h3 className={styles.barrio}>
+              <span className={styles.mask}>
+                <span>{c.barrio}</span>
+              </span>
+            </h3>
+            <p className={styles.data}>
+              <span className={styles.mask}>
+                <span style={{ transitionDelay: "120ms" }}>
+                  <b>{c.price}</b>
+                  <i>{c.rooms}</i>
+                  <em>Vendido en {c.days} días</em>
                 </span>
-              </p>
-            </li>
-          ))}
-        </ol>
+              </span>
+            </p>
+            {!c.real && <p className={styles.note}>Imagen orientativa</p>}
+          </div>
+        ))}
 
         <div ref={endRef} className={styles.end}>
           <p className={styles.endBig}>
