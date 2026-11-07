@@ -12,8 +12,8 @@
   position: absolute;
   z-index: 1;
   inset: 0 0 auto;
-  height: clamp(130px, 22vh, 220px);
-  background: linear-gradient(180deg, rgba(10, 8, 7, 0.5) 0%, rgba(10, 8, 7, 0.22) 55%, rgba(10, 8, 7, 0) 100%);
+  height: clamp(170px, 28vh, 260px);
+  background: linear-gradient(180deg, rgba(10, 8, 7, 0.5) 0%, rgba(10, 8, 7, 0.24) 55%, rgba(10, 8, 7, 0) 100%);
   pointer-events: none;
 }
 
@@ -482,5 +482,28 @@
   .wordLogo {
     transition: opacity 0.4s linear;
     transform: none !important;
+  }
+}
+
+/* ---------- Tira superior (línea + «Inmobiliaria en Valencia» / © año) ---------- */
+.topline {
+  position: absolute;
+  z-index: 2;
+  left: var(--nw-pad);
+  right: var(--nw-pad);
+  top: calc(env(safe-area-inset-top, 0px) + 112px);
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(240, 223, 207, 0.35);
+  color: #f6efe6;
+  font: italic 600 10px/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .topline {
+    top: calc(env(safe-area-inset-top, 0px) + 78px);
   }
 }

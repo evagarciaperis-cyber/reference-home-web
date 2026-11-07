@@ -1,1 +1,1 @@
-export { ValuationScene, ValuationIntro, ValuationVisual } from "./ValuationScene";
+export { ValuationScene, ValuationIntro } from "./ValuationScene";

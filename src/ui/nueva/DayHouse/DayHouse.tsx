@@ -139,6 +139,12 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
         {!fallback && <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />}
 
 
+        {/* Tira superior bajo la cabecera, como en la portada anterior */}
+        <div className={styles.topline} data-exit="">
+          <span>Inmobiliaria en Valencia</span>
+          <span>© {new Date().getFullYear()}</span>
+        </div>
+
         <div ref={wordsRef} className={styles.words} aria-hidden="true" data-exit="">
           <div className={styles.word} data-word="0" data-state="idle" data-tone="dark">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -164,7 +170,6 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
 
         <div className={styles.foot} data-exit="">
           <div className={styles.intro}>
-            <p className={styles.eyebrow}>Inmobiliaria en Valencia</p>
             <h1 id="dayhouse-title" className={styles.title}>
               Vendemos tu vivienda en Valencia con estrategia, imagen y criterio.
             </h1>
