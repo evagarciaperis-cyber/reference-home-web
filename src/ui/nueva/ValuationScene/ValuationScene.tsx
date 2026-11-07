@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Script from "next/script";
+import { sendLead, STATIC_FORMS } from "@/lib/sendLead";
 import { HEADER_TONE_REFRESH_EVENT } from "@/motion/core/events";
 import { subscribeFrame } from "@/motion/core/frameTicker";
 import styles from "./ValuationScene.module.css";
@@ -190,9 +191,7 @@ export function ValuationScene() {
     data.set("message", `Solicitud de valoración\nDirección: ${data.get("address")}\nTipo: ${data.get("type")}\nSuperficie: ${data.get("size")} m²`);
     setStatus({ kind: "sending" });
     try {
-      const res = await fetch("/api/contact", { method: "POST", body: data, headers: { Accept: "application/json" } });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.message || "No se pudo enviar.");
+      await sendLead(data, "home-valoracion");
       setStatus({ kind: "ok" });
     } catch (err) {
       setStatus({ kind: "error", message: err instanceof Error ? err.message : "No se pudo enviar. Inténtalo de nuevo." });
@@ -214,7 +213,7 @@ export function ValuationScene() {
 
   return (
     <section ref={sectionRef} className={styles.section} id="valoracion" aria-labelledby="valuation-title" data-header-tone="dark" data-header-transparent="true">
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
+      {!STATIC_FORMS && <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />}
       <div ref={stageRef} className={styles.stage}>
         {/* Escenas que cambian con cada respuesta */}
         <div className={styles.scenes} aria-hidden="true">
@@ -305,7 +304,7 @@ export function ValuationScene() {
                         Acepto la <a href="/política-privacidad">política de privacidad</a>
                       </span>
                     </label>
-                    <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark" />
+                    {!STATIC_FORMS && <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark" />}
                     <div className={styles.actions}>
                       <button type="submit" className={styles.submit} disabled={status.kind === "sending"}>
                         {status.kind === "sending" ? "Enviando…" : "Pedir mi valoración"}

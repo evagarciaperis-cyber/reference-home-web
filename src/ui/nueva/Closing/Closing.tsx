@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
+import { sendLead, STATIC_FORMS } from "@/lib/sendLead";
 import styles from "./Closing.module.css";
 
 /**
@@ -70,9 +71,7 @@ export function Closing() {
     }
     setStatus({ kind: "sending" });
     try {
-      const res = await fetch("/api/contact", { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.message || "No se pudo enviar.");
+      await sendLead(new FormData(form), "home-contacto");
       setStatus({ kind: "ok", message: "Gracias. Te llamamos muy pronto." });
       form.reset();
     } catch (err) {
@@ -83,7 +82,7 @@ export function Closing() {
 
   return (
     <>
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
+      {!STATIC_FORMS && <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }} />
 
       <section className={styles.contact} id="contacto" aria-labelledby="contact-title" data-header-tone="dark">
@@ -166,7 +165,7 @@ export function Closing() {
                 Acepto la <a href="/política-privacidad">política de privacidad</a>
               </span>
             </label>
-            <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark" />
+            {!STATIC_FORMS && <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark" />}
             <button type="submit" className={styles.submit} disabled={status.kind === "sending"}>
               {status.kind === "sending" ? "Enviando…" : "Enviar"} <span aria-hidden="true">→</span>
             </button>

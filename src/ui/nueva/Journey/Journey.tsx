@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
+import { sendLead, STATIC_FORMS } from "@/lib/sendLead";
 import { requestHeaderToneRefresh } from "@/motion/core/events";
 import styles from "./Journey.module.css";
 
@@ -82,9 +83,7 @@ function ValuationQuestions() {
     data.set("message", `Solicitud de valoración\nDirección: ${data.get("address")}\nTipo: ${data.get("type")}\nSuperficie: ${data.get("size")} m²`);
     setStatus({ kind: "sending" });
     try {
-      const res = await fetch("/api/contact", { method: "POST", body: data, headers: { Accept: "application/json" } });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.message || "No se pudo enviar.");
+      await sendLead(data, "home-valoracion-recorrido");
       setStatus({ kind: "ok", message: "Gracias. Un agente de tu zona te llamará para preparar la valoración." });
       form.reset();
     } catch (err) {
@@ -162,7 +161,7 @@ function ValuationQuestions() {
                 Acepto la <a href="/política-privacidad">política de privacidad</a>
               </span>
             </label>
-            <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark" />
+            {!STATIC_FORMS && <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-size="flexible" data-theme="dark" />}
             <div className={styles.vActions}>
               <button type="button" className={styles.vBack} onClick={() => setStep(1)}>
                 Atrás
@@ -276,7 +275,7 @@ export function Journey({ full = false }: { full?: boolean }) {
 
   return (
     <section ref={sectionRef} className={styles.journey} aria-label="Cómo vendemos tu vivienda" data-header-transparent="true">
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
+      {!STATIC_FORMS && <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />}
       <div className={styles.sticky}>
         <div ref={trackRef} className={styles.track}>
           {/* 1 · Manifiesto */}
