@@ -236,75 +236,85 @@
 /* ---------- Pie ---------- */
 .foot {
   --p: 0;
-  position: relative;
   background: #15110f;
   color: #f6efe6;
-  padding: clamp(60px, 10vh, 100px) var(--nw-pad) 1.6rem;
-  overflow: hidden;
+  padding: clamp(56px, 9vh, 90px) var(--nw-pad) 1.6rem;
 }
 
-.footTop {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 1.6rem;
+.footGrid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 2.4rem;
+  opacity: calc(0.4 + var(--p) * 0.6);
+  transform: translate3d(0, calc((1 - var(--p)) * 20px), 0);
 }
 
-.footNav,
-.social {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem 1.8rem;
-  font: 400 0.95rem/1 var(--nw-sans);
-}
-
-.footNav a,
-.social a,
-.legal a {
-  color: inherit;
-  text-decoration: none;
-  opacity: 0.85;
-  transition: opacity 0.3s;
-}
-
-.footNav a:hover,
-.social a:hover,
-.legal a:hover {
-  opacity: 1;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.social {
-  font-size: 0.78rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-/* La firma de la marca sube con el scroll */
-.word {
+.logo {
   display: block;
-  width: 100%;
+  width: 168px;
   height: auto;
-  margin: clamp(3rem, 8vh, 5rem) 0 clamp(1.4rem, 3vh, 2rem);
-  opacity: calc(0.25 + var(--p) * 0.75);
-  transform: translate3d(0, calc((1 - var(--p)) * 40%), 0);
+}
+
+.brandCol p {
+  max-width: 22rem;
+  margin: 1.2rem 0 0;
+  font: italic 300 1.15rem/1.4 var(--nw-serif);
+  color: rgba(246, 239, 230, 0.7);
+}
+
+.col {
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
+}
+
+.col h3 {
+  margin: 0 0 0.4rem;
+  font: 500 0.66rem/1 var(--nw-sans);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(246, 239, 230, 0.5);
+}
+
+.col a,
+.legal a {
+  justify-self: start;
+  color: rgba(246, 239, 230, 0.85);
+  font: 400 0.92rem/1.3 var(--nw-sans);
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s;
+}
+
+.col a:hover,
+.legal a:hover {
+  color: #f6efe6;
+  background-size: 100% 1px;
 }
 
 .legal {
+  max-width: 1400px;
+  margin: clamp(2.6rem, 7vh, 4.4rem) auto 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.8rem;
   padding-top: 1.2rem;
-  border-top: 1px solid rgba(246, 239, 230, 0.18);
-  font: 400 0.78rem/1.4 var(--nw-sans);
-  color: rgba(246, 239, 230, 0.7);
+  border-top: 1px solid rgba(246, 239, 230, 0.14);
+  font: 400 0.76rem/1.4 var(--nw-sans);
+  color: rgba(246, 239, 230, 0.55);
 }
 
 .legal span:last-child {
   display: flex;
-  gap: 1.2rem;
+  gap: 1.4rem;
+}
+
+.legal a {
+  font-size: 0.76rem;
+  color: rgba(246, 239, 230, 0.6);
 }
 
 @media (max-width: 900px) {
@@ -323,5 +333,13 @@
   .channels a {
     flex-direction: column;
     gap: 0.4rem;
+  }
+
+  .footGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .brandCol {
+    grid-column: 1 / -1;
   }
 }

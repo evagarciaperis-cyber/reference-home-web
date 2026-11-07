@@ -9,8 +9,7 @@ import styles from "./Closing.module.css";
  *
  * Contacto en el verde de la marca: titular grande, datos de las dos
  * oficinas y un formulario corto que envía a /api/contact (Turnstile).
- * El pie aparece por debajo, como si se levantara el bloque de contacto:
- * la palabra «reference» en la tipografía de la marca sube con el scroll.
+ * Pie sobrio en cuatro columnas (marca, servicios, empresa, redes).
  * Incluye los datos estructurados (RealEstateAgent) para Google.
  */
 
@@ -179,16 +178,27 @@ export function Closing() {
       </section>
 
       <footer ref={footRef} className={styles.foot}>
-        <div className={styles.footTop}>
-          <nav className={styles.footNav} aria-label="Pie">
+        <div className={styles.footGrid}>
+          <div className={styles.brandCol}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={styles.logo} src="/nueva/logo-blanco.png" alt="Reference Home" width={1600} height={229} />
+            <p>Asesoría inmobiliaria en Valencia desde la confianza y el criterio.</p>
+          </div>
+          <nav className={styles.col} aria-label="Servicios">
+            <h3>Servicios</h3>
             <a href="/quieres-vender">Vender</a>
             <a href="/quieres-comprar">Comprar</a>
             <a href="/quieres-vender/valoracion">Valoración gratis</a>
-            <a href="/inmobiliaria-valencia">Inmobiliaria en Valencia</a>
+            <a href="/inmobiliaria-valencia">Barrios de Valencia</a>
+          </nav>
+          <nav className={styles.col} aria-label="Reference Home">
+            <h3>Reference Home</h3>
             <a href="/empresa/nosotros">Nosotros</a>
+            <a href="/empresa/ser-agente">Trabaja con nosotros</a>
             <a href="/contacto">Contacto</a>
           </nav>
-          <nav className={styles.social} aria-label="Redes sociales">
+          <div className={styles.col}>
+            <h3>Síguenos</h3>
             <a href="https://www.instagram.com/inmobiliariareferencehome/" target="_blank" rel="noopener noreferrer">
               Instagram
             </a>
@@ -198,14 +208,11 @@ export function Closing() {
             <a href="https://www.youtube.com/channel/UCv7G5UovIrhO8VsCLsGVuFg" target="_blank" rel="noopener noreferrer">
               YouTube
             </a>
-          </nav>
+          </div>
         </div>
 
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.word} src="/nueva/logo-blanco.png" alt="Reference Home" />
-
         <div className={styles.legal}>
-          <span>© {new Date().getFullYear()} Reference Home · Agentes inscritos en el registro RAICV 00091</span>
+          <span>© {new Date().getFullYear()} Reference Home · RAICV 00091</span>
           <span>
             <a href="/aviso-legal">Aviso legal</a>
             <a href="/política-privacidad">Privacidad</a>

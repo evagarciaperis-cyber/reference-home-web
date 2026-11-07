@@ -7,13 +7,14 @@ import styles from "./ValuationScene.module.css";
 /**
  * Valoración · «Cruza la puerta».
  *
- * 1. Umbral: una pared crema con un arco por el que se ve la casa de noche.
- *    Al bajar, la cámara avanza y cruza el arco hasta quedar dentro.
+ * 1. Umbral: una puerta de verdad (dos hojas de madera pintada con molduras,
+ *    marco de piedra) en una pared crema. Al bajar, las hojas se abren y la
+ *    cámara avanza hasta cruzar el umbral y quedar dentro del comedor.
  * 2. Dentro, a pantalla completa, una pregunta cada vez; cada respuesta
  *    cambia la escena:
- *    - «¿Dónde está?» → la vista de Valencia; si la dirección menciona uno
- *      de los barrios con caso real, aparece su dato real.
- *    - «¿A quién llamamos?» → el equipo en la oficina.
+ *    - «¿Dónde está?» → el comedor; tras responder, el salón con vistas y,
+ *      si la dirección menciona un barrio con caso real, su dato real.
+ *    - «¿A quién llamamos?» → la terraza al atardecer.
  *    - Enviado → «Gracias, ya estamos en ello».
  * Envía a /api/contact con Turnstile, como el formulario de contacto.
  */
@@ -33,7 +34,8 @@ const BARRIOS: Record<string, { name: string; days: number }> = {
   campanar: { name: "Campanar", days: 22 },
 };
 
-const SCENES = ["/nueva/noche.webp", "/nueva/valencia.webp", "/nueva/equipo/equipo-color.webp"];
+// Fotos que no se usan en ninguna otra parte de la home.
+const SCENES = ["/nueva/viaje/comedor.webp", "/nueva/viaje/salon-mar.webp", "/nueva/viaje/terraza.webp"];
 const TYPES = ["Piso", "Ático", "Dúplex", "Bajo", "Casa o chalet"];
 
 function clamp01(v: number) {
@@ -51,7 +53,26 @@ function findBarrio(address: string) {
 
 type Status = { kind: "idle" | "sending" | "ok" | "error"; message?: string };
 
-/** Primer fotograma (la pared con el arco), para revelarlo detrás del vídeo de inmuebles. */
+function Door() {
+  return (
+    <div className={styles.wall} aria-hidden="true">
+      <p className={styles.wallText}>
+        ¿Cuánto vale <em>tu casa?</em>
+      </p>
+      <div className={styles.doorway}>
+        <div className={`${styles.leaf} ${styles.leafL}`}>
+          <i className={styles.knob} />
+        </div>
+        <div className={`${styles.leaf} ${styles.leafR}`}>
+          <i className={styles.knob} />
+        </div>
+      </div>
+      <p className={styles.wallHint}>Pasa</p>
+    </div>
+  );
+}
+
+/** Primer fotograma (la puerta cerrada), para revelarlo detrás del vídeo de inmuebles. */
 export function ValuationIntro() {
   return (
     <div className={styles.stage} style={{ position: "relative", height: "100%", visibility: "visible" }} aria-hidden="true">
@@ -59,12 +80,7 @@ export function ValuationIntro() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.scene} data-on="" src={SCENES[0]} alt="" />
       </div>
-      <div className={styles.wall}>
-        <p className={styles.wallText}>
-          ¿Cuánto vale <em>tu casa?</em>
-        </p>
-        <p className={styles.wallHint}>Pasa</p>
-      </div>
+      <Door />
     </div>
   );
 }
@@ -158,18 +174,13 @@ export function ValuationScene() {
         <div className={styles.scenes} aria-hidden="true">
           {SCENES.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} className={styles.scene} data-on={i === scene ? "" : undefined} src={src} alt="" loading="lazy" />
+            <img key={src} className={styles.scene} data-on={i === scene ? "" : undefined} src={src} alt="" />
           ))}
           <div className={styles.shade} data-done={done ? "" : undefined} />
         </div>
 
-        {/* La pared con el arco, que se cruza al bajar */}
-        <div className={styles.wall} aria-hidden="true">
-          <p className={styles.wallText}>
-            ¿Cuánto vale <em>tu casa?</em>
-          </p>
-          <p className={styles.wallHint}>Pasa</p>
-        </div>
+        {/* La puerta, que se abre y se cruza al bajar */}
+        <Door />
 
         {/* Dentro: una pregunta cada vez */}
         <div className={styles.inside}>
