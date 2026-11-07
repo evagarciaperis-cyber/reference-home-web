@@ -140,9 +140,6 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
             <a href="#barrios">Barrios</a>
             <a href="#equipo">Nosotros</a>
           </nav>
-          <a className={styles.cta} href="#valoracion">
-            Valora tu vivienda
-          </a>
         </header>
 
         <div ref={wordsRef} className={styles.words} aria-hidden="true" data-exit="">
@@ -174,6 +171,16 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
             <h1 id="dayhouse-title" className={styles.title}>
               Vendemos tu vivienda en Valencia con estrategia, imagen y criterio.
             </h1>
+            <a className={styles.circle} href="#valoracion">
+              <span>
+                Valora
+                <br />
+                tu
+                <br />
+                vivienda
+              </span>
+              <i aria-hidden="true">↗</i>
+            </a>
           </div>
           <div className={styles.day}>
             <div className={styles.dayTop}>

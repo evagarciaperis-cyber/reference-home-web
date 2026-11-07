@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { DayHouse } from "@/ui/nueva/DayHouse";
 import { CityScene } from "@/ui/nueva/CityScene";
 import { CasesScene } from "@/ui/nueva/CasesScene";
+import { MethodScene } from "@/ui/nueva/MethodScene";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -37,8 +38,9 @@ export default function NuevaPage() {
         <DayHouse fontFamily={serif.style.fontFamily} />
         <CityScene />
         <CasesScene />
+        <MethodScene />
         <section className={styles.next} aria-labelledby="next-title">
-          <p className={styles.eyebrow}>Escena 5 · en construcción</p>
+          <p className={styles.eyebrow}>Escena 6 · en construcción</p>
           <h2 id="next-title" className={styles.nextTitle}>
             ¿Cuánto vale <em>tu casa</em>?
           </h2>

@@ -249,6 +249,44 @@
   max-width: 30rem;
 }
 
+/* Botón circular «Valora tu vivienda» (como en la web anterior): contorno
+   crema y, al pasar el ratón, se rellena del vino de la marca. */
+.circle {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  width: clamp(112px, 10vw, 150px);
+  aspect-ratio: 1;
+  margin-top: clamp(1.2rem, 3vh, 2rem);
+  border: 1px solid rgba(246, 239, 230, 0.75);
+  border-radius: 50%;
+  color: inherit;
+  text-align: center;
+  text-decoration: none;
+  font: italic 500 clamp(0.7rem, 0.8vw, 0.82rem)/1.35 var(--nw-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background 0.5s var(--nw-ease), border-color 0.5s var(--nw-ease), transform 0.6s var(--nw-ease);
+}
+
+.circle i {
+  font-style: normal;
+  font-size: 0.95rem;
+  transition: transform 0.5s var(--nw-ease);
+}
+
+.circle:hover,
+.circle:focus-visible {
+  background: #a11f48;
+  border-color: #a11f48;
+  transform: scale(1.04);
+}
+
+.circle:hover i {
+  transform: translate(3px, -3px);
+}
+
 .eyebrow {
   margin: 0 0 0.7rem;
   font: 500 0.7rem/1 var(--nw-sans);

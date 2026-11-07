@@ -8,18 +8,21 @@ import styles from "./CasesScene.module.css";
  *
  * Vuelo tipográfico en profundidad: cada vivienda vendida (datos reales de
  * la web actual) llega desde el fondo, se queda nítida un momento y pasa de
- * largo por delante de la cámara. Sin fotos: no hay fotos de esas viviendas
- * y no se ilustran precios reales con casas que no son. Mientras tanto el
- * fondo pasa de la noche a las primeras luces del amanecer.
+ * largo por delante de la cámara, con su foto encima y los datos debajo.
+ * Mientras tanto el fondo pasa de la noche a las primeras luces del amanecer.
  */
 
+// Fotos: las mismas que acompañan a cada caso en la web actual. Son
+// imágenes orientativas (la mayoría generadas), no fotos de la vivienda
+// vendida, y así se indica en cada tarjeta. Si llega la foto real de un
+// caso, se sustituye y se pone `real: true` para quitar la etiqueta.
 const CASES = [
-  { barrio: "Ruzafa", rooms: "Piso · 3 habitaciones", price: "315.000 €", days: 14 },
-  { barrio: "Benimaclet", rooms: "Piso · 4 habitaciones", price: "235.000 €", days: 19 },
-  { barrio: "Ciutat Vella", rooms: "Piso · 2 habitaciones", price: "198.000 €", days: 12 },
-  { barrio: "Cánovas", rooms: "Piso · 3 habitaciones", price: "385.000 €", days: 26 },
-  { barrio: "Patraix", rooms: "Piso · 3 habitaciones", price: "205.000 €", days: 35 },
-  { barrio: "Campanar", rooms: "Piso · 4 habitaciones", price: "365.000 €", days: 22 },
+  { barrio: "Ruzafa", rooms: "Piso · 3 habitaciones", price: "315.000 €", days: 14, img: "ruzafa", real: false },
+  { barrio: "Benimaclet", rooms: "Piso · 4 habitaciones", price: "235.000 €", days: 19, img: "benimaclet", real: false },
+  { barrio: "Ciutat Vella", rooms: "Piso · 2 habitaciones", price: "198.000 €", days: 12, img: "ciutat-vella", real: false },
+  { barrio: "Cánovas", rooms: "Piso · 3 habitaciones", price: "385.000 €", days: 26, img: "canovas", real: false },
+  { barrio: "Patraix", rooms: "Piso · 3 habitaciones", price: "205.000 €", days: 35, img: "patraix", real: false },
+  { barrio: "Campanar", rooms: "Piso · 4 habitaciones", price: "365.000 €", days: 22, img: "campanar", real: false },
 ] as const;
 
 const AVG_DAYS = Math.round(CASES.reduce((s, c) => s + c.days, 0) / CASES.length);
@@ -111,6 +114,11 @@ export function CasesScene() {
         <ol ref={cardsRef} className={styles.cards}>
           {CASES.map((c, i) => (
             <li key={c.barrio} className={styles.card}>
+              <figure className={styles.photo}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/nueva/casos/${c.img}.webp`} alt={`Vivienda de referencia para el caso de ${c.barrio}`} loading="lazy" />
+                {!c.real && <figcaption>Imagen orientativa</figcaption>}
+              </figure>
               <span className={styles.index}>{String(i + 1).padStart(2, "0")}</span>
               <h3 className={styles.barrio}>{c.barrio}</h3>
               <p className={styles.price}>{c.price}</p>
