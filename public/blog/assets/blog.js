@@ -311,6 +311,32 @@
     update(false);
   });
 
+  /* ---------- Simulador de arras ---------- */
+  document.querySelectorAll("[data-arras]").forEach(function (box) {
+    var price = box.querySelector("[data-arras-price]");
+    var pct = box.querySelector("[data-arras-pct]");
+    var fmt = new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 });
+    var t = 0;
+    function calc(user) {
+      var p = Math.max(0, parseFloat(price.value) || 0);
+      var k = parseFloat(pct.value) || 0;
+      var a = Math.round((p * k) / 100);
+      box.querySelector("[data-arras-pct-label]").textContent = k + " %";
+      box.querySelector("[data-arras-amount]").textContent = fmt.format(a) + " €";
+      box.querySelector("[data-arras-buyer]").textContent = fmt.format(a) + " €";
+      box.querySelector("[data-arras-seller]").textContent = fmt.format(a * 2) + " €";
+      if (user) {
+        clearTimeout(t);
+        t = setTimeout(function () {
+          track("rh_arras", { percent: k });
+        }, 1000);
+      }
+    }
+    price.addEventListener("input", function () { calc(true); });
+    pct.addEventListener("input", function () { calc(true); });
+    calc(false);
+  });
+
   /* ---------- Buscador y filtros de la portada ---------- */
   var grid = document.querySelector("[data-grid]");
   if (grid) {
