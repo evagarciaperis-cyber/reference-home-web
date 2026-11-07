@@ -53,3 +53,7 @@ next-env.d.ts
 images/video_marketing.mp4
 public/videos/comprar-inmuebles.mp4
 public/videos/video_marketing.mp4
+
+# Exportación estática de la home
+/.next-export/
+/dist-home/

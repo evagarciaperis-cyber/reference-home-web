@@ -10,10 +10,12 @@ import { usePathname } from "next/navigation";
  * este componente desaparece junto con el chrome antiguo.
  */
 const NEW_SITE_PREFIXES = ["/nueva"];
+// En la versión estática la portada (/) es la home nueva.
+const EXPORT_HOME = process.env.NEXT_PUBLIC_EXPORT_HOME === "1";
 
 export function ChromeGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "/";
-  const isNewSite = NEW_SITE_PREFIXES.some(
+  const isNewSite = (EXPORT_HOME && pathname === "/") || NEW_SITE_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
   if (isNewSite) return null;

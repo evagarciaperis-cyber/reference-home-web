@@ -1,77 +1,44 @@
 import type { Metadata } from "next";
-import { Hero } from "@/ui/sections/Hero";
-import { Manifesto } from "@/ui/sections/Manifesto";
-import { MarketingReel } from "@/ui/sections/MarketingReel";
-import { SellingErrors } from "@/ui/sections/SellingErrors";
-import { BrandPause } from "@/ui/sections/BrandPause";
-import { ProjectsGallery } from "@/ui/sections/ProjectsGallery";
-import { BuyerExperience } from "@/ui/sections/BuyerExperience";
-import { Process } from "@/ui/sections/Process";
-import { ProcessTeamPause } from "@/ui/sections/ProcessTeamPause";
-import { WorkZoom } from "@/ui/sections/WorkZoom";
-import { BrandStory } from "@/ui/sections/BrandStory";
-import { FinalReveal } from "@/ui/sections/FinalReveal";
+import NuevaPage from "./nueva/page";
 
-// Puerto literal de las <meta> de web-nueva/index.html (título,
-// description) -- fase 15, metadata técnica mínima, docs/MIGRACION.md.
-// Sin metadataBase (no hay dominio de despliegue todavío decidido): el
-// canonical queda relativo, válido pero sin resolver a absoluto hasta que
-// se fije. Sin imagen de Open Graph -- no existe ninguna diseñada para
-// ese uso todavía (regla nº2 de la fase 15: no inventar imágenes
-// sociales definitivas).
-const TITLE = "Reference Study — Experiencia digital";
-const DESCRIPTION =
-  "Estudio web independiente de una experiencia editorial y cinética. Proyecto estático listo para FTP.";
+/**
+ * Portada.
+ *
+ * - En Vercel (vista previa) sigue la portada antigua; la web nueva vive en /nueva.
+ * - En la versión estática que se sube a referencehome.es
+ *   (NEXT_PUBLIC_EXPORT_HOME=1, ver scripts/export-home.mjs) la portada es la
+ *   home nueva, indexable y con la dirección canónica del dominio.
+ */
+const EXPORT_HOME = process.env.NEXT_PUBLIC_EXPORT_HOME === "1";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
+const exportMetadata: Metadata = {
+  metadataBase: new URL("https://referencehome.es"),
+  title: "Reference Home | Inmobiliaria en Valencia para vender y comprar vivienda",
+  description:
+    "Inmobiliaria en Valencia. Valoramos, mostramos, negociamos y vendemos tu vivienda con estrategia, imagen y criterio. Oficinas en Valencia y Llombai.",
   robots: { index: true, follow: true },
-  alternates: { canonical: "/" },
+  alternates: { canonical: "https://referencehome.es/" },
   openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
     type: "website",
     locale: "es_ES",
-    siteName: "Reference Study",
+    siteName: "Reference Home",
+    url: "https://referencehome.es/",
+    title: "Reference Home | Inmobiliaria en Valencia",
+    description: "Valoramos, mostramos, negociamos y vendemos tu vivienda en Valencia con estrategia, imagen y criterio.",
+    images: [{ url: "/nueva/equipo/equipo-sofa.webp", width: 2000, height: 1548, alt: "El equipo de Reference Home" }],
   },
-  twitter: {
-    card: "summary",
-    title: TITLE,
-    description: DESCRIPTION,
-  },
+  twitter: { card: "summary_large_image" },
 };
 
-// <main> envuelve el contenido tal como en el index.html original; se
-// trasladará a app/(marketing)/layout.tsx cuando exista ese route group
-// (igual que Header/MobileMenu, ver layout.tsx).
-// 2026-08-25: Contact (sección independiente) y Footer (layout, hermano
-// de <main>) se eliminan y se sustituyen por FinalReveal, que envuelve a
-// FooterContact -- mismo lugar en el árbol que ocupaba el Footer antiguo
-// (hermano de <main>, justo después de BrandStory, NO dentro de <main>):
-// esa adyacencia es la que permite que el ScrollTrigger del relevo
-// (useFinalReveal.ts) arranque exactamente donde termina el pin
-// narrativo de BrandStory, sin hueco. BrandStory se queda dentro de
-// <main>, sin cambios -- FinalReveal solo contiene FooterContact (ver
-// useFinalReveal.ts para por qué BrandStory no puede vivir anidado ahí
-// dentro sin romper su propio pin de 5 etapas).
-export default function Home() {
-  return (
-    <>
-      <main>
-        <Hero />
-        <Manifesto />
-        <MarketingReel />
-        <SellingErrors />
-        <BrandPause />
-        <ProjectsGallery />
-        <BuyerExperience />
-        <Process />
-        <ProcessTeamPause />
-        <WorkZoom />
-        <BrandStory />
-      </main>
-      <FinalReveal />
-    </>
-  );
+// La portada antigua se carga solo cuando hace falta, para que la versión
+// estática no arrastre su código ni sus imágenes.
+export async function generateMetadata(): Promise<Metadata> {
+  if (EXPORT_HOME) return exportMetadata;
+  return (await import("./OldHome")).oldHomeMetadata;
+}
+
+export default async function Home() {
+  if (EXPORT_HOME) return <NuevaPage />;
+  const { default: OldHome } = await import("./OldHome");
+  return <OldHome />;
 }

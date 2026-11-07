@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
+// Versión estática de la home para referencehome.es (scripts/export-home.mjs):
+// se construye en otra carpeta y sin el optimizador de imágenes de Vercel.
+const EXPORT_HOME = process.env.NEXT_PUBLIC_EXPORT_HOME === "1";
+
 const nextConfig: NextConfig = {
+  distDir: EXPORT_HOME ? ".next-export" : ".next",
   images: {
+    unoptimized: EXPORT_HOME,
     // Hero (docs/HERO_REDESIGN_SPEC.md, sección 16): AVIF primero, WebP como
     // fallback -- next/image negocia el formato según el header Accept del
     // navegador, así que basta con declarar el orden de preferencia aquí.
