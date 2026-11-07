@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import { DayHouse } from "@/ui/nueva/DayHouse";
 import { CityScene } from "@/ui/nueva/CityScene";
+import { CasesScene } from "@/ui/nueva/CasesScene";
 import styles from "./nueva.module.css";
 
 // Web nueva (prototipo de portada). No se indexa mientras convive con la
@@ -35,13 +36,14 @@ export default function NuevaPage() {
       <main>
         <DayHouse fontFamily={serif.style.fontFamily} />
         <CityScene />
+        <CasesScene />
         <section className={styles.next} aria-labelledby="next-title">
-          <p className={styles.eyebrow}>Escena 4 · en construcción</p>
+          <p className={styles.eyebrow}>Escena 5 · en construcción</p>
           <h2 id="next-title" className={styles.nextTitle}>
-            Casos <em>reales</em>
+            ¿Cuánto vale <em>tu casa</em>?
           </h2>
           <p className={styles.nextText}>
-            Aquí llegarán las viviendas vendidas en un vuelo en profundidad: cada una con su precio y los días que tardó en venderse.
+            Aquí llegará la valoración: amanece sobre una vivienda y aparece el formulario para pedir la tuya.
           </p>
         </section>
       </main>
