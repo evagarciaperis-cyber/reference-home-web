@@ -53,6 +53,7 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
           isTransparent && styles.isTransparent,
         )}
         data-header
+        data-hidden={isHidden ? "true" : undefined}
       >
         <Link className={styles.brand} href="/" aria-label="Volver al inicio">
           {/* 2026-07-28: dos logos apilados (blanco/rojo) en vez de un único

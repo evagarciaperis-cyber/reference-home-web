@@ -114,6 +114,14 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
       stageRef.current?.querySelectorAll<HTMLElement>("[data-exit]").forEach((el) => {
         el.style.opacity = exit;
       });
+      // La tira superior se esconde y vuelve junto con la cabecera.
+      const hdr = document.querySelector<HTMLElement>("[data-header]");
+      const hdrHidden = hdr?.dataset.hidden === "true";
+      const top = stageRef.current?.querySelector<HTMLElement>("[data-topline]");
+      if (top && top.dataset.hdr !== String(hdrHidden)) {
+        top.dataset.hdr = String(hdrHidden);
+        top.style.transform = hdrHidden ? "translate3d(0, -160px, 0)" : "none";
+      }
       if (hintRef.current) hintRef.current.style.opacity = String(Math.max(0, 1 - p * 18) * Math.min(1, Math.max(0, (now - start - 2600) / 900)));
     };
     raf = requestAnimationFrame(loop);
@@ -140,7 +148,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
 
 
         {/* Tira superior bajo la cabecera, como en la portada anterior */}
-        <div className={styles.topline} data-exit="">
+        <div className={styles.topline} data-exit="" data-topline="">
           <span>Inmobiliaria en Valencia</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
