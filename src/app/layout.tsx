@@ -7,6 +7,7 @@ import { Preloader } from "@/ui/layout/Preloader";
 import { NoiseOverlay } from "@/ui/layout/NoiseOverlay";
 import { CustomCursor } from "@/ui/layout/CustomCursor";
 import { SiteHeader } from "@/ui/layout/SiteHeader";
+import { ChromeGate } from "@/ui/layout/ChromeGate";
 
 // Metadata técnica mínima, compartida por toda la app (fase 15,
 // docs/MIGRACION.md): viewport y theme-color, puerto literal de las
@@ -75,10 +76,12 @@ export default function RootLayout({
       <body>
         <SmoothScrollProvider>
           <PreloaderProvider>
-            <Preloader />
-            <NoiseOverlay />
-            <CustomCursor />
-            <SiteHeader />
+            <ChromeGate>
+              <Preloader />
+              <NoiseOverlay />
+              <CustomCursor />
+              <SiteHeader />
+            </ChromeGate>
             {children}
           </PreloaderProvider>
         </SmoothScrollProvider>

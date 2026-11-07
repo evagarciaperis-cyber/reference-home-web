@@ -1,0 +1,280 @@
+.scene {
+  position: relative;
+  height: 640svh;
+  background: #0b0b0d;
+  color: #f6efe6;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.canvas,
+.fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* ---------- Barra superior ---------- */
+.bar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: calc(env(safe-area-inset-top, 0px) + clamp(16px, 2.4vw, 30px)) var(--nw-pad) 0;
+}
+
+.logo {
+  width: clamp(120px, 11vw, 170px);
+  height: auto;
+}
+
+.nav {
+  display: flex;
+  gap: clamp(1.2rem, 2.6vw, 2.6rem);
+  font: 500 0.78rem/1 var(--nw-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav a,
+.cta {
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav a {
+  position: relative;
+  padding-block: 0.4rem;
+}
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.5s var(--nw-ease);
+}
+
+.nav a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.cta {
+  font: 500 0.78rem/1 var(--nw-sans);
+  letter-spacing: 0.06em;
+  padding: 0.95rem 1.3rem;
+  border: 1px solid rgba(246, 239, 230, 0.55);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.4s, color 0.4s, border-color 0.4s;
+}
+
+.cta:hover {
+  background: #f6efe6;
+  color: #7a1836;
+  border-color: #f6efe6;
+}
+
+/* ---------- Frase bajo el titular de humo ---------- */
+.sub {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 70%;
+  width: min(90vw, 34rem);
+  margin: 0 0 0 calc(min(90vw, 34rem) / -2);
+  text-align: center;
+  font: 400 clamp(0.95rem, 1.25vw, 1.12rem)/1.5 var(--nw-sans);
+  letter-spacing: 0.01em;
+  opacity: 0;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.35);
+  will-change: opacity, transform;
+}
+
+/* ---------- Pie de la escena ---------- */
+.foot {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  padding: 0 var(--nw-pad) calc(env(safe-area-inset-bottom, 0px) + clamp(18px, 3.2vw, 40px));
+}
+
+.intro {
+  max-width: 30rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.7rem;
+  font: 500 0.7rem/1 var(--nw-sans);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.title {
+  margin: 0;
+  font: 400 clamp(1.25rem, 1.9vw, 1.75rem)/1.2 var(--nw-serif);
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.day {
+  width: min(24rem, 40vw);
+  font-family: var(--nw-sans);
+}
+
+.dayTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.7rem;
+}
+
+.clock {
+  font: 300 clamp(1.8rem, 2.6vw, 2.4rem)/1 var(--nw-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+.phase {
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.track {
+  display: block;
+  position: relative;
+  height: 1px;
+  background: rgba(246, 239, 230, 0.25);
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  background: #f6efe6;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.steps {
+  list-style: none;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.steps li {
+  opacity: 0.4;
+  transition: opacity 0.6s;
+}
+
+.steps li[data-active] {
+  opacity: 1;
+}
+
+.steps strong {
+  font-weight: 500;
+}
+
+/* La frase de cada fase está en el HTML (Google la lee), pero visualmente
+   la cuenta el humo: aquí se oculta sin quitarla del documento. */
+.steps span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.hint {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: clamp(110px, 18vh, 170px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  font: 500 0.66rem/1 var(--nw-sans);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hint i {
+  width: 1px;
+  height: 42px;
+  background: linear-gradient(#f6efe6, transparent);
+  animation: hint 2.2s var(--nw-ease) infinite;
+  transform-origin: top;
+}
+
+@keyframes hint {
+  0% { transform: scaleY(0); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .nav {
+    display: none;
+  }
+
+  .cta {
+    padding: 0.8rem 1rem;
+    font-size: 0.72rem;
+  }
+
+  .foot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.4rem;
+  }
+
+  .day {
+    width: 100%;
+  }
+
+  .sub {
+    top: 66%;
+  }
+
+  .hint {
+    bottom: 42%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hint i {
+    animation: none;
+  }
+}

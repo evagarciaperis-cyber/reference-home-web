@@ -1,0 +1,43 @@
+.root {
+  --nw-serif: var(--nw-serif-font), "Cormorant Garamond", Georgia, serif;
+  --nw-sans: var(--nw-sans-font), "Montserrat", system-ui, sans-serif;
+  --nw-pad: max(18px, env(safe-area-inset-left, 0px), clamp(18px, 3vw, 48px));
+  --nw-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  background: #0b0b0d;
+  color: #f6efe6;
+  font-family: var(--nw-sans);
+}
+
+.next {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: 1.2rem;
+  padding: 18vh var(--nw-pad);
+  background: radial-gradient(120% 80% at 70% 0%, #1b2236 0%, #0b0b0d 60%);
+}
+
+.eyebrow {
+  margin: 0;
+  font: 500 0.7rem/1 var(--nw-sans);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.nextTitle {
+  margin: 0;
+  font: 300 clamp(2.6rem, 7vw, 6.5rem)/0.95 var(--nw-serif);
+}
+
+.nextTitle em {
+  color: #f0dfcf;
+}
+
+.nextText {
+  margin: 0;
+  max-width: 36rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.75;
+}
