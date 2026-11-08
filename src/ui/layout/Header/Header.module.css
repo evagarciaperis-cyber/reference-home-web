@@ -275,6 +275,12 @@
   transition: opacity 0.25s var(--ease), transform 0.35s var(--ease), visibility 0s linear 0.35s;
 }
 
+/* Desplegables cerca del borde derecho (Nosotros): se abren hacia la izquierda */
+.dropRight .dropMenu {
+  left: auto;
+  right: -1.3rem;
+}
+
 .drop:hover .dropMenu,
 .drop:focus-within .dropMenu {
   opacity: 1;

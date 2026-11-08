@@ -103,7 +103,15 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
           <a href="/quieres-comprar">Comprar</a>
           <a href="/inmobiliaria-valencia">Inmobiliaria en Valencia</a>
           <a href="/blog/">Blog</a>
-          <a href="/empresa/nosotros">Nosotros</a>
+          <span className={cx(styles.drop, styles.dropRight)}>
+            <a href="/empresa/nosotros" aria-haspopup="true">
+              Nosotros
+            </a>
+            <span className={styles.dropMenu}>
+              <a href="/empresa/ser-agente">Trabaja con nosotros</a>
+              <a href="/empresa/nosotros">Quiénes somos</a>
+            </span>
+          </span>
           <a href="/contacto">Contacto</a>
         </nav>
 
