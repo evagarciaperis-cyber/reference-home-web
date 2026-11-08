@@ -10,6 +10,7 @@ import { BuyerScene } from "@/ui/nueva/BuyerScene";
 import { ValuationScene } from "@/ui/nueva/ValuationScene";
 import { Process } from "@/ui/sections/Process";
 import { TeamScene } from "@/ui/nueva/TeamScene";
+import { BlogLatest } from "@/ui/nueva/BlogLatest";
 import { Closing } from "@/ui/nueva/Closing";
 import styles from "./nueva.module.css";
 
@@ -59,6 +60,8 @@ export default function NuevaPage() {
           </div>
         </div>
         <TeamScene />
+        {/* Últimas entradas del blog (/blog/ultimas.json, se actualiza al publicar). */}
+        <BlogLatest />
       </main>
       <Closing />
     </div>

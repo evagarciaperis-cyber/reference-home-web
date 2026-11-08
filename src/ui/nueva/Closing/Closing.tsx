@@ -1,5 +1,6 @@
 "use client";
 
+import CurrentYear from "@/ui/primitives/CurrentYear";
 import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { sendLead, STATIC_FORMS } from "@/lib/sendLead";
@@ -211,7 +212,7 @@ export function Closing() {
         </div>
 
         <div className={styles.legal}>
-          <span>© {new Date().getFullYear()} Reference Home · RAICV 00091</span>
+          <span>© <CurrentYear /> Reference Home · RAICV 00091</span>
           <span>
             <a href="/aviso-legal">Aviso legal</a>
             <a href="/política-privacidad">Privacidad</a>

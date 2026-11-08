@@ -1,5 +1,6 @@
 "use client";
 
+import CurrentYear from "@/ui/primitives/CurrentYear";
 import { useEffect, useRef, useState } from "react";
 import { createDayHouseScene, textState, type DayHouseScene } from "@/motion/webgl/dayHouseScene";
 import { requestHeaderToneRefresh } from "@/motion/core/events";
@@ -150,7 +151,7 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
         {/* Tira superior bajo la cabecera, como en la portada anterior */}
         <div className={styles.topline} data-exit="" data-topline="">
           <span>Inmobiliaria en Valencia</span>
-          <span>© {new Date().getFullYear()}</span>
+          <span>© <CurrentYear /></span>
         </div>
 
         <div ref={wordsRef} className={styles.words} aria-hidden="true" data-exit="">

@@ -401,16 +401,20 @@
   flex-direction: column;
   align-items: center;
   gap: 0.8rem;
-  font: 500 0.66rem/1 var(--nw-sans);
+  font: 500 0.7rem/1 var(--nw-sans);
   letter-spacing: 0.24em;
   text-transform: uppercase;
+  /* Claro y con sombra suave: se lee sobre el agua y la piedra a cualquier hora */
+  color: #f8f6f2;
+  text-shadow: 0 1px 2px rgba(17, 17, 15, 0.55), 0 0 18px rgba(17, 17, 15, 0.45);
   opacity: 0;
   pointer-events: none;
 }
 
 .hint i {
-  width: 1px;
-  height: 42px;
+  width: 1.5px;
+  height: 48px;
+  filter: drop-shadow(0 0 4px rgba(17, 17, 15, 0.6));
   background: linear-gradient(currentColor, transparent);
   animation: hint 2.2s var(--nw-ease) infinite;
   transform-origin: top;
