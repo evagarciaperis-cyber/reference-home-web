@@ -236,7 +236,8 @@
 /* ---------- Pie ---------- */
 .foot {
   --p: 0;
-  background: #15110f;
+  /* Verde de la marca, como el pie de las páginas interiores (un punto más oscuro que el bloque de contacto) */
+  background: #3f504d;
   color: #f6efe6;
   padding: clamp(56px, 9vh, 90px) var(--nw-pad) 1.6rem;
 }

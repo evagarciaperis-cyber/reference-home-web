@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Nunito_Sans, Great_Vibes } from "next/font/google";
+import { Inter, Nunito_Sans, Great_Vibes, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { PreloaderProvider } from "@/motion/PreloaderProvider";
 import { SmoothScrollProvider } from "@/motion/SmoothScrollProvider";
@@ -58,6 +58,14 @@ const manifestoScript = Great_Vibes({
   display: "swap",
 });
 
+// Serif de la marca para piezas comunes (menú del móvil), igual que la home y Joomla.
+const brandSerif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--rh-serif-font",
+  display: "swap",
+});
+
 // Header/MobileMenu viven en el layout raíz por ahora porque es la única
 // superficie que existe todavía. docs/ARQUITECTURA.md (sección 4) los sitúa
 // en app/(marketing)/layout.tsx junto al Footer; ese route group se crea
@@ -71,7 +79,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${manifestoSans.variable} ${manifestoMicro.variable} ${manifestoScript.variable}`}
+      className={`${manifestoSans.variable} ${manifestoMicro.variable} ${manifestoScript.variable} ${brandSerif.variable}`}
     >
       <body>
         <SmoothScrollProvider>

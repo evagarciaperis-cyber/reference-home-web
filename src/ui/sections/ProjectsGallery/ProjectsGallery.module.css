@@ -60,12 +60,13 @@
    tipografía nueva: las dos ya están cargadas y en uso en el resto del
    sistema (--font-manifesto-sans y --serif). */
 .headlineMain {
-  font-family: var(--font-manifesto-sans), var(--sans);
-  font-weight: 600;
+  /* Serif de la marca, como el resto de titulares de la web */
+  font-family: var(--nw-serif, var(--rh-serif-font, var(--serif)));
+  font-weight: 400;
 }
 
 .headlineAccent {
-  font-family: var(--serif);
+  font-family: var(--nw-serif, var(--rh-serif-font, var(--serif)));
   font-style: italic;
   font-weight: 400;
 }
@@ -259,12 +260,12 @@
 .cardTitle {
   margin: 0;
   max-width: 20ch;
-  font-family: var(--font-manifesto-sans), var(--sans);
-  font-weight: 600;
-  font-size: clamp(28px, 2.4vw, 48px);
+  font-family: var(--nw-serif, var(--rh-serif-font, var(--serif)));
+  font-weight: 400;
+  font-size: clamp(30px, 2.6vw, 50px);
   line-height: 1.05;
-  letter-spacing: .02em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: #000;
 }
 
