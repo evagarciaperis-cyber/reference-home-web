@@ -36,7 +36,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const html = path.join(DIST, "server", "app", "index.html");
 copy(html, path.join(OUT, "inicio.html"));
 // Icono de la pestaña: la home lo pide en /favicon.ico (src/app/favicon.ico)
-copy(path.join("src", "app", "favicon.ico"), path.join(OUT, "favicon.ico"));
+copy(path.join(ROOT, "src", "app", "favicon.ico"), path.join(OUT, "favicon.ico"));
 copy(path.join(DIST, "static"), path.join(OUT, "_next", "static"));
 copy(path.join(ROOT, "public", "nueva"), path.join(OUT, "nueva"));
 copy(path.join(ROOT, "public", "videos"), path.join(OUT, "videos"));
