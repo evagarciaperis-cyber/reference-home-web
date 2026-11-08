@@ -98,9 +98,20 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
               <a href="/quieres-vender/antes-y-despues">Antes y después</a>
               <a href="/quieres-vender/asegura-tu-venta">Asegura tu venta</a>
               <a href="/quieres-vender/vender-en-ruzafa">Vender en Ruzafa</a>
+              <a href="/herramientas/precio-metro-cuadrado-valencia/">Precio del m² por barrio</a>
+              <a href="/herramientas/">Todas las herramientas</a>
             </span>
           </span>
-          <a href="/quieres-comprar">Comprar</a>
+          <span className={styles.drop}>
+            <a href="/quieres-comprar" aria-haspopup="true">
+              Comprar
+            </a>
+            <span className={styles.dropMenu}>
+              <a href="/quieres-comprar">Comprar vivienda</a>
+              <a href="/herramientas/aval-ico-valencia/">Aval ICO: tu primera casa</a>
+              <a href="/herramientas/">Todas las herramientas</a>
+            </span>
+          </span>
           <a href="/inmobiliaria-valencia">Inmobiliaria en Valencia</a>
           <a href="/blog/">Blog</a>
           <span className={cx(styles.drop, styles.dropRight)}>
