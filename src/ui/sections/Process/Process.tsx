@@ -28,7 +28,7 @@ const SERVICES: Service[] = [
     title: "Comprar",
     description: "Encontramos, filtramos y negociamos la vivienda adecuada para ti.",
     ctaLabel: "Explorar viviendas",
-    ctaHref: "/inmuebles",
+    ctaHref: "/quieres-comprar#viviendas",
   },
   {
     number: "02",

@@ -92,7 +92,7 @@ export function BuyerReveal() {
             <br />
             <span className={styles.headlineAccent}>últimos inmuebles.</span>
           </h2>
-          <a className={styles.cta} href="/inmuebles" ref={ctaRef}>
+          <a className={styles.cta} href="/quieres-comprar#viviendas" ref={ctaRef}>
             <span className={styles.ctaText}>Ver viviendas</span>
             <span className={styles.ctaLine} aria-hidden="true" />
           </a>

@@ -46,7 +46,7 @@ async function submitContactForm(form: HTMLFormElement): Promise<string> {
 const NAV_LINKS = [
   { label: "Inicio", href: "/" },
   { label: "Nosotros", href: "/nosotros" },
-  { label: "Viviendas", href: "/inmuebles" },
+  { label: "Viviendas", href: "/quieres-comprar#viviendas" },
   { label: "Servicios", href: "#proceso" },
   { label: "Contacto", href: "#contacto" },
 ];

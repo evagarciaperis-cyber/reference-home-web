@@ -126,7 +126,7 @@ export function Hero() {
           {/* /inmuebles -- misma ruta real que ya usan BuyerReveal,
               BuyerExperience y el CTA "Comprar" de Process, no una ruta
               inventada. */}
-          <a className={styles.secondaryCta} href="/inmuebles">
+          <a className={styles.secondaryCta} href="/quieres-comprar#viviendas">
             Ver últimas viviendas <b aria-hidden="true">↗</b>
           </a>
           <a className={styles.secondaryCta} href="#proceso">

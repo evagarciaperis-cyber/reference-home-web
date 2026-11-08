@@ -362,6 +362,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  column-gap: 0.9em;
   font-size: 0.64rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -460,6 +461,13 @@
 
   .hint {
     bottom: 42%;
+  }
+}
+
+/* Móviles bajos: la pista se montaba encima del titular. */
+@media (max-width: 700px) and (max-height: 780px) {
+  .hint {
+    display: none;
   }
 }
 
