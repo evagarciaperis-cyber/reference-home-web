@@ -176,13 +176,31 @@ export function ValuationScene() {
     if (step === 0) {
       const addr = (fs?.querySelector<HTMLInputElement>("input[name=address]")?.value ?? "").trim();
       setBarrio(findBarrio(addr));
+      goToValuator(addr);
+      return;
     }
     setStep((s) => Math.min(3, s + 1));
+  };
+
+  // La dirección pasa al valorador propio (/valorar/), que la localiza y
+  // sigue desde ahí: el visitante no la escribe dos veces y el contacto
+  // entra en el CRM con su valoración.
+  const goToValuator = (addr: string) => {
+    window.location.href = `/valorar/?direccion=${encodeURIComponent(addr.slice(0, 160))}`;
   };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
+    if (step === 0) {
+      const input = form.querySelector<HTMLInputElement>("input[name=address]");
+      if (!input?.value.trim()) {
+        input?.reportValidity();
+        return;
+      }
+      goToValuator(input.value.trim());
+      return;
+    }
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -245,7 +263,7 @@ export function ValuationScene() {
             <form className={styles.form} onSubmit={onSubmit} noValidate>
               <input type="text" name="company" tabIndex={-1} autoComplete="off" className={styles.srOnly} aria-hidden="true" />
               <p className={styles.kicker}>
-                Valoración gratuita · {String(step + 1).padStart(2, "0")} / 03
+                Valoración gratuita · en dos minutos
               </p>
               <p className={styles.question} key={`q${step}`}>
                 {questions[step]}
