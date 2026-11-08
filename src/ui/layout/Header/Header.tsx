@@ -94,7 +94,7 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
               Vender
             </a>
             <span className={styles.dropMenu}>
-              <a href="/quieres-vender/valoracion">Valoración</a>
+              <a href="/valorar/">Valoración</a>
               <a href="/quieres-vender/antes-y-despues">Antes y después</a>
               <a href="/quieres-vender/asegura-tu-venta">Asegura tu venta</a>
               <a href="/quieres-vender/vender-en-ruzafa">Vender en Ruzafa</a>

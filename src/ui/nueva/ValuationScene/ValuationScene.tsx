@@ -22,6 +22,10 @@ import styles from "./ValuationScene.module.css";
  * Envía a /api/contact con Turnstile, como el formulario de contacto.
  */
 
+// Valorador propio en el CRM: sugerencias de dirección (CartoCiudad, IGN)
+const CRM_URL = (process.env.NEXT_PUBLIC_CRM_URL ?? "https://crm.referencehome.es").replace(/\/+$/, "");
+type Addr = { id: string | null; label: string; municipality: string | null; province: string | null; postalCode: string | null; lat: number | null; lng: number | null };
+
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 
 // Datos reales de casos de la web actual.
@@ -98,6 +102,11 @@ export function ValuationScene() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(0);
+  const [sugg, setSugg] = useState<Addr[]>([]);
+  const [active, setActive] = useState(-1);
+  const [addrHint, setAddrHint] = useState<string | null>(null);
+  const suggTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggQ = useRef("");
   const [type, setType] = useState("");
   const [barrio, setBarrio] = useState<{ name: string; days: number } | null>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -176,17 +185,74 @@ export function ValuationScene() {
     if (step === 0) {
       const addr = (fs?.querySelector<HTMLInputElement>("input[name=address]")?.value ?? "").trim();
       setBarrio(findBarrio(addr));
-      goToValuator(addr);
+      submitAddress(addr);
       return;
     }
     setStep((s) => Math.min(3, s + 1));
   };
 
-  // La dirección pasa al valorador propio (/valorar/), que la localiza y
-  // sigue desde ahí: el visitante no la escribe dos veces y el contacto
-  // entra en el CRM con su valoración.
-  const goToValuator = (addr: string) => {
-    window.location.href = `/valorar/?direccion=${encodeURIComponent(addr.slice(0, 160))}`;
+  // La dirección pasa al valorador propio (/valorar/). Si se ha elegido de
+  // las sugerencias, va completa (municipio, código postal y coordenadas) y el
+  // valorador empieza por el tipo de vivienda; si no, el valorador enseña las
+  // direcciones posibles para elegir. El contacto entra en el CRM.
+  const goToValuator = (addr: string, it?: Addr) => {
+    const qs = new URLSearchParams({ direccion: (it?.label ?? addr).slice(0, 160) });
+    if (it?.municipality) qs.set("municipio", it.municipality);
+    if (it?.postalCode) qs.set("cp", it.postalCode);
+    if (it?.lat != null && it?.lng != null) {
+      qs.set("lat", String(it.lat));
+      qs.set("lng", String(it.lng));
+    }
+    window.location.href = `/valorar/?${qs.toString()}`;
+  };
+
+  const onAddrInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value.trim();
+    suggQ.current = v;
+    setAddrHint(null);
+    setActive(-1);
+    if (suggTimer.current) clearTimeout(suggTimer.current);
+    if (v.length < 4) {
+      setSugg([]);
+      return;
+    }
+    suggTimer.current = setTimeout(() => {
+      fetch(`${CRM_URL}/api/public/valoracion/direccion?q=${encodeURIComponent(v)}`, { mode: "cors" })
+        .then((r) => r.json())
+        .then((j: { results?: Addr[] }) => {
+          if (suggQ.current === v) setSugg(j.results ?? []);
+        })
+        .catch(() => setSugg([]));
+    }, 260);
+  };
+
+  const onAddrKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!sugg.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActive((a) => Math.min(sugg.length - 1, a + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActive((a) => Math.max(0, a - 1));
+    } else if (e.key === "Enter" && active >= 0) {
+      e.preventDefault();
+      goToValuator(sugg[active].label, sugg[active]);
+    } else if (e.key === "Escape") {
+      setSugg([]);
+    }
+  };
+
+  /** Con la flecha: si hay sugerencias, se pide elegir una; si no, se sigue con lo escrito. */
+  const submitAddress = (addr: string) => {
+    if (sugg.length) {
+      if (active >= 0) {
+        goToValuator(sugg[active].label, sugg[active]);
+        return;
+      }
+      setAddrHint("Elige tu dirección de la lista para que el precio sea el de tu zona.");
+      return;
+    }
+    goToValuator(addr);
   };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -198,7 +264,7 @@ export function ValuationScene() {
         input?.reportValidity();
         return;
       }
-      goToValuator(input.value.trim());
+      submitAddress(input.value.trim());
       return;
     }
     if (!form.checkValidity()) {
@@ -275,7 +341,7 @@ export function ValuationScene() {
                     <legend className={styles.srOnly}>Dirección de la vivienda</legend>
                     <label className={styles.line} htmlFor="val-address">
                       <span className={styles.srOnly}>Dirección de la vivienda</span>
-                      <input id="val-address" name="address" required placeholder="Calle, número y barrio" autoComplete="street-address" />
+                      <input id="val-address" name="address" required placeholder="Calle, número y municipio" autoComplete="off" role="combobox" aria-autocomplete="list" aria-expanded={sugg.length > 0} aria-controls="val-sugg" onChange={onAddrInput} onKeyDown={onAddrKey} />
                       <button type="button" className={styles.go} onClick={next} aria-label="Siguiente">
                         →
                       </button>
@@ -335,6 +401,23 @@ export function ValuationScene() {
                 </div>
               </div>
 
+              {step === 0 && (sugg.length > 0 || addrHint) ? (
+                <div className={styles.sugg}>
+                  {addrHint ? <p className={styles.suggHint} role="alert">{addrHint}</p> : null}
+                  {sugg.length ? (
+                    <ul id="val-sugg" role="listbox" aria-label="Direcciones encontradas">
+                      {sugg.map((it, i) => (
+                        <li key={`${it.id ?? i}-${it.label}`} role="option" aria-selected={i === active}>
+                          <button type="button" onMouseEnter={() => setActive(i)} onClick={() => goToValuator(it.label, it)}>
+                            <b>{it.label}</b>
+                            <small>{[it.postalCode, it.municipality, it.province].filter(Boolean).join(" · ")}</small>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
               <p className={styles.caption} key={`c${step}${barrio?.name ?? ""}`} aria-live="polite">
                 {caption}
               </p>
