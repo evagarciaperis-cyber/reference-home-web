@@ -8,6 +8,7 @@ import { NoiseOverlay } from "@/ui/layout/NoiseOverlay";
 import { CustomCursor } from "@/ui/layout/CustomCursor";
 import { SiteHeader } from "@/ui/layout/SiteHeader";
 import { ChromeGate } from "@/ui/layout/ChromeGate";
+import { SiteAnalytics } from "@/ui/layout/SiteAnalytics";
 
 // Metadata técnica mínima, compartida por toda la app (fase 15,
 // docs/MIGRACION.md): viewport y theme-color, puerto literal de las
@@ -82,6 +83,7 @@ export default function RootLayout({
       className={`${manifestoSans.variable} ${manifestoMicro.variable} ${manifestoScript.variable} ${brandSerif.variable}`}
     >
       <body>
+        <SiteAnalytics />
         <SmoothScrollProvider>
           <PreloaderProvider>
             <ChromeGate>
