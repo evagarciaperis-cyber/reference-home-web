@@ -13,6 +13,12 @@ const SAMPLE_Y = 44;
 // la franja superior y el propio header no cause parpadeos.
 const HOVER_HIDE_DELAY_MS = 700;
 
+// 2026-11-10: la cabecera también aparece sola cuando el visitante deja de hacer
+// scroll (tras IDLE_REVEAL_MS) o en cuanto sube; se esconde mientras baja. Antes
+// solo aparecía con el ratón arriba del todo y la gente no encontraba el menú.
+const IDLE_REVEAL_MS = 450;
+const SCROLL_DELTA = 6;
+
 // El original identifica las secciones "oscuras" con una lista fija de
 // selectores (.solutions, .process, .work-zoom, .contact, .site-footer),
 // ninguna de las cuales existe todavía. En vez de reproducir esa lista
@@ -102,6 +108,7 @@ export function useHeaderState(): HeaderState {
     isTransparent: false,
   });
   const hoverRevealedRef = useRef(false);
+  const scrollRevealedRef = useRef(true);
 
   useEffect(() => {
     const update = () => {
@@ -146,12 +153,39 @@ export function useHeaderState(): HeaderState {
       });
 
       const isDesktop = window.matchMedia(DESKTOP_QUERY).matches;
-      const isHidden = forceVisible ? false : isDesktop ? !hoverRevealedRef.current : sectionHidden;
+      const revealed = hoverRevealedRef.current || scrollRevealedRef.current;
+      const isHidden = forceVisible ? false : isDesktop ? !revealed : sectionHidden && !scrollRevealedRef.current;
 
       setState({ isScrolled, isOnDark, isHidden, isTransparent });
     };
 
-    window.addEventListener("scroll", update, { passive: true });
+    // Mientras baja: oculta. Al subir o al parar (IDLE_REVEAL_MS): visible.
+    let lastY = window.scrollY;
+    let prevY = lastY;
+    let idleTimer: number | null = null;
+    const onScroll = () => {
+      const y = window.scrollY;
+      // El final del scroll suave (pasos de 1-2 px) cuenta como «parado»
+      const moving = Math.abs(y - prevY) >= 3;
+      prevY = y;
+      if (y < lastY - SCROLL_DELTA) scrollRevealedRef.current = true;
+      else if (y > lastY + SCROLL_DELTA && y > SCROLLED_AFTER_Y) scrollRevealedRef.current = false;
+      if (Math.abs(y - lastY) > SCROLL_DELTA) lastY = y;
+      if (idleTimer !== null && !moving) {
+        update();
+        return;
+      }
+      if (idleTimer !== null) window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        idleTimer = null;
+        if (!scrollRevealedRef.current) {
+          scrollRevealedRef.current = true;
+          update();
+        }
+      }, IDLE_REVEAL_MS);
+      update();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", update);
     window.addEventListener(HEADER_TONE_REFRESH_EVENT, update);
     update();
@@ -210,7 +244,8 @@ export function useHeaderState(): HeaderState {
     headerEl?.addEventListener("focusout", handleFocusOut);
 
     return () => {
-      window.removeEventListener("scroll", update);
+      window.removeEventListener("scroll", onScroll);
+      if (idleTimer !== null) window.clearTimeout(idleTimer);
       window.removeEventListener("resize", update);
       window.removeEventListener(HEADER_TONE_REFRESH_EVENT, update);
       clearHideTimer();

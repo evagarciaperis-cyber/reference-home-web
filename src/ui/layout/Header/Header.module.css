@@ -156,8 +156,10 @@
 .desktopNav {
   justify-self: end;
   display: flex;
-  gap: 28px;
-  font-size: 12px;
+  gap: clamp(18px, 2vw, 30px);
+  /* 2026-11-10: de 12 a 14 px (más legible); igual en Joomla, blog, valorador y herramientas */
+  font-size: 14px;
+  font-weight: 500;
   align-items: center;
 }
 
