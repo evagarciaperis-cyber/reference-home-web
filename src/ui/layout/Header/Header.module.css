@@ -303,3 +303,173 @@
 .desktopNav .dropMenu a:hover {
   padding-left: 1.6rem;
 }
+
+/* Megamenú de Vender y Comprar: el mismo panel que en las páginas de Joomla.
+   .dropMega sin posición propia: el panel se coloca respecto a la cabecera
+   (fija, a todo el ancho) y queda centrado en la pantalla. */
+.dropMega {
+  position: static;
+}
+
+.megaPanel {
+  position: absolute;
+  top: calc(100% - 6px);
+  left: 50%;
+  width: min(1040px, calc(100vw - 48px));
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(240px, 0.95fr);
+  gap: 8px;
+  padding: 26px;
+  border-radius: 24px;
+  background: rgba(248, 246, 242, 0.97);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 40px 80px -40px rgba(25, 30, 29, 0.55), 0 0 0 1px rgba(43, 43, 43, 0.06);
+  color: #2b2b2b;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 10px);
+  transition: opacity 0.3s, transform 0.4s var(--ease), visibility 0s linear 0.3s;
+}
+
+.megaBuy {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(240px, 0.9fr);
+}
+
+.drop:hover .megaPanel,
+.drop:focus-within .megaPanel {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition-delay: 0s;
+}
+
+/* Puente invisible para que el ratón no pierda el panel al bajar */
+.dropMega::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 0;
+}
+
+.megaCol {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding-right: 10px;
+}
+
+.megaHead {
+  margin: 0 0 8px 12px;
+  font: 600 10px/1 var(--sans, "Montserrat", sans-serif);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #a11f48;
+}
+
+.desktopNav .megaLink {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  color: #2b2b2b;
+  white-space: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: background 0.25s, transform 0.35s var(--ease);
+}
+
+.desktopNav .megaLink::after {
+  display: none;
+}
+
+.desktopNav .megaLink b {
+  font: 500 14.5px/1.25 var(--sans, "Montserrat", sans-serif);
+}
+
+.desktopNav .megaLink span {
+  font: 400 12px/1.35 var(--sans, "Montserrat", sans-serif);
+  color: #5f6b68;
+}
+
+.desktopNav .megaLink:hover,
+.desktopNav .megaLink:focus-visible {
+  background: #fff;
+  transform: translateX(3px);
+}
+
+.megaCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 200px;
+  padding: 24px;
+  border-radius: 18px;
+  color: #f8f6f2;
+  background: radial-gradient(80% 80% at 100% 0%, rgba(244, 197, 66, 0.28), rgba(244, 197, 66, 0) 60%), #a11f48;
+}
+
+.megaBuy .megaCard {
+  background: radial-gradient(80% 80% at 100% 0%, rgba(244, 197, 66, 0.24), rgba(244, 197, 66, 0) 60%), #4a5d5a;
+}
+
+.megaCardTitle {
+  margin-bottom: 8px;
+  font: 400 1.6rem/1.1 var(--rh-serif-font), "Cormorant Garamond", Georgia, serif;
+  color: #fff;
+}
+
+.megaCardText {
+  margin-bottom: 16px;
+  font: 400 13px/1.45 var(--sans, "Montserrat", sans-serif);
+  color: rgba(248, 246, 242, 0.85);
+}
+
+.desktopNav .megaCardGo {
+  align-self: flex-start;
+  padding: 11px 18px;
+  border-radius: 999px;
+  font: 600 11px/1 var(--sans, "Montserrat", sans-serif);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2b2b2b;
+  background: #f4c542;
+  transition: transform 0.3s var(--ease);
+}
+
+.desktopNav .megaCardGo::after {
+  display: none;
+}
+
+.desktopNav .megaCardGo:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1199px) {
+  .megaPanel {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .megaBuy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .megaCard {
+    grid-column: 1 / -1;
+    min-height: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .megaCardTitle,
+  .megaCardText {
+    margin: 0;
+  }
+
+  .megaCardText {
+    margin-right: auto;
+  }
+}

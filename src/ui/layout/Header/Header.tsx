@@ -6,6 +6,32 @@ import { useHeaderState } from "@/motion/hooks/useHeaderState";
 import logoBlanco from "../../../../images/logo-blanco.png";
 import logoRojo from "../../../../images/logo-rojo.png";
 import styles from "./Header.module.css";
+import { MEGA_BUY, MEGA_SELL, type MegaMenu } from "./megaMenu";
+
+function MegaPanel({ menu }: { menu: MegaMenu }) {
+  return (
+    <span className={cx(styles.megaPanel, menu.tone === "buy" && styles.megaBuy)}>
+      {menu.cols.map((col) => (
+        <span key={col.title} className={styles.megaCol}>
+          <span className={styles.megaHead}>{col.title}</span>
+          {col.links.map((l) => (
+            <a key={l.href} className={styles.megaLink} href={l.href}>
+              <b>{l.title}</b>
+              <span>{l.text}</span>
+            </a>
+          ))}
+        </span>
+      ))}
+      <span className={styles.megaCard}>
+        <span className={styles.megaCardTitle}>{menu.card.title}</span>
+        <span className={styles.megaCardText}>{menu.card.text}</span>
+        <a className={styles.megaCardGo} href={menu.card.href}>
+          {menu.card.cta} →
+        </a>
+      </span>
+    </span>
+  );
+}
 
 type HeaderProps = {
   menuOpen: boolean;
@@ -89,28 +115,17 @@ export function Header({ menuOpen, onToggleMenu }: HeaderProps) {
             de referencehome.es, por eso <a> y no <Link>). */}
         <nav className={styles.desktopNav} aria-label="Navegación principal">
           <Link href="/">Inicio</Link>
-          <span className={styles.drop}>
+          <span className={cx(styles.drop, styles.dropMega)}>
             <a href="/quieres-vender" aria-haspopup="true">
               Vender
             </a>
-            <span className={styles.dropMenu}>
-              <a href="/valorar/">Valoración</a>
-              <a href="/quieres-vender/antes-y-despues">Antes y después</a>
-              <a href="/quieres-vender/asegura-tu-venta">Asegura tu venta</a>
-              <a href="/quieres-vender/vender-en-ruzafa">Vender en Ruzafa</a>
-              <a href="/herramientas/precio-metro-cuadrado-valencia/">Precio del m² por barrio</a>
-              <a href="/herramientas/">Todas las herramientas</a>
-            </span>
+            <MegaPanel menu={MEGA_SELL} />
           </span>
-          <span className={styles.drop}>
+          <span className={cx(styles.drop, styles.dropMega)}>
             <a href="/quieres-comprar" aria-haspopup="true">
               Comprar
             </a>
-            <span className={styles.dropMenu}>
-              <a href="/quieres-comprar">Comprar vivienda</a>
-              <a href="/herramientas/aval-ico-valencia/">Aval ICO: tu primera casa</a>
-              <a href="/herramientas/">Todas las herramientas</a>
-            </span>
+            <MegaPanel menu={MEGA_BUY} />
           </span>
           <a href="/inmobiliaria-valencia">Inmobiliaria en Valencia</a>
           <a href="/blog/">Blog</a>
