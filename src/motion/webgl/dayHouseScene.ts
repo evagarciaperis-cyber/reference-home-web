@@ -1,4 +1,7 @@
 import * as THREE from "three";
+import { TEXT_WINDOWS, textState } from "./dayHouseText";
+
+export { textState };
 
 /**
  * Escena "Una casa, un día" (web nueva, portada).
@@ -68,16 +71,6 @@ const MOBILE_FOCUS: Array<[number, number]> = [
   [0.64, 0.08],
   [0.76, 0.2],
   [0.9, 0.68],
-];
-
-// Ventanas de cada texto: [entra desde, formado en, empieza a irse, se ha ido].
-// El primero (logo) entra con el tiempo de la apertura, no con el scroll.
-const TEXT_WINDOWS: Array<[number, number, number, number]> = [
-  [-1, -1, 0.0, 0.05], // logo
-  [0.04, 0.09, 0.15, 0.21], // Se valora.
-  [0.27, 0.33, 0.39, 0.45], // Se muestra.
-  [0.55, 0.61, 0.67, 0.73], // Se negocia.
-  [0.85, 0.91, 2, 2], // Se vende. (se queda)
 ];
 
 const FOG_COLORS: Array<[number, number, number]> = [
@@ -300,26 +293,6 @@ function lightState(p: number): { from: number; to: number; t: number } {
     if (p <= e) return { from: i, to: i + 1, t: easeInOut((p - s) / (e - s)) };
   }
   return { from: 3, to: 3, t: 0 };
-}
-
-export function textState(p: number, intro: number): { index: number; amt: number } {
-  for (let i = 0; i < TEXT_WINDOWS.length; i++) {
-    const [a, b, c, d] = TEXT_WINDOWS[i];
-    if (i === 0) {
-      if (p < d) {
-        const formed = clamp01((intro - 0.35) / 0.5);
-        const leaving = 1 - clamp01((p - c) / (d - c));
-        return { index: 0, amt: Math.min(formed, leaving) };
-      }
-      continue;
-    }
-    if (p >= a && p < d) {
-      const inAmt = clamp01((p - a) / (b - a));
-      const outAmt = 1 - clamp01((p - c) / (d - c));
-      return { index: i, amt: Math.min(inAmt, outAmt) };
-    }
-  }
-  return { index: -1, amt: 0 };
 }
 
 function makeTextTexture(text: string, fontFamily: string): { tex: THREE.Texture; aspect: number } {

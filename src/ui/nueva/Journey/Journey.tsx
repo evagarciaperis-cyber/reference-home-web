@@ -364,7 +364,7 @@ export function Journey({ full = false }: { full?: boolean }) {
 
           {/* 5 · Método: el vídeo a toda la altura */}
           <article className={`${styles.ch} ${styles.method}`} data-chapter="metodo" data-label="El método">
-            <video className={styles.methodVideo} src={VIDEO_MARKETING} muted loop playsInline preload="metadata" />
+            <video className={styles.methodVideo} src={VIDEO_MARKETING} muted loop playsInline preload="none" />
             <div className={styles.methodText} data-speed="0.5">
               <h2>
                 Cada vivienda necesita <em>una estrategia propia.</em>

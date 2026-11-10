@@ -8,6 +8,10 @@ import { prefersReducedMotion } from "../core/media";
 //     setTimeout(() => { preloader.classList.add('is-hidden'); hero.classList.add('is-ready') }, reduced ? 0 : 780)
 //   });
 const REVEAL_DELAY_MS = 780;
+// Como mucho se espera esto (desde que la página está lista) aunque falten
+// imágenes por cargar: la cortina no debe tapar la portada mientras se
+// descargan fotos de más abajo (Google mide cuándo se ve el titular).
+const MAX_WAIT_MS = 900;
 
 /**
  * Señala cuándo termina la secuencia de entrada (evento `load` + 780ms, o
@@ -29,14 +33,27 @@ export function usePreloader(): { ready: boolean } {
     // antes del evento `load`), un componente React puede montarse después
     // de que `load` ya haya ocurrido. Sin este fallback, el preloader se
     // quedaría fijo en pantalla para siempre en ese caso.
-    if (document.readyState === "complete") {
+    let done = false;
+    const once = () => {
+      if (done) return;
+      done = true;
       reveal();
+    };
+    const capId = window.setTimeout(() => {
+      if (done) return;
+      done = true;
+      setReady(true);
+    }, MAX_WAIT_MS);
+
+    if (document.readyState === "complete") {
+      once();
     } else {
-      window.addEventListener("load", reveal, { once: true });
+      window.addEventListener("load", once, { once: true });
     }
 
     return () => {
-      window.removeEventListener("load", reveal);
+      window.removeEventListener("load", once);
+      window.clearTimeout(capId);
       if (timeoutId) window.clearTimeout(timeoutId);
     };
   }, []);

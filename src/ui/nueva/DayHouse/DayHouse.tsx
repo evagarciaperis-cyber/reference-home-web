@@ -2,7 +2,8 @@
 
 import CurrentYear from "@/ui/primitives/CurrentYear";
 import { useEffect, useRef, useState } from "react";
-import { createDayHouseScene, textState, type DayHouseScene } from "@/motion/webgl/dayHouseScene";
+import type { DayHouseScene } from "@/motion/webgl/dayHouseScene";
+import { textState } from "@/motion/webgl/dayHouseText";
 import { requestHeaderToneRefresh } from "@/motion/core/events";
 import styles from "./DayHouse.module.css";
 
@@ -48,19 +49,35 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
     const mobile = window.matchMedia("(max-width: 760px)").matches;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // La escena 3D (three.js y sus cuatro texturas) se prepara al primer gesto
+    // (bajar, mover el ratón, tocar) o a los 5 s: hasta entonces se ve la foto de
+    // día, que es la misma imagen con la que empieza la escena. Así la portada
+    // carga rápida (antes bloqueaba el móvil varios segundos al abrirla).
     let scene: DayHouseScene | null = null;
-    try {
-      scene = createDayHouseScene(canvas, {
-        images: ["/nueva/dia.webp", "/nueva/tarde.webp", "/nueva/atardecer.webp", "/nueva/noche.webp"],
-        items: [],
-        fontFamily,
-        mobile,
-        reducedMotion,
-      });
-    } catch {
-      queueMicrotask(() => setFallback(true));
-      return;
-    }
+    let disposed = false;
+    let booted = false;
+    const GESTURES = ["scroll", "wheel", "pointerdown", "pointermove", "touchstart", "keydown"] as const;
+    const boot = () => {
+      if (booted) return;
+      booted = true;
+      GESTURES.forEach((g) => window.removeEventListener(g, boot));
+      clearTimeout(bootTimer);
+      import("@/motion/webgl/dayHouseScene")
+        .then(({ createDayHouseScene }) => {
+          if (disposed) return;
+          scene = createDayHouseScene(canvas, {
+            images: ["/nueva/dia.webp", "/nueva/tarde.webp", "/nueva/atardecer.webp", "/nueva/noche.webp"],
+            items: [],
+            fontFamily,
+            mobile,
+            reducedMotion,
+          });
+          scene.ready.then(() => canvas.setAttribute("data-ready", "")).catch(() => setFallback(true));
+        })
+        .catch(() => setFallback(true));
+    };
+    GESTURES.forEach((g) => window.addEventListener(g, boot, { passive: true }));
+    const bootTimer = window.setTimeout(boot, 5000);
 
     const start = performance.now();
     let lastPhase = -1;
@@ -131,9 +148,11 @@ export function DayHouse({ fontFamily }: { fontFamily: string }) {
       scene?.setPointer((e.clientX / window.innerWidth - 0.5) * 2, (0.5 - e.clientY / window.innerHeight) * 2);
     };
     window.addEventListener("pointermove", onPointer, { passive: true });
-    scene.ready.then(() => canvas.setAttribute("data-ready", "")).catch(() => setFallback(true));
 
     return () => {
+      disposed = true;
+      clearTimeout(bootTimer);
+      GESTURES.forEach((g) => window.removeEventListener(g, boot));
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onPointer);
       scene?.destroy();

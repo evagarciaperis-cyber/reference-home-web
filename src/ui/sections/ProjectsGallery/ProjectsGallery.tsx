@@ -22,28 +22,28 @@ type Step = {
 // <img> normales, nunca bloquean el build ni el dev server.
 const STEPS: Step[] = [
   {
-    image: "/images/pasos/paso1.jpg",
+    image: "/images/pasos/paso1.webp",
     imageAlt: "Análisis y valoración de la vivienda",
     number: "01",
     title: "Análisis y valoración",
     description: "Estudiamos tu vivienda y el mercado para definir el mejor precio de salida.",
   },
   {
-    image: "/images/pasos/paso2.jpg",
+    image: "/images/pasos/paso2.webp",
     imageAlt: "Estrategia de venta a medida",
     number: "02",
     title: "Estrategia a medida",
     description: "Creamos un plan de marketing y comercial específico para tu vivienda.",
   },
   {
-    image: "/images/pasos/paso3.jpg",
+    image: "/images/pasos/paso3.webp",
     imageAlt: "Promoción inteligente de la vivienda",
     number: "03",
     title: "Promoción inteligente",
     description: "Difundimos tu vivienda en los canales que realmente atraen compradores.",
   },
   {
-    image: "/images/pasos/paso4.jpg",
+    image: "/images/pasos/paso4.webp",
     imageAlt: "Gestión de visitas cualificadas",
     number: "04",
     title: "Gestión de visitas",
@@ -51,7 +51,7 @@ const STEPS: Step[] = [
       "Filtramos y gestionamos compradores interesados para que solo visites con quien realmente puede comprar.",
   },
   {
-    image: "/images/pasos/paso5.jpg",
+    image: "/images/pasos/paso5.webp",
     imageAlt: "Negociación y cierre de la operación",
     number: "05",
     title: "Negociación y cierre",
@@ -98,7 +98,7 @@ export function ProjectsGallery() {
             {STEPS.map((step) => (
               <article key={step.number} className={styles.card} data-project-card tabIndex={0}>
                 <div className={styles.media}>
-                  <img src={step.image} alt={step.imageAlt} />
+                  <img src={step.image} alt={step.imageAlt} loading="lazy" decoding="async" />
                 </div>
                 <div className={styles.overlay} aria-hidden="true" />
                 <span className={styles.cardNumber} aria-hidden="true">

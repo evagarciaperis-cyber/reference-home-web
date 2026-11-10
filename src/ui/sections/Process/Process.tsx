@@ -57,7 +57,7 @@ const SERVICES: Service[] = [
   },
 ];
 
-const BACKGROUND_IMAGE = "/images/services/services-panorama.webp";
+const BACKGROUND_IMAGE = "/images/services/services-panorama-1800.webp";
 
 // 2026-08-20: una única fotografía panorámica como fondo COMÚN de toda
 // la sección (.backgroundMedia, capa global) en vez de una imagen por
@@ -79,7 +79,7 @@ export function Process() {
   return (
     <section className={styles.process} id="proceso" ref={sectionRef}>
       <div className={styles.backgroundMedia} aria-hidden="true">
-        <img className={styles.backgroundImage} src={BACKGROUND_IMAGE} alt="" data-process-bg />
+        <img className={styles.backgroundImage} src={BACKGROUND_IMAGE} alt="" loading="lazy" decoding="async" data-process-bg />
       </div>
       <div className={styles.backgroundOverlay} aria-hidden="true" />
 

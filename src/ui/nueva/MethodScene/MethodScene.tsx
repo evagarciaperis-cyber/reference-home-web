@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { LazyVideo } from "@/ui/media/LazyVideo";
 import styles from "./MethodScene.module.css";
 import { requestHeaderToneRefresh } from "@/motion/core/events";
 
@@ -141,7 +142,7 @@ export function MethodScene() {
             }}
             className={i === 1 ? `${styles.panel} ${styles.center}` : styles.panel}
           >
-            <video className={styles.video} src={pnl.src} autoPlay muted loop playsInline preload={i === 1 ? "auto" : "metadata"} />
+            <LazyVideo className={styles.video} src={pnl.src} />
             <div className={styles.copy}>
               <span className={styles.n}>{pnl.n}</span>
               <h3 className={styles.panelTitle}>{pnl.title}</h3>

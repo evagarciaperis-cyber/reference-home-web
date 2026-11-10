@@ -171,7 +171,7 @@ export function CityScene() {
         </div>
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={houseRef} className={styles.house} src="/nueva/noche.webp" alt="" aria-hidden="true" />
+        <img ref={houseRef} className={styles.house} src="/nueva/noche.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
         <div ref={houseGradeRef} className={styles.houseGrade} aria-hidden="true" />
         <div ref={glowRef} className={styles.glow} aria-hidden="true" />
 

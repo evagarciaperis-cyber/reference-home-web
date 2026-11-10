@@ -71,11 +71,11 @@ function Door() {
     <div className={styles.wall} aria-hidden="true">
       <div className={styles.doorBox}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={`${styles.leaf} ${styles.leafL}`} src="/nueva/viaje/puerta-hoja-izq.webp" alt="" />
+        <img className={`${styles.leaf} ${styles.leafL}`} src="/nueva/viaje/puerta-hoja-izq.webp" alt="" loading="lazy" decoding="async" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={`${styles.leaf} ${styles.leafR}`} src="/nueva/viaje/puerta-hoja-der.webp" alt="" />
+        <img className={`${styles.leaf} ${styles.leafR}`} src="/nueva/viaje/puerta-hoja-der.webp" alt="" loading="lazy" decoding="async" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.wallImg} src="/nueva/viaje/puerta-pared.webp" alt="" />
+        <img className={styles.wallImg} src="/nueva/viaje/puerta-pared.webp" alt="" loading="lazy" decoding="async" />
         <p className={`${styles.flank} ${styles.flankL}`}>¿Cuánto vale</p>
         <p className={`${styles.flank} ${styles.flankR}`}>
           <em>tu casa?</em>
@@ -91,7 +91,7 @@ export function ValuationIntro() {
     <div className={styles.stage} style={{ position: "relative", height: "100%", visibility: "visible" }} aria-hidden="true">
       <div className={styles.scenes}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.scene} data-on="" src={SCENES[0]} alt="" />
+        <img className={styles.scene} data-on="" src={SCENES[0]} alt="" loading="lazy" decoding="async" />
       </div>
       <Door />
     </div>
@@ -303,7 +303,7 @@ export function ValuationScene() {
         <div className={styles.scenes} aria-hidden="true">
           {SCENES.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} className={styles.scene} data-on={i === scene ? "" : undefined} src={src} alt="" />
+            <img key={src} className={styles.scene} data-on={i === scene ? "" : undefined} src={src} alt="" loading="lazy" decoding="async" />
           ))}
           <div className={styles.shade} data-done={done ? "" : undefined} />
         </div>

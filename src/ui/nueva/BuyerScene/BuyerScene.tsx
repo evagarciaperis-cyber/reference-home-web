@@ -6,6 +6,7 @@
 
 import { ValuationIntro } from "@/ui/nueva/ValuationScene";
 import { useBuyerExperience } from "@/motion/hooks/useBuyerExperience";
+import { LazyVideo } from "@/ui/media/LazyVideo";
 import styles from "@/ui/sections/BuyerExperience/BuyerExperience.module.css";
 
 // 2026-08-19: Supabase Storage (bucket público web-videos) en vez del
@@ -51,16 +52,7 @@ export function BuyerScene() {
               duplica ningún otro. La "apertura en dos mitades" es el
               clip-path de este mismo elemento animado en
               useBuyerExperience.ts. */}
-          <video
-            className={styles.video}
-            ref={videoRef}
-            src={VIDEO_SRC}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-          />
+          <LazyVideo className={styles.video} ref={videoRef} src={VIDEO_SRC} />
 
           <div className={styles.overlay} ref={overlayRef} aria-hidden="true" />
           <div className={styles.copy}>
