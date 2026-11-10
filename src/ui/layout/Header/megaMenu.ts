@@ -30,6 +30,8 @@ export const MEGA_SELL: MegaMenu = {
       title: "Por zona",
       links: [
         { href: "/quieres-vender/vender-en-ruzafa", title: "Vender en Ruzafa", text: "Lo que se vende y a qué precio" },
+        { href: "/quieres-vender/vender-en-benimaclet", title: "Vender en Benimaclet", text: "Barrio con alma de pueblo, junto a los campus" },
+        { href: "/quieres-vender/vender-en-campanar", title: "Vender en Campanar", text: "Familias, garaje y urbanizaciones con piscina" },
         { href: "/inmobiliaria-valencia", title: "Inmobiliaria en Valencia", text: "Nuestras oficinas y cómo trabajamos" },
       ],
     },

@@ -352,8 +352,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: -70px;
-  height: 70px;
+  /* Solo el hueco entre el enlace y el panel: no tapa el enlace (debe seguir siendo clicable) */
+  top: -36px;
+  height: 36px;
 }
 
 .megaCol {
