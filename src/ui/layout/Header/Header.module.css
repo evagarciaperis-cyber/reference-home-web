@@ -344,14 +344,14 @@
   transition-delay: 0s;
 }
 
-/* Puente invisible para que el ratón no pierda el panel al bajar */
-.dropMega::after {
+/* Puente invisible entre «Vender/Comprar» y el panel, para que no se cierre al bajar con el ratón */
+.megaPanel::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  top: 100%;
-  height: 0;
+  top: -70px;
+  height: 70px;
 }
 
 .megaCol {
