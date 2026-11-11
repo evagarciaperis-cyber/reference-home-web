@@ -57,6 +57,25 @@ export async function sendLead(data: FormData, landing: string): Promise<void> {
   if (!json.ok) {
     throw new Error(ENVIAR_ERRORS[json.error ?? ""] ?? "No se pudo enviar. Escríbenos por WhatsApp al 674 61 22 72 o llama al 963 547 596.");
   }
+  // Aviso en el CRM con push (además del email). Si el CRM no responde, el email ya ha llegado.
+  try {
+    void fetch("https://crm.referencehome.es/api/public/visita", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "omit",
+      body: JSON.stringify({
+        name: out.get("nombre"),
+        phone: out.get("telefono"),
+        email: out.get("email"),
+        landing,
+        detail: detalle,
+        website: out.get("website"),
+        consent: true,
+      }),
+    }).catch(() => {});
+  } catch {
+    // sin aviso en el CRM; el email ya está enviado
+  }
   if (typeof window !== "undefined") {
     const w = window as unknown as { gtag?: (...a: unknown[]) => void };
     w.gtag?.("event", "generate_lead", { lead_method: "form", form_id: landing });
