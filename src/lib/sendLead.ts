@@ -69,6 +69,13 @@ export async function sendLead(data: FormData, landing: string): Promise<void> {
         email: out.get("email"),
         landing,
         detail: detalle,
+        attribution: (() => {
+          try {
+            return JSON.parse(sessionStorage.getItem("rh_attr") || "null");
+          } catch {
+            return null;
+          }
+        })(),
         website: out.get("website"),
         consent: true,
       }),
